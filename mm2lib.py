@@ -17,7 +17,7 @@ with open(cwd+"/MM2.json") as j:
 gui = mm2json['gui']
 netid = mm2json['netid']
 passphrase = mm2json['passphrase']
-userpass = mm2json['passphrase']
+userpass = mm2json['rpc_password']
 rpc_password = mm2json['rpc_password']
 local_ip = "http://127.0.0.1:7783"
 
