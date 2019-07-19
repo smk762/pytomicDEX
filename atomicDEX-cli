@@ -63,15 +63,15 @@ if method in supported_methods:
         resp = cancel_pair(node_ip, userpass, baserel[0], baserel[1])
         pprint(resp.json())
     elif method == 'setprice':
-        volprice = get_tradeparams(method)
+        tradeparams = get_tradeparams(method)
         resp = setprice(node_ip, userpass, tradeparams[0], tradeparams[1], tradeparams[2], tradeparams[3])
         pprint(resp.json())
     elif method == 'buy':
-        volprice = get_tradeparams(method)
+        tradeparams = get_tradeparams(method)
         resp = buy(node_ip, userpass, tradeparams[0], tradeparams[1], tradeparams[2], tradeparams[3])
         pprint(resp.json())
     elif method == 'sell':
-        volprice = get_tradeparams(method)
+        tradeparams = get_tradeparams(method)
         resp = sell(node_ip, userpass, tradeparams[0], tradeparams[1], tradeparams[2], tradeparams[3])
         pprint(resp.json())
     elif method == 'withdraw':
