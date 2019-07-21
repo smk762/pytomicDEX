@@ -58,8 +58,9 @@ NOTE: Native mode requires the local chain to be fully sync'd, the deamon runnin
 `electrum` Defines the server and port to use for interacting with mm2 in lite mode.   
 Electrum server details can be found at https://github.com/jl777/coins/tree/master/electrums (for Komodo ecosystem coins), and online for external coins (check the coin's website, github or ask the coin community).   
 Note the different format that is used for ETH/ERC20 tokens in the examples below.   
-`contract` This value is only required for ETH/ERC20 tokens. The contract is always `0x8500AFc0bc5214728082163326C2FF0C73f4a871`, which handles atomic swap between ETH/ERC20 tokens and other blockchains.  
-ETH/ERC20 tokens can all use the same Electrum SPV servers as each other.
+`contract` This value is only required for ETH/ERC20 tokens.   
+The contract is always `0x8500AFc0bc5214728082163326C2FF0C73f4a871`, which handles atomic swap between ETH/ERC20 tokens and other blockchains.  
+ETH/ERC20 tokens can all use the same Electrum SPV servers as each other.   
 NOTE: Trading ETH/ERC20 coins requires a sufficient ETH balance in your mm2 ETH address to cover gas fees.   
 
 ##### Native example *(needs native daemon installed with a sync'd blockchain)*
