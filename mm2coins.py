@@ -1,63 +1,13 @@
 coins = [
+    
     {
-        'tag': 'RICK',
-        'min_swap': 1,
-        'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10017"},
-                     {"url":"electrum2.cipig.net:10017"},
-                     {"url":"electrum3.cipig.net:10017"}]
-    },
-    {
-        'tag': 'DGB',
-        'api-id': 'digibyte',
-        'min_swap': 10,
-        'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10059"},
-                     {"url":"electrum2.cipig.net:10059"},
-                     {"url":"electrum3.cipig.net:10059"}]
-    },
-    {
-        'tag': 'MORTY',
-        'min_swap': 1,
-        'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10018"},
-                     {"url":"electrum2.cipig.net:10018"},
-                     {"url":"electrum3.cipig.net:10018"}]
-    },
-    {
-        'tag': 'LTC',
-        'api-id': 'litecoin',
+        'tag': 'KMD',
         'min_swap': 0.01,
+        'api-id': 'komodo',
         'activate_with':'electrum',
-        'electrum': [{"url":"electrum-ltc.bysh.me:50001"},
-                     {"url":"electrum.ltc.xurious.com:50001"},
-                     {"url":"ltc.rentonisk.com:50001"},
-                     {"url":"backup.electrum-ltc.org:50001"}]
-    },
-    {
-        'tag': 'DASH',
-        'api-id': 'dash',
-        'min_swap': 0.01,
-        'activate_with':'electrum',
-        'electrum':  [{"url":"electrum1.cipig.net:10061"},
-                      {"url":"electrum2.cipig.net:10061"},
-                      {"url":"electrum3.cipig.net:10061"}]
-    },
-    {
-        'tag': 'LABS',
-        'min_swap': 5,
-        'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10019"},
-                     {"url":"electrum2.cipig.net:10019"},
-                     {"url":"electrum3.cipig.net:10019"}]
-    },
-    {
-        'tag': 'RFOX',
-        'min_swap': 5,
-        'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10034"},
-                     {"url":"electrum2.cipig.net:10034"},
-                     {"url":"electrum3.cipig.net:10034"}]
+        'electrum': [{"url":"electrum1.cipig.net:10001"},
+                     {"url":"electrum2.cipig.net:10001"},
+                     {"url":"electrum3.cipig.net:10001"}]
     },
     {
         'tag': 'VRSC',
@@ -70,22 +20,20 @@ coins = [
                      {"url":"electrum3.cipig.net:10021"}]
     },
     {
+        'tag': 'BTC',
+        'api-id': 'bitcoin',
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum1.cipig.net:10000"},
+                     {"url":"electrum2.cipig.net:10000"},
+                     {"url":"electrum3.cipig.net:10000"}]
+    },
+    {
         'tag': 'BCH',
         'min_swap': 0.01,
         'activate_with':'electrum',
         'electrum': [{"url":"bch.imaginary.cash:50001"},
                      {"url":"electroncash.dk:50001"},
                      {"url":"electron-cash.dragon.zone:50001"}]
-    },
-    {
-        'tag': 'BAT',
-        'min_swap': 0.5,
-        'activate_with':'electrum',
-        'api-id': 'basic-attention-token',
-        'electrum': ["http://eth1.cipig.net:8555",
-                     "http://eth2.cipig.net:8555",
-                     "http://eth3.cipig.net:8555"],
-        'contract': "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
     },
     {
         'tag': 'ETH',
@@ -96,6 +44,25 @@ coins = [
                      "http://eth2.cipig.net:8555",
                      "http://eth3.cipig.net:8555"],
         'contract': "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
+    },
+    {
+        'tag': 'DASH',
+        'api-id': 'dash',
+        'min_swap': 0.01,
+        'activate_with':'electrum',
+        'electrum':  [{"url":"electrum1.cipig.net:10061"},
+                      {"url":"electrum2.cipig.net:10061"},
+                      {"url":"electrum3.cipig.net:10061"}]
+    },
+    {
+        'tag': 'LTC',
+        'api-id': 'litecoin',
+        'min_swap': 0.01,
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum-ltc.bysh.me:50001"},
+                     {"url":"electrum.ltc.xurious.com:50001"},
+                     {"url":"ltc.rentonisk.com:50001"},
+                     {"url":"backup.electrum-ltc.org:50001"}]
     },
     {
         'tag': 'USDC',
@@ -117,21 +84,87 @@ coins = [
                      {"url":"electrum3.cipig.net:10060"}]
     },
     {
-        'tag': 'KMD',
-        'min_swap': 0.01,
-        'api-id': 'komodo',
+        'tag': 'DGB',
+        'api-id': 'digibyte',
+        'min_swap': 10,
         'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10001"},
-                     {"url":"electrum2.cipig.net:10001"},
-                     {"url":"electrum3.cipig.net:10001"}]
+        'electrum': [{"url":"electrum1.cipig.net:10059"},
+                     {"url":"electrum2.cipig.net:10059"},
+                     {"url":"electrum3.cipig.net:10059"}]
     },
     {
-        'tag': 'ZEXO',
-        'api-id': 'Zaddex',
+        'tag': 'QTUM',
+        'min_swap': 5,
+        'activate_with':'electrum',
+        'electrum': [{"url":"s1.qtum.info:50001"},
+                     {"url":"s2.qtum.info:50001"},
+                     {"url":"s3.qtum.info:50001"},
+                     {"url":"s4.qtum.info:50001"},
+                     {"url":"s5.qtum.info:50001"},
+                     {"url":"s6.qtum.info:50001"},
+                     {"url":"s7.qtum.info:50001"},
+                     {"url":"s8.qtum.info:50001"},
+                     {"url":"s9.qtum.info:50001"}
+                     ]
+    },
+    {
+        'tag': 'RFOX',
+        'min_swap': 5,
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum1.cipig.net:10034"},
+                     {"url":"electrum2.cipig.net:10034"},
+                     {"url":"electrum3.cipig.net:10034"}]
+    },
+
+    {
+        'tag': 'ZILLA',
+        'min_swap': 5,
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum1.cipig.net:10028"},
+                     {"url":"electrum2.cipig.net:10028"},
+                     {"url":"electrum3.cipig.net:10028"}]
+    },
+
+    {
+        'tag': 'RVN',
+        'min_swap': 5,
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum1.cipig.net:10051"},
+                     {"url":"electrum2.cipig.net:10051"},
+                     {"url":"electrum3.cipig.net:10051"}]
+    },
+    {
+        'tag': 'BAT',
+        'min_swap': 0.5,
+        'activate_with':'electrum',
+        'api-id': 'basic-attention-token',
+        'electrum': ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        'contract': "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
+    },
+    {
+        'tag': 'RICK',
         'min_swap': 1,
         'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10035"},
-                     {"url":"electrum2.cipig.net:10035"},
-                     {"url":"electrum3.cipig.net:10035"}]
+        'electrum': [{"url":"electrum1.cipig.net:10017"},
+                     {"url":"electrum2.cipig.net:10017"},
+                     {"url":"electrum3.cipig.net:10017"}]
+    },
+    {
+        'tag': 'MORTY',
+        'min_swap': 1,
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum1.cipig.net:10018"},
+                     {"url":"electrum2.cipig.net:10018"},
+                     {"url":"electrum3.cipig.net:10018"}]
+    },
+    {
+        'tag': 'LABS',
+        'min_swap': 5,
+        'activate_with':'electrum',
+        'electrum': [{"url":"electrum1.cipig.net:10019"},
+                     {"url":"electrum2.cipig.net:10019"},
+                     {"url":"electrum3.cipig.net:10019"}]
     }
 ]

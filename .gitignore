@@ -1,5 +1,10 @@
 __pycache__
 mm2_output.log
+mm2.log
 coins
 DB
 mm2
+logs/
+api_keys.json
+MM2.json
+binance_makerbot.py
