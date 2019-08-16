@@ -462,7 +462,7 @@ def gecko_fiat_prices(gecko_ids, fiat):
     return r
 
 
-def show_balances_table(coin_data):
+def show_balances_table(coin_data, trading_coins=[]):
   btc_total = 0
   usd_total = 0
   aud_total = 0
@@ -489,7 +489,11 @@ def show_balances_table(coin_data):
     aud_price = coin_data[coin]['AUD_price']
     aud_val = aud_price*bal
     aud_total += aud_val
-    print("  |"+'{:^7}'.format(coin)+"|"+'{:^50}'.format(addr)+"|" \
+    if coin in trading_coins:
+      highlight = '\033[94m'
+    else:
+      highlight = '\033[0m'      
+    print(highlight+"  |"+'{:^7}'.format(coin)+"|"+'{:^50}'.format(addr)+"|" \
            +'{:^11}'.format(str(bal)[:9])+"|" \
            +'{:^11}'.format(str(btc_price)[:9])+"|"+'{:^11}'.format(str(btc_val)[:9])+"|"\
            +'{:^11}'.format(str(usd_price)[:9])+"|"+'{:^11}'.format(str(usd_val)[:9])+"|"\
