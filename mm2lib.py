@@ -360,14 +360,15 @@ def my_balances(node_ip, user_pass, coins):
 def orderbooks(node_ip, user_pass, coins, coins_data=''):
   if len(coins_data) < 1:
     coins_data = build_coins_data(coins)
-  print("  ---------------------------------------------------------------------------------------------------------------------------------------------")
-  print(\
-      "  |"+'{:^14}'.format('PAIR')+"|"+'{:^24}'.format('VOLUME')+"|" \
-      +'{:^24}'.format('VALUE (BTC)')+"|" \
-      +'{:^24}'.format('MM2 RATE')+"|"+'{:^24}'.format('MARKET RATE')+"|" \
-      +'{:^24}'.format('DIFFERENTIAL')+"|"  \
-      )
-  print("  ---------------------------------------------------------------------------------------------------------------------------------------------")
+  print("  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+  print(
+        "  |"+'{:^14}'.format('PAIR')+"|"+'{:^24}'.format('VOLUME')+"|" \
+        +'{:^24}'.format('VALUE (BTC)')+"|"'{:^24}'.format('VALUE (REL)')+"|" \
+        +'{:^24}'.format('MM2 RATE')+"|"+'{:^24}'.format('MARKET RATE')+"|" \
+        +'{:^24}'.format('DIFFERENTIAL')+"|"  \
+        )
+  print("  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+  total_btc_val = 0
   for rel in coins:
     balance_data = my_balance('http://127.0.0.1:7783', userpass, rel['tag']).json()
     addr = balance_data['address']
@@ -394,16 +395,22 @@ def orderbooks(node_ip, user_pass, coins, coins_data=''):
                 differential = 0
               if differential < 0:
                 differential = colorize('{:^24}'.format(differential), 'green')
+              elif differential > 0.07:
+                differential = colorize('{:^24}'.format(differential), 'red')
               value = coins_data[rel['tag']]['BTC_price'] * float(volume)
+              rel_value = float(volume)/float(price)
               print(highlight+"  |"+'{:^14}'.format(pair)+"|"+'{:^24}'.format(volume)+"|" \
-                         +'{:^24}'.format(value)+"|" \
+                         +'{:^24}'.format(value)+"|"+'{:^24}'.format(rel_value)+"|" \
                          +'{:^24}'.format(price)+"|"+'{:^24}'.format(market_rate)+"|" \
                          +'{:^24}'.format(differential)+"|\033[0m" \
                          )
-            print("  ---------------------------------------------------------------------------------------------------------------------------------------------")
+              total_btc_val += value
+            print("  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+  
         except Exception as e:
           print("Orderbooks error: "+str(e))
           sys.exit(0)
+  return total_btc_val 
 
 def build_coins_data(coins):
     coins_data = {}
