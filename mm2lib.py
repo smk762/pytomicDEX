@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import time
 import requests
 import subprocess
 import binance_api
@@ -511,3 +512,102 @@ def show_balances_table(coin_data, trading_coins=[]):
            +'{:^11}'.format('TOTAL USD')+"|"+'{:^11}'.format(str(usd_total)[:9])+"|"\
            +'{:^11}'.format('TOTAL AUD')+"|"+'{:^11}'.format(str(aud_total)[:9])+"|")
   print("                                                                         -------------------------------------------------------------------------")
+
+
+def recent_swaps_table(node_ip, userpass, coins_data):
+  header_list = []
+  swap_json = []
+  header = "  |"+'{:^26}'.format("TIME")+"|"+'{:^14}'.format("RESULT")+"|"
+  error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed', 'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed', 'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
+  swap_status = "Success"
+  recent_swaps = my_recent_swaps(node_ip, userpass).json()
+  swap_list = recent_swaps['result']['swaps']
+  for swap in swap_list:
+    swap_data = swap['events'][0]
+    maker_coin = swap_data['event']['data']['maker_coin']
+    maker_amount = swap_data['event']['data']['maker_amount']
+    taker_coin = swap_data['event']['data']['taker_coin']
+    taker_amount = swap_data['event']['data']['taker_amount']
+    timestamp = int(int(swap_data['timestamp'])/1000)
+    human_time = time.ctime(timestamp)
+    if maker_coin not in header_list:
+      header_list.append(maker_coin)
+    if taker_coin not in header_list:
+      header_list.append(taker_coin)
+    rate = float(maker_amount)/float(taker_amount)
+    swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
+    for event in swap['events']:
+      if event['event'] in error_events:
+        swap_status = "Failed"
+    swap_json.append({"result":swap_status,
+                    "time":human_time,
+                    "maker_coin":maker_coin,
+                    "maker_amount":maker_amount,
+                    "taker_coin":taker_coin,
+                    "taker_amount":taker_amount
+          })
+  line_row = "  -"
+  for i in range(0,len(header_list)*15+42):
+    line_row += "-"
+  print(line_row)
+  delta = {}
+  for coin in header_list:
+    header += '{:^14}'.format(coin)+"|"
+    delta[coin] = 0
+  print(header)
+  print(line_row)
+  for swap in swap_json:
+    row_str = "  |"+'{:^26}'.format(swap['time'])+"|"
+    row_str += '{:^14}'.format(swap['result'])+"|"
+    for coin in header_list:
+      if coin == swap['maker_coin']:
+        row_str += '\033[91m'+'{:^14}'.format(swap['maker_amount'][:12])+'\033[0m'+"|"
+        delta[coin] -= float(swap['maker_amount'])
+      elif coin == swap['taker_coin']:
+        row_str += '\033[92m'+'{:^14}'.format(swap['taker_amount'][:12])+'\033[0m'+"|"
+        delta[coin] += float(swap['taker_amount'])
+      else:
+        row_str += '{:^14}'.format('-')+"|"
+    print(row_str)
+  line_row += "---------------"
+  print(line_row)
+  delta_row = row_str = "  |"+'{:^41}'.format("TOTAL")+"|"
+  btc_row = row_str = "  |"+'{:^41}'.format("BTC")+"|"
+  usd_row = row_str = "  |"+'{:^41}'.format("USD")+"|"
+  aud_row = row_str = "  |"+'{:^41}'.format("AUD")+"|"
+  btc_sum = 0
+  usd_sum = 0
+  aud_sum = 0
+  for delta_coin in delta:
+    for header_coin in header_list:
+      if delta_coin == header_coin:
+        if float(delta[header_coin]) > 0:
+          highlight = '\033[92m'
+        else:
+          highlight = '\033[91m'
+        btc_price = coins_data[header_coin]['BTC_price']*delta[header_coin]
+        usd_price = coins_data[header_coin]['USD_price']*delta[header_coin]
+        aud_price = coins_data[header_coin]['AUD_price']*delta[header_coin]
+        btc_sum += btc_price
+        usd_sum += usd_price
+        aud_sum += aud_price
+        delta_row += highlight+'{:^14}'.format(str(delta[header_coin])[:12])+'\033[0m'+"|"
+        btc_row += highlight+'{:^14}'.format(str(btc_price)[:12])+'\033[0m'+"|"
+        usd_row += highlight+'{:^14}'.format("$"+str(usd_price)[:10])+'\033[0m'+"|"
+        aud_row += highlight+'{:^14}'.format("$"+str(aud_price)[:10])+'\033[0m'+"|"
+  delta_row += '{:^14}'.format("TOTAL")+"|"
+
+  btc_row += '{:^14}'.format(str(btc_sum)[:12])+"|"
+  usd_row += '{:^14}'.format("$"+str(usd_sum)[:10])+"|"
+  aud_row += '{:^14}'.format("$"+str(aud_sum)[:10])+"|"
+
+  print(delta_row)
+  print(line_row)
+  print(btc_row)
+  print(line_row)
+  print(usd_row)
+  print(line_row)
+  print(aud_row)
+  print(line_row)
+  #calculate in / out value
+  
