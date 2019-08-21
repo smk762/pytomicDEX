@@ -296,7 +296,7 @@ def my_swap_status(node_ip, user_pass, swap_uuid):
     r = requests.post(node_ip,json=params)
     return r
 
-def my_recent_swaps(node_ip, user_pass, from_uuid='', limit=10):
+def my_recent_swaps(node_ip, user_pass, limit=10, from_uuid=''):
     if from_uuid=='':
         params = {'userpass': user_pass,
                   'method': 'my_recent_swaps',
@@ -514,13 +514,13 @@ def show_balances_table(coin_data, trading_coins=[]):
   print("                                                                         -------------------------------------------------------------------------")
 
 
-def recent_swaps_table(node_ip, userpass, coins_data):
+def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
   header_list = []
   swap_json = []
   header = "  |"+'{:^26}'.format("TIME")+"|"+'{:^14}'.format("RESULT")+"|"
   error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed', 'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed', 'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
   swap_status = "Success"
-  recent_swaps = my_recent_swaps(node_ip, userpass).json()
+  recent_swaps = my_recent_swaps(node_ip, userpass, swapcount).json()
   swap_list = recent_swaps['result']['swaps']
   for swap in swap_list:
     swap_data = swap['events'][0]

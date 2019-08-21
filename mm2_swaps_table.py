@@ -15,5 +15,5 @@ except:
     mm2lib.start_mm2()
     pass
 coins_data = mm2lib.build_coins_data(mm2lib.coins)
-
-mm2lib.recent_swaps_table("http://127.0.0.1:7783", mm2lib.userpass, coins_data)
+swapcount = 50
+mm2lib.recent_swaps_table("http://127.0.0.1:7783", mm2lib.userpass, swapcount, coins_data)
