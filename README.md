@@ -97,13 +97,52 @@ NOTE: Trading ETH/ERC20 coins requires a sufficient ETH balance in your mm2 ETH 
         'contract': "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
     }
 ```
+If using the Binance API, you also need to populate the values for coins in your trading list.
+`reserve_balance:` number of coins to keep in MM2 wallet (excess will be sent your to Binance wallet)
+`premium:` Value relative to Binance market rate to setprices as marketmaker. E.g. a value of 1.05 will set your sell price 5% above Binance market price.
+`minQty; maxQty; steSize:` Values as required for setting orders on Binance, available from https://api.binance.com/api/v1/exchangeInfo
 
-## Usage  
+For example:
+```
+    "KMD":{
+        "reserve_balance":1000,
+        "premium":1.0377,
+        "minQty":"0.01000000",
+        "maxQty":"90000000.00000000",
+        "stepSize":"0.01000000"
+    },
+```
+
+## Command Line Usage  
 ### atomicDEX-cli  
 Use like `./atomicDEX-cli METHOD [PARAMETERS]`  
 If you use `./atomicDEX-cli` without a method, it will list the available methods.  
 If you use `./atomicDEX-cli METHOD` for methods that require parameters, it will list the parameters required (and the order they need to be in).  
 
+## Additional files
 ### mm2lib.py  
 Contains functions to translate mm2 curl methods to use the python requests library.   
 Not all methods or optional parameters are exposed in the CLI as yet.  
+
+### mm2_balances_table.py
+
+![MM2 Balances](https://i.imgur.com/1zN7nwD.png)
+
+Display your MM2 addresses, balances and fiat value.
+
+### mm2_orderbook_table.py
+
+![MM2 Orderbook](https://i.imgur.com/aIuDqcE.png)
+
+Display current MM2 orderbook. 
+
+### mm2_swaps_table.py
+
+![MM2 Swaps](https://i.imgur.com/KrsOHDj.png)
+
+Display your 50 most recent swaps, and combined trade values.
+
+### binance_makerbot.py
+
+Sets maker orders on MM2 based on coins and values in `mm2coins.py`, and periodically displays the balance, orderbook and swaps tables.
+
