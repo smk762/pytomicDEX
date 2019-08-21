@@ -6,7 +6,7 @@ import time
 import requests
 import subprocess
 import binance_api
-from mm2coins import coins
+from mm2coins import coins, trading_list
 from subprocess import Popen
 from os.path import expanduser
 
@@ -468,7 +468,6 @@ def gecko_fiat_prices(gecko_ids, fiat):
     params = dict(ids=str(gecko_ids),vs_currencies=fiat)
     r = requests.get(url=url, params=params)
     return r
-
 
 def show_balances_table(coin_data, trading_coins=[]):
   btc_total = 0

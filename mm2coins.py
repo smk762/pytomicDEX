@@ -1,5 +1,5 @@
-coins = [
-    
+# Input coins you want to activate in MM2 Here
+coins = [    
     {
         'tag': 'KMD',
         'min_swap': 0.01,
@@ -168,3 +168,66 @@ coins = [
                      {"url":"electrum3.cipig.net:10019"}]
     }
 ]
+
+# Input coins you want to trade here. 
+# reserve_balance: excess funds will be sent to your Binance wallet
+# premium: value relative to binance market rate to setprices as marketmaker.
+# min/max/stepsize need to be set from values from https://api.binance.com/api/v1/exchangeInfo
+trading_list = {
+    "LTC":{
+        "reserve_balance":2,
+        "premium":1.0777,
+        "minQty":"0.01000000",
+        "maxQty":"100000.00000000",
+        "stepSize":"0.01000000"
+    },
+    "DASH":{
+        "reserve_balance":2,
+        "premium":1.0777,
+        "minQty":"0.00100000",
+        "maxQty":"900000.00000000",
+        "stepSize":"0.00100000"
+    },
+    "BCH":{
+        "reserve_balance":2,
+        "premium":1.0777,
+        "minQty":"0.00001000",
+        "maxQty":"900000.00000000",
+        "stepSize":"0.00001000"
+    },
+    "RVN":{
+        "reserve_balance":2500,
+        "premium":1.0777,
+        "minQty":"1.00000000",
+        "maxQty":"90000000.00000000",
+        "stepSize":"1.00000000"
+    },
+    "DOGE":{
+        "reserve_balance":20000,
+        "premium":1.0777,
+        "minQty":"1.00000000",
+        "maxQty":"90000000.00000000",
+        "stepSize":"1.00000000"
+    },
+    "QTUM":{
+        "reserve_balance":50,
+        "premium":1.0777,
+        "minQty":"0.01000000",
+        "maxQty":"10000000.00000000",
+        "stepSize":"0.01000000"
+    },
+    "KMD":{
+        "reserve_balance":1000,
+        "premium":1.0777,
+        "minQty":"0.01000000",
+        "maxQty":"90000000.00000000",
+        "stepSize":"0.01000000"
+    },
+    "ETH":{
+        "reserve_balance":2,
+        "premium":1.0777,
+        "minQty":"0.001000000",
+        "maxQty":"100000.00000000",
+        "stepSize":"0.001000000"
+    },
+}
