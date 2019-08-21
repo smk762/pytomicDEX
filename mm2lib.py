@@ -6,7 +6,11 @@ import time
 import requests
 import subprocess
 import binance_api
-from mm2coins import coins, trading_list
+try:
+  from mm2coins import coins, trading_list
+except:
+  print("mm2coins.py not found! copy mm2coins_example.py and modify as required.")
+  sys.exit(0)
 from subprocess import Popen
 from os.path import expanduser
 

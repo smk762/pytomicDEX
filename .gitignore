@@ -7,3 +7,5 @@ mm2
 logs/
 api_keys.json
 MM2.json
+run_bot.py
+mm2coins.py
