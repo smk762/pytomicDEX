@@ -94,5 +94,8 @@ while True:
     total_aud_val = total_btc_val * coins_data['BTC']['AUD_price']
     print("Combined Orderbook Value (USD): $"+str(total_usd_val))
     print("Combined Orderbook Value (AUD): $"+str(total_aud_val))
-    time.sleep(300)
+    for i in range(10):
+        time_left = 300-i*30
+        print("Waiting 30 sec, "+str(time_left)+"sec remaining until refresh..." )
+        time.sleep(30)
     # TODO: Detect swaps in progress, and make sure to not cancel with new swap.

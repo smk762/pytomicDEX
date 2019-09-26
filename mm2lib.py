@@ -477,15 +477,15 @@ def show_balances_table(coin_data, trading_coins=[]):
   btc_total = 0
   usd_total = 0
   aud_total = 0
-  print("  ------------------------------------------------------------------------------------------------------------------------------------------------")
-  print(\
-      "  |"+'{:^7}'.format('COIN')+"|"+'{:^50}'.format('ADDRESS')+"|" \
+  header = "|"+'{:^7}'.format('COIN')+"|"+'{:^50}'.format('ADDRESS')+"|" \
       +'{:^11}'.format('BALANCE')+"|"+'{:^11}'.format('BTC PRICE')+"|" \
       +'{:^11}'.format('BTC VALUE')+"|"+'{:^11}'.format('USD PRICE')+"|" \
       +'{:^11}'.format('USD VALUE')+"|"+'{:^11}'.format('AUD PRICE')+"|" \
-      +'{:^11}'.format('AUD VALUE')+"|" \
-      )
-  print("  ------------------------------------------------------------------------------------------------------------------------------------------------")
+      +'{:^11}'.format('AUD VALUE')+"|"
+  table_dash = "-"*len(header)
+  print(" "+table_dash)  
+  print(" "+header)
+  print(" "+table_dash)  
   for coin in coin_data:
     balance_data = my_balance('http://127.0.0.1:7783', userpass, coin).json()
     coin = balance_data['coin']
@@ -504,23 +504,24 @@ def show_balances_table(coin_data, trading_coins=[]):
       highlight = '\033[94m'
     else:
       highlight = '\033[0m'      
-    print(highlight+"  |"+'{:^7}'.format(coin)+"|"+'{:^50}'.format(addr)+"|" \
+    row = highlight+"|"+'{:^7}'.format(coin)+"|"+'{:^50}'.format(addr)+"|" \
            +'{:^11}'.format(str(bal)[:9])+"|" \
            +'{:^11}'.format(str(btc_price)[:9])+"|"+'{:^11}'.format(str(btc_val)[:9])+"|"\
            +'{:^11}'.format(str(usd_price)[:9])+"|"+'{:^11}'.format(str(usd_val)[:9])+"|"\
-           +'{:^11}'.format(str(aud_price)[:9])+"|"+'{:^11}'.format(str(aud_val)[:9])+"|")
-  print("  ------------------------------------------------------------------------------------------------------------------------------------------------")
-  print(" |"+'{:^88}'.format(' ')+"|"
+           +'{:^11}'.format(str(aud_price)[:9])+"|"+'{:^11}'.format(str(aud_val)[:9])+"|"
+    print(" "+row)
+  print(" "+table_dash)  
+  row = "|"+'{:^70}'.format(' ')+"|" \
            +'{:^11}'.format('TOTAL BTC')+"|"+'{:^11}'.format(str(btc_total)[:9])+"|"\
            +'{:^11}'.format('TOTAL USD')+"|"+'{:^11}'.format(str(usd_total)[:9])+"|"\
-           +'{:^11}'.format('TOTAL AUD')+"|"+'{:^11}'.format(str(aud_total)[:9])+"|")
-  print("  ------------------------------------------------------------------------------------------------------------------------------------------------")
+           +'{:^11}'.format('TOTAL AUD')+"|"+'{:^11}'.format(str(aud_total)[:9])+"|"
+  print(" "+row)
+  print(" "+table_dash+"\n\n")  
 
 
 def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
   header_list = []
   swap_json = []
-  header = "  |"+'{:^26}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
   error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed',
                   'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed',
                   'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 
@@ -543,7 +544,6 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
     rate = float(maker_amount)/float(taker_amount)
     swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
     for event in swap['events']:
-      print(event['event']['type'])
       if event['event']['type'] in error_events:
         swap_status = "Failed ("+event['event']['type']+")"
         break
@@ -556,18 +556,17 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
                     "taker_coin":taker_coin,
                     "taker_amount":taker_amount
           })
-  line_row = "  -"
-  for i in range(0,len(header_list)*15+42):
-    line_row += "-"
-  print(line_row)
   delta = {}
+  header = "|"+'{:^26}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
   for coin in header_list:
     header += '{:^14}'.format(coin)+"|"
     delta[coin] = 0
-  print(header)
-  print(line_row)
+  table_dash = "-"*len(header)
+  print(" "+table_dash)
+  print(" "+header)
+  print(" "+table_dash)
   for swap in swap_json:
-    row_str = "  |"+'{:^26}'.format(swap['time'])+"|"
+    row_str = "|"+'{:^26}'.format(swap['time'])+"|"
     row_str += '{:^36}'.format(swap['result'])+"|"
     for coin in header_list:
       if coin == swap['maker_coin']:
@@ -578,13 +577,12 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
         delta[coin] += float(swap['taker_amount'])
       else:
         row_str += '{:^14}'.format('-')+"|"
-    print(row_str)
-  line_row += "---------------"
-  print(line_row)
-  delta_row = row_str = "  |"+'{:^41}'.format("TOTAL")+"|"
-  btc_row = row_str = "  |"+'{:^41}'.format("BTC")+"|"
-  usd_row = row_str = "  |"+'{:^41}'.format("USD")+"|"
-  aud_row = row_str = "  |"+'{:^41}'.format("AUD")+"|"
+    print(" "+row_str)
+  delta_row = "|"+'{:^63}'.format("TOTAL")+"|"
+  btc_row = "|"+'{:^63}'.format("BTC")+"|"
+  usd_row = "|"+'{:^63}'.format("USD")+"|"
+  aud_row = "|"+'{:^63}'.format("AUD")+"|"
+  table_dash = "-"*(len(delta_row)+(len(header_list)+1)*15)
   btc_sum = 0
   usd_sum = 0
   aud_sum = 0
@@ -606,18 +604,18 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
         usd_row += highlight+'{:^14}'.format("$"+str(usd_price)[:10])+'\033[0m'+"|"
         aud_row += highlight+'{:^14}'.format("$"+str(aud_price)[:10])+'\033[0m'+"|"
   delta_row += '{:^14}'.format("TOTAL")+"|"
-
   btc_row += '{:^14}'.format(str(btc_sum)[:12])+"|"
   usd_row += '{:^14}'.format("$"+str(usd_sum)[:10])+"|"
   aud_row += '{:^14}'.format("$"+str(aud_sum)[:10])+"|"
 
-  print(delta_row)
-  print(line_row)
-  print(btc_row)
-  print(line_row)
-  print(usd_row)
-  print(line_row)
-  print(aud_row)
-  print(line_row)
+  print(" "+table_dash)
+  print(" "+delta_row)
+  print(" "+table_dash)
+  print(" "+btc_row)
+  print(" "+table_dash)
+  print(" "+usd_row)
+  print(" "+table_dash)
+  print(" "+aud_row)
+  print(" "+table_dash)
   #calculate in / out value
   
