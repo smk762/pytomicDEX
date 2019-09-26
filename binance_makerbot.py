@@ -85,8 +85,9 @@ while True:
                     else:
                         rel_price = rel_btc_price['price']
                     pair_price = float(base_price)/float(rel_price)
-                    resp = mm2lib.setprice('http://127.0.0.1:7783', mm2lib.userpass, base, rel, trade_vol, pair_price*mm2lib.trading_list[base]['premium']).json()
-                    time.sleep(1)
+                    if trade_vol > mm2lib.trading_list[base]['min_swap']:
+                        resp = mm2lib.setprice('http://127.0.0.1:7783', mm2lib.userpass, base, rel, trade_vol, pair_price*mm2lib.trading_list[base]['premium']).json()
+                        time.sleep(1)
     
     total_btc_val = mm2lib.orderbooks('http://127.0.0.1:7783', mm2lib.userpass, mm2lib.coins, coins_data)
     print("Combined Orderbook Value (BTC): "+str(total_btc_val))
@@ -94,8 +95,8 @@ while True:
     total_aud_val = total_btc_val * coins_data['BTC']['AUD_price']
     print("Combined Orderbook Value (USD): $"+str(total_usd_val))
     print("Combined Orderbook Value (AUD): $"+str(total_aud_val))
-    for i in range(10):
-        time_left = 300-i*30
+    for i in range(30):
+        time_left = 900-i*30
         print("Waiting 30 sec, "+str(time_left)+"sec remaining until refresh..." )
         time.sleep(30)
     # TODO: Detect swaps in progress, and make sure to not cancel with new swap.
