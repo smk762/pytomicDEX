@@ -1,3 +1,4 @@
+*.zip
 __pycache__
 mm2_output.log
 mm2.log
