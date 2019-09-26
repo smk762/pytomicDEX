@@ -26,6 +26,7 @@ while True:
     mm2lib.show_balances_table(coins_data, trading_coins)
     mm2lib.recent_swaps_table("http://127.0.0.1:7783", mm2lib.userpass, 50, coins_data)
     my_orders = mm2lib.my_orders('http://127.0.0.1:7783', mm2lib.userpass).json()
+    swaps_in_progress = 0
     for base in mm2lib.trading_list:
         balance_data = mm2lib.my_balance('http://127.0.0.1:7783', mm2lib.userpass, base).json()
         base_addr = balance_data['address']

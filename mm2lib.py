@@ -406,7 +406,7 @@ def orderbooks(node_ip, user_pass, coins, coins_data=''):
               rel_value = float(volume)/float(price)
               print(highlight+"  |"+'{:^14}'.format(pair)+"|"+'{:^24}'.format(volume)+"|" \
                          +'{:^24}'.format(value)+"|"+'{:^24}'.format(rel_value)+"|" \
-                         +'{:^24}'.format(price)+"|"+'{:^24}'.format(market_rate)+"|" \
+                         +'{:^24}'.format(str(price)[:14])+"|"+'{:^24}'.format(str(market_rate)[:14])+"|" \
                          +'{:^24}'.format(differential)+"|\033[0m" \
                          )
               total_btc_val += value
@@ -510,19 +510,22 @@ def show_balances_table(coin_data, trading_coins=[]):
            +'{:^11}'.format(str(usd_price)[:9])+"|"+'{:^11}'.format(str(usd_val)[:9])+"|"\
            +'{:^11}'.format(str(aud_price)[:9])+"|"+'{:^11}'.format(str(aud_val)[:9])+"|")
   print("  ------------------------------------------------------------------------------------------------------------------------------------------------")
-  print("  "+'{:^71}'.format(' ')+"|"
+  print(" |"+'{:^88}'.format(' ')+"|"
            +'{:^11}'.format('TOTAL BTC')+"|"+'{:^11}'.format(str(btc_total)[:9])+"|"\
            +'{:^11}'.format('TOTAL USD')+"|"+'{:^11}'.format(str(usd_total)[:9])+"|"\
            +'{:^11}'.format('TOTAL AUD')+"|"+'{:^11}'.format(str(aud_total)[:9])+"|")
-  print("                                                                         -------------------------------------------------------------------------")
+  print("  ------------------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
   header_list = []
   swap_json = []
-  header = "  |"+'{:^26}'.format("TIME")+"|"+'{:^14}'.format("RESULT")+"|"
-  error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed', 'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed', 'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
-  swap_status = "Success"
+  header = "  |"+'{:^26}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
+  error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed',
+                  'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed',
+                  'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 
+                  'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
+  swap_status = "Success" 
   recent_swaps = my_recent_swaps(node_ip, userpass, swapcount).json()
   swap_list = recent_swaps['result']['swaps']
   for swap in swap_list:
@@ -540,8 +543,12 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
     rate = float(maker_amount)/float(taker_amount)
     swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
     for event in swap['events']:
-      if event['event'] in error_events:
-        swap_status = "Failed"
+      print(event['event']['type'])
+      if event['event']['type'] in error_events:
+        swap_status = "Failed ("+event['event']['type']+")"
+        break
+      else:
+        swap_status = "Success ("+event['event']['type']+")"
     swap_json.append({"result":swap_status,
                     "time":human_time,
                     "maker_coin":maker_coin,
@@ -561,7 +568,7 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
   print(line_row)
   for swap in swap_json:
     row_str = "  |"+'{:^26}'.format(swap['time'])+"|"
-    row_str += '{:^14}'.format(swap['result'])+"|"
+    row_str += '{:^36}'.format(swap['result'])+"|"
     for coin in header_list:
       if coin == swap['maker_coin']:
         row_str += '\033[91m'+'{:^14}'.format(swap['maker_amount'][:12])+'\033[0m'+"|"
