@@ -120,7 +120,16 @@ def electrum(node_ip, user_pass, cointag, tx_history=True):
                   'tx_history':tx_history,}
     r = requests.post(node_ip, json=params)
     return r
-    
+
+def buy(node_ip, user_pass, base, rel, basevolume, relprice):
+    params ={'userpass': user_pass,
+             'method': 'buy',
+             'base': base,
+             'rel': rel,
+             'volume': basevolume,
+             'price': relprice,}
+    r = requests.post(node_ip,json=params)
+    return r    
 
 def my_balance(node_ip, user_pass, cointag):
     params = {'userpass': user_pass,
@@ -129,12 +138,41 @@ def my_balance(node_ip, user_pass, cointag):
     r = requests.post(node_ip, json=params)
     return r
 
-def build_coins_data(coins):
+def my_orders(node_ip, user_pass):
+    params = {'userpass': user_pass, 'method': 'my_orders',}
+    r = requests.post(node_ip, json=params)
+    return r
+
+def cancel_orders(node_ip, user_pass):
+    params = {'userpass': user_pass, 'method': 'my_orders',}
+    r = requests.post(node_ip, json=params)
+    return r
+
+def cancel_all(node_ip, user_pass):
+    params = {'userpass': user_pass,
+              'method': 'cancel_all_orders',
+              'cancel_by': {"type":"All"},}
+    r = requests.post(node_ip,json=params)
+    return r
+
+def cancel_pair(node_ip, user_pass, base, rel):
+    params = {'userpass': user_pass,
+              'method': 'cancel_all_orders',
+              'cancel_by': {
+                    "type":"Pair",
+                    "data":{"base":base,"rel":rel},
+                    },}
+    r = requests.post(node_ip,json=params)
+    return r
+
+def build_coins_data(cointag_list=''):
+    if cointag_list == '':
+        cointag_list = list(coinslib.coins.keys())
     coins_data = {}
     cointags = []
     gecko_ids = []
     print('Getting prices from Binance...')
-    for coin in coins:
+    for coin in cointag_list:
       coins_data[coin] = {}
       cointags.append(coin)
       if coin == 'BCH':
