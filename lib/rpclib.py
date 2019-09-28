@@ -171,14 +171,33 @@ def setprice(node_ip, user_pass, base, rel, basevolume, relprice, trademax=False
               'cancel_previous':cancel_previous,}
     r = requests.post(node_ip, json=params)
     return r
-    
+
+
+def withdraw(node_ip, user_pass, cointag, address, amount, max_amount=False):
+    params = {'userpass': user_pass,
+              'method': 'withdraw',
+              'coin': cointag,
+              'to': address,
+              'amount': amount,
+              'max': max_amount,}
+    r = requests.post(node_ip, json=params)
+    return r 
+
+def send_raw_transaction(node_ip, user_pass, cointag, rawhex):
+    params = {'userpass': user_pass,
+              'method': 'send_raw_transaction',
+              'coin': cointag, "tx_hex":rawhex,}
+    r = requests.post(node_ip, json=params)
+    return r
+
+
 def build_coins_data(cointag_list=''):
     if cointag_list == '':
         cointag_list = list(coinslib.coins.keys())
     coins_data = {}
     cointags = []
     gecko_ids = []
-    print('Getting prices from Binance...')
+    print(tuilib.colorize('Getting prices from Binance...', 'cyan'))
     for coin in cointag_list:
       coins_data[coin] = {}
       cointags.append(coin)
@@ -196,7 +215,7 @@ def build_coins_data(cointag_list=''):
       else:
         coins_data[coin]['BTC_price'] = 0
     # Get Coingecko API ids
-    print('Getting prices from CoinGecko...')
+    print(tuilib.colorize('Getting prices from CoinGecko...', 'cyan'))
     gecko_coins_list = requests.get(url='https://api.coingecko.com/api/v3/coins/list').json()
     for gecko_coin in gecko_coins_list:
       if gecko_coin['symbol'].upper() in cointags:

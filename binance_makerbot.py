@@ -34,7 +34,7 @@ while True:
             bal = float(balance_data['balance'])
         except:
             print("my_balance failed!")
-            print("balance_data")
+            print(balance_data)
             base_addr = ''
             bal = 0
             pass

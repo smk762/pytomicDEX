@@ -32,6 +32,7 @@ def colorize(string, color):
     else:
         return colors[color] + string + '\033[0m'
 
+hl = colorize("|", 'lightblue')
 
 def wait_continue(msg=''):
     return input(colorize(msg+"Press [Enter] to continue...", 'orange'))
@@ -98,6 +99,7 @@ def select_coin(interrogative, coin_list):
     selection = validate_selection(interrogative, coin_list)
     return selection
 
+
 def show_orderbook_pair(node_ip, user_pass):
     coin_status = rpclib.check_coins_status(node_ip, user_pass)
     active_coins = coin_status[3]
@@ -121,11 +123,11 @@ def pair_orderbook_table(node_ip, user_pass, orderbook, pair_data):
         row = "-"*177
         print("  "+row)
         print(
-            "  |"+'{:^10}'.format('ORDER NUM')+"|"+'{:^14}'.format('PAIR')+"|"+'{:^18}'.format('VOLUME')+"|" \
-            +'{:^18}'.format('PRICE (USD)')+"|"'{:^18}'.format('PRICE (AUD)')+"|" \
-            +'{:^18}'.format('PRICE (BTC)')+"|"'{:^18}'.format('PRICE ('+rel+')')+"|" \
-            +'{:^18}'.format('MM2 RATE')+"|"+'{:^18}'.format('MARKET RATE')+"|" \
-            +'{:^16}'.format('DIFFERENTIAL')+"|"  \
+            "  |"+'{:^10}'.format('ORDER NUM')+hl+'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
+            +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
+            +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('PRICE ('+rel+')')+hl \
+            +'{:^18}'.format('MM2 RATE')+hl+'{:^18}'.format('MARKET RATE')+hl \
+            +'{:^16}'.format('DIFFERENTIAL')+hl  \
             )
         print("  "+row)
         try:
@@ -157,11 +159,11 @@ def pair_orderbook_table(node_ip, user_pass, orderbook, pair_data):
                 else:
                     differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
                 rel_price = float(price)
-                print(highlight+"  |"+'{:^10}'.format("["+str(i)+"]")+"|"+'{:^14}'.format(pair)+"|"+'{:^18}'.format(volume[:14])+"|" \
-                           +'{:^18}'.format("$"+str(usd_price)[:14])+"|"+'{:^18}'.format("$"+str(aud_price)[:14])+"|" \
-                           +'{:^18}'.format(str(btc_price)[:14])+"|"+'{:^18}'.format(str(rel_price)[:14])+"|" \
-                           +'{:^18}'.format(str(price)[:14])+"|"+'{:^18}'.format(str(market_rate)[:14])+"|" \
-                           +str(differential)+"\033[0m"+"|" \
+                print(highlight+"  |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
+                           +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                           +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                           +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                           +str(differential)+"\033[0m"+hl \
                            )
                 i += 1
                 print("  "+row)
@@ -200,10 +202,10 @@ def pair_orderbook_table(node_ip, user_pass, orderbook, pair_data):
                         print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook['bids'])), 'red'))
                         pass
         else:
-            print("  |"+'{:^10}'.format("[*]")+"|"+'{:^14}'.format(pair)+"|"+'{:^18}'.format(0)+"|" \
-                       +'{:^18}'.format("$"+str(usd_price)[:14])+"|"+'{:^18}'.format("$"+str(aud_price)[:14])+"|" \
-                       +'{:^18}'.format(str(btc_price)[:14])+"|"+'{:^18}'.format(str(market_rate)[:14])+"|" \
-                       +'{:^18}'.format(str('-')[:14])+"|"+'{:^18}'.format(str(market_rate)[:14])+"|" \
+            print("  |"+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^18}'.format(0)+hl \
+                       +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                       +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                       +'{:^18}'.format(str('-')[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
                        +'{:^18}'.format(str('-')+"\033[0m")+"  |" \
                        )
             print("  "+row)
@@ -253,12 +255,12 @@ def my_orders_table(node_ip, user_pass, my_orders):
         row = colorize("-"*174, 'blue')
         print("  "+row)
         print(
-            "  |"+'{:^11}'.format("ORDER NUM")+"|"+'{:^14}'.format('ORDER TYPE')+"|" \
-            +'{:^14}'.format('PAIR')+"|"+'{:^18}'.format('VOLUME')+"|" \
-            +'{:^18}'.format('PRICE (USD)')+"|"'{:^18}'.format('PRICE (AUD)')+"|" \
-            +'{:^18}'.format('PRICE (BTC)')+"|"'{:^18}'.format('MY PRICE')+"|" \
-            +'{:^18}'.format('MARKET RATE')+"|" \
-            +'{:^16}'.format('DIFFERENTIAL')+"|"  \
+            "  |"+'{:^11}'.format("ORDER NUM")+hl+'{:^14}'.format('ORDER TYPE')+hl \
+            +'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
+            +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
+            +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('MY PRICE')+hl \
+            +'{:^18}'.format('MARKET RATE')+hl \
+            +'{:^16}'.format('DIFFERENTIAL')+hl  \
             )
         print("  "+row)
         i = 1
@@ -289,12 +291,12 @@ def my_orders_table(node_ip, user_pass, my_orders):
             else:
                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
             rel_price = float(price)
-            print(colorize("  |"+'{:^11}'.format("["+str(i)+"]")+"|"+'{:^14}'.format(order_type)+"|" \
-                       +'{:^14}'.format(pair)+"|"+'{:^18}'.format(volume[:14])+"|" \
-                       +'{:^18}'.format("$"+str(usd_price)[:14])+"|"+'{:^18}'.format("$"+str(aud_price)[:14])+"|" \
-                       +'{:^18}'.format(str(btc_price)[:14])+"|"+'{:^18}'.format(str(rel_price)[:14])+"|" \
-                       +'{:^18}'.format(str(market_rate)[:14])+"|" \
-                       +str(differential)+"|", 'blue') \
+            print(colorize("  |"+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
+                       +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
+                       +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                       +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                       +'{:^18}'.format(str(market_rate)[:14])+hl \
+                       +str(differential)+hl, 'blue') \
                  )
             i += 1
             print("  "+row)
@@ -325,12 +327,12 @@ def my_orders_table(node_ip, user_pass, my_orders):
             else:
                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
             rel_price = float(price)
-            print("  |"+'{:^10}'.format("["+str(i)+"]")+"|"+'{:^14}'.format(order_type)+"|" \
-                       +'{:^14}'.format(pair)+"|"+'{:^18}'.format(volume[:14])+"|" \
-                       +'{:^18}'.format("$"+str(usd_price)[:14])+"|"+'{:^18}'.format("$"+str(aud_price)[:14])+"|" \
-                       +'{:^18}'.format(str(btc_price)[:14])+"|"+'{:^18}'.format(str(rel_price)[:14])+"|" \
-                       +"|"+'{:^18}'.format(str(market_rate)[:14])+"|" \
-                       +str(differential)+"|" \
+            print("  |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
+                       +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
+                       +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                       +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                       +hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                       +str(differential)+hl \
                  )
             i += 1
             print("  "+row)
@@ -375,21 +377,25 @@ def show_balances_table(node_ip, user_pass):
     btc_total = 0
     usd_total = 0
     aud_total = 0
-    header = "|"+'{:^7}'.format('COIN')+"|"+'{:^50}'.format('ADDRESS')+"|" \
-              +'{:^11}'.format('BALANCE')+"|"+'{:^11}'.format('BTC PRICE')+"|" \
-              +'{:^11}'.format('BTC VALUE')+"|"+'{:^11}'.format('USD PRICE')+"|" \
-              +'{:^11}'.format('USD VALUE')+"|"+'{:^11}'.format('AUD PRICE')+"|" \
-              +'{:^11}'.format('AUD VALUE')+"|"
-    table_dash = "-"*len(header)
-    print(" "+table_dash)  
-    print(" "+header)
-    print(" "+table_dash)  
+    header = hl+'{:^7}'.format('COIN')+hl+'{:^50}'.format('ADDRESS (green = bot trading)')+hl \
+              +'{:^11}'.format('BALANCE')+hl+'{:^11}'.format('BTC PRICE')+hl \
+              +'{:^11}'.format('BTC VALUE')+hl+'{:^11}'.format('USD PRICE')+hl \
+              +'{:^11}'.format('USD VALUE')+hl+'{:^11}'.format('AUD PRICE')+hl \
+              +'{:^11}'.format('AUD VALUE')+hl
+    table_dash = "-"*144
+    print(colorize(" "+table_dash, 'lightblue'))
+    print(colorize(" "+header, 'lightblue'))
+    print(colorize(" "+table_dash, 'lightblue'))
     for coin in coin_data:
         if coin in active_coins:
-            balance_data = rpclib.my_balance(node_ip, user_pass, coin).json()
-            coin = balance_data['coin']
-            addr = balance_data['address']
-            bal = float(balance_data['balance'])
+            try:
+                balance_data = rpclib.my_balance(node_ip, user_pass, coin).json()
+                addr = balance_data['address']
+                bal = float(balance_data['balance'])
+            except:
+                addr = "RPC timed out!"
+                bal = 0
+                pass
             btc_price = coin_data[coin]['BTC_price']
             btc_val = btc_price*bal
             btc_total += btc_val
@@ -399,21 +405,58 @@ def show_balances_table(node_ip, user_pass):
             aud_price = coin_data[coin]['AUD_price']
             aud_val = aud_price*bal
             aud_total += aud_val
-            if coin in trading_coins:
-                highlight = '\033[94m'
+            if coin not in trading_coins:
+                row = hl+'{:^7}'.format(coin)+hl+'{:^50}'.format(addr)+hl \
+                               +'{:^11}'.format(str(bal)[:9])+hl \
+                               +'{:^11}'.format(str(btc_price)[:9])+hl+'{:^11}'.format(str(btc_val)[:9])+hl \
+                               +'{:^11}'.format(str(usd_price)[:9])+hl+'{:^11}'.format(str(usd_val)[:9])+hl \
+                               +'{:^11}'.format(str(aud_price)[:9])+hl+'{:^11}'.format(str(aud_val)[:9])+hl
+                print(colorize(" "+row, 'lightblue'))
             else:
-                highlight = '\033[0m'      
-            row = highlight+"|"+'{:^7}'.format(coin)+"|"+'{:^50}'.format(addr)+"|" \
-                           +'{:^11}'.format(str(bal)[:9])+"|" \
-                           +'{:^11}'.format(str(btc_price)[:9])+"|"+'{:^11}'.format(str(btc_val)[:9])+"|"\
-                           +'{:^11}'.format(str(usd_price)[:9])+"|"+'{:^11}'.format(str(usd_val)[:9])+"|"\
-                           +'{:^11}'.format(str(aud_price)[:9])+"|"+'{:^11}'.format(str(aud_val)[:9])+"|"
-            print(" "+row)
-    print(" "+table_dash)  
-    row = "|"+'{:^70}'.format(' ')+"|" \
-           +'{:^11}'.format('TOTAL BTC')+"|"+'{:^11}'.format(str(btc_total)[:9])+"|"\
-           +'{:^11}'.format('TOTAL USD')+"|"+'{:^11}'.format(str(usd_total)[:9])+"|"\
-           +'{:^11}'.format('TOTAL AUD')+"|"+'{:^11}'.format(str(aud_total)[:9])+"|"
-    print(" "+row)
-    print(" "+table_dash+"\n\n")
-    wait_continue()
+                row = hl+colorize('{:^7}'.format(coin),'green')+hl+colorize('{:^50}'.format(addr),'green')+hl \
+                               +colorize('{:^11}'.format(str(bal)[:9]),'green')+hl \
+                               +colorize('{:^11}'.format(str(btc_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(btc_val)[:9]),'green')+hl\
+                               +colorize('{:^11}'.format(str(usd_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(usd_val)[:9]),'green')+hl\
+                               +colorize('{:^11}'.format(str(aud_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(aud_val)[:9]),'green')+hl
+                print(colorize(" "+row, 'lightblue'))
+    print(colorize(" "+table_dash, 'lightblue')) 
+    row = hl+'{:^70}'.format(' ')+hl \
+           +'{:^11}'.format('TOTAL BTC')+hl+'{:^11}'.format(str(btc_total)[:9])+hl \
+           +'{:^11}'.format('TOTAL USD')+hl+'{:^11}'.format(str(usd_total)[:9])+hl \
+           +'{:^11}'.format('TOTAL AUD')+hl+'{:^11}'.format(str(aud_total)[:9])+hl
+    print(colorize(" "+row, 'lightblue'))
+    print(colorize(" "+table_dash+"\n\n", 'lightblue'))
+    while True:
+        outcome = withdraw_tui(node_ip, user_pass, active_coins)
+        if outcome == 'back to menu':
+            break
+
+def withdraw_tui(node_ip, user_pass, active_coins):
+        q = input(colorize("[W]ithdraw funds, or [E]xit to menu: ", 'orange'))
+        if q == 'e' or q == 'E':
+            return 'back to menu'
+        elif q == 'w' or q == 'W':
+            while True:
+                cointag = select_coin("Select coin to withdraw funds: ", active_coins)
+                address = input(colorize("Enter destination address: ",'orange'))
+                amount = input(colorize("Enter amount to send: ",'orange'))
+                resp = rpclib.withdraw(node_ip, user_pass, cointag, address, amount).json()
+                if 'error' in resp:
+                    if resp['error'].find("Invalid Address") > 0:
+                        print(colorize("Invalid address! Try again...", 'red'))
+                    elif resp['error'].find("Not sufficient balance") > 0:
+                        print(colorize("Insufficient balance! Try again...", 'red'))
+                    else:
+                        print(colorize("Error: "+str(resp['error']), 'red'))
+                else:
+                    txid = rpclib.send_raw_transaction(node_ip, user_pass, cointag, resp['tx_hex']).json()
+                    if 'tx_hash' in txid:
+                        print(colorize("Withdrawl successful! TXID: ["+txid['tx_hash']+"]", 'green'))
+                        print(colorize("Track transaction status at [https://www.kmdexplorer.io/tx/"+txid['tx_hash']+"]", 'cyan'))
+                        break
+                    else:
+                        print(colorize("Error: "+str(txid), 'red'))
+                        break
+        else:
+            print(colorize("Invalid selection, must be [E/e] or [W/w]! Try again...", 'red'))
+            return 'try again'

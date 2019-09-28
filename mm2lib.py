@@ -416,7 +416,7 @@ def orderbooks(node_ip, user_pass, coins, coins_data=''):
           except Exception as e:
             print("Orderbooks error: "+str(e))
             pass
-    except:
+    except Exception as e:
       print("Orderbooks error 2: "+str(e))
       pass    
   return total_btc_val 
@@ -491,10 +491,14 @@ def show_balances_table(coin_data, trading_coins=[]):
   print(" "+header)
   print(" "+table_dash)  
   for coin in coin_data:
-    balance_data = my_balance('http://127.0.0.1:7783', userpass, coin).json()
-    coin = balance_data['coin']
-    addr = balance_data['address']
-    bal = float(balance_data['balance'])
+    try:
+      balance_data = my_balance('http://127.0.0.1:7783', userpass, coin).json()
+      addr = balance_data['address']
+      bal = float(balance_data['balance'])
+    except:
+      print(balance_data)
+      addr = ''
+      bal = 0
     btc_price = coin_data[coin]['BTC_price']
     btc_val = btc_price*bal
     btc_total += btc_val
