@@ -190,6 +190,19 @@ def send_raw_transaction(node_ip, user_pass, cointag, rawhex):
     r = requests.post(node_ip, json=params)
     return r
 
+def my_recent_swaps(node_ip, user_pass, limit=10, from_uuid=''):
+    if from_uuid=='':
+        params = {'userpass': user_pass,
+                  'method': 'my_recent_swaps',
+                  'limit': int(limit),}
+        
+    else:
+        params = {'userpass': user_pass,
+                  'method': 'my_recent_swaps',
+                  "limit": int(limit),
+                  "from_uuid":from_uuid,}
+    r = requests.post(node_ip,json=params)
+    return r
 
 def build_coins_data(cointag_list=''):
     if cointag_list == '':
