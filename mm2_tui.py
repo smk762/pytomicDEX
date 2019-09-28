@@ -43,7 +43,7 @@ mm2_main['menu'] = [
 ]
 mm2_main['author'] = '{:^55}'.format('Welcome to the AtomicDEX TUI v0.1 by Thorn Mennet')
 
-ip_user_params_list = ["Stop MarketMaker 2", "Show balances table", "Activate coins", "View orderbook", "View my orders", "Cancel my orders"]
+ip_user_params_list = ["Stop MarketMaker 2", "Show balances table", "Activate coins", "View orderbook", "View/cancel my orders"]
 def main():
     menu = mm2_main
     while True:
@@ -62,8 +62,7 @@ def main():
             if len(status[3]) > 0:
                 menuItems.append({"Show balances table": tuilib.show_balances_table})
                 menuItems.append({"View orderbook": tuilib.show_orderbook_pair})
-                menuItems.append({"View my orders": tuilib.show_orders})
-                menuItems.append({"Cancel my orders": tuilib.cancel_orders})
+                menuItems.append({"View/cancel my orders": tuilib.show_orders})
 
         menuItems.append({"Exit TUI": tuilib.exit})
         print("\n")

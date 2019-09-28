@@ -143,11 +143,6 @@ def my_orders(node_ip, user_pass):
     r = requests.post(node_ip, json=params)
     return r
 
-def cancel_orders(node_ip, user_pass):
-    params = {'userpass': user_pass, 'method': 'my_orders',}
-    r = requests.post(node_ip, json=params)
-    return r
-
 def cancel_all(node_ip, user_pass):
     params = {'userpass': user_pass,
               'method': 'cancel_all_orders',
@@ -165,6 +160,18 @@ def cancel_pair(node_ip, user_pass, base, rel):
     r = requests.post(node_ip,json=params)
     return r
 
+def setprice(node_ip, user_pass, base, rel, basevolume, relprice, trademax=False, cancel_previous=True):
+    params = {'userpass': user_pass,
+              'method': 'setprice',
+              'base': base,
+              'rel': rel,
+              'volume': basevolume,
+              'price': relprice,
+              'max':trademax,
+              'cancel_previous':cancel_previous,}
+    r = requests.post(node_ip, json=params)
+    return r
+    
 def build_coins_data(cointag_list=''):
     if cointag_list == '':
         cointag_list = list(coinslib.coins.keys())

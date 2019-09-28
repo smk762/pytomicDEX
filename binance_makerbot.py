@@ -28,9 +28,16 @@ while True:
     my_orders = mm2lib.my_orders('http://127.0.0.1:7783', mm2lib.userpass).json()
     swaps_in_progress = 0
     for base in mm2lib.trading_list:
-        balance_data = mm2lib.my_balance('http://127.0.0.1:7783', mm2lib.userpass, base).json()
-        base_addr = balance_data['address']
-        bal = float(balance_data['balance'])
+        try:
+            balance_data = mm2lib.my_balance('http://127.0.0.1:7783', mm2lib.userpass, base).json()
+            base_addr = balance_data['address']
+            bal = float(balance_data['balance'])
+        except:
+            print("my_balance failed!")
+            print("balance_data")
+            base_addr = ''
+            bal = 0
+            pass
         if base == 'BCH':
             base_btc_price = binance_api.get_price('BCHABCBTC')
         else:
@@ -49,11 +56,12 @@ while True:
             print("TXID: "+send_resp['tx_hash'])
         elif bal < mm2lib.trading_list[base]['reserve_balance']*0.8:
             qty = mm2lib.trading_list[base]['reserve_balance'] - bal
-            if base == "BCH":
-                withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
-            else:
-                withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-            print(withdraw_tx)
+            if base_addr != '':
+                if base == "BCH":
+                    withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+                else:
+                    withdraw_tx = binance_api.withdraw(base, base_addr, qty)
+                print(withdraw_tx)
         for rel in accepted_coins:
             if rel != base:
                 if rel == 'BCH':

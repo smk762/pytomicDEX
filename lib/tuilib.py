@@ -88,9 +88,9 @@ def select_coin(interrogative, coin_list):
     row = ''
     for coin in coin_list:
         if i < 10:
-            row += " ["+str(i)+"] "+'{:^14}'.format(coin)
+            row += '{:<14}'.format(" ["+str(i)+"] "+coin)
         else:
-            row += "["+str(i)+"] "+'{:^14}'.format(coin)
+            row += '{:<14}'.format("["+str(i)+"] "+coin)
         if len(row) > 64:
             print(colorize(row, 'blue'))
             row = ''
@@ -184,8 +184,10 @@ def pair_orderbook_table(node_ip, user_pass, orderbook, pair_data):
                                         q = input(colorize("Confirm buy order, "+str(buy_num)+" "+base+" for "+str(float(price)*buy_num)+" "+rel+" (y/n): ",'orange'))
                                         if q == 'Y' or q == 'y':
                                             resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, price).json()
+                                            print(resp)
                                             print(colorize("Order submitted!", 'green'))
-                                            break
+                                            wait_continue()
+                                            return 'back to menu'
                                         elif q == 'N' or q == 'n':
                                             return 'back to menu'
                                         else:
@@ -205,15 +207,48 @@ def pair_orderbook_table(node_ip, user_pass, orderbook, pair_data):
                        +'{:^18}'.format(str('-')+"\033[0m")+"  |" \
                        )
             print("  "+row)
-            input(colorize("No orders in orderbook for "+base+"/"+rel+"! Create one manually? (y/n): ", 'red'))
+            q = input(colorize("No orders in orderbook for "+base+"/"+rel+"! Create one manually? (y/n): ", 'red'))
+            while True:
+                if q == 'N' or q == 'n':
+                    break
+                if q == 'Y' or q == 'y':
+                    try:
+                        base_bal = rpclib.my_balance(node_ip, user_pass, base).json()['balance']
+                        print(colorize("Available "+rel+" balance: "+str(base_bal), 'green'))
+                        base_price = float(input(colorize("What "+base+" price?: ", 'orange')))
+                        max_vol = float(base_bal)/base_price
+                        buy_num = float(input(colorize("How many "+rel+" to buy? (max. "+'{:^6}'.format(str(max_vol))+": ", 'orange')))
+                        if buy_num > max_vol:
+                            print(colorize("Can't buy more than max volume! Try again..." , 'red'))
+                        else:
+                            while True:
+                                q = input(colorize("Confirm setprice order, "+str(buy_num)+" "+rel+" for "+str(float(base_price)*buy_num)+" "+base+" (y/n): ",'orange'))
+                                if q == 'Y' or q == 'y':
+                                    resp = rpclib.setprice(node_ip, user_pass, base, rel, buy_num, base_price).json()
+                                    print(resp)
+                                    print(colorize("Order submitted!", 'green'))
+                                    wait_continue()
+                                    return 'back to menu'
+                                elif q == 'N' or q == 'n':
+                                    return 'back to menu'
+                                else:
+                                    print(colorize("Invalid selection, must be [Y/y] or [N/n]. Try again...", 'red'))
+                    except Exception as e:
+                        print(e)
+                        pass
     except Exception as e:
         print("Orderbooks error: "+str(e))
         pass    
     wait_continue()
 
 def my_orders_table(node_ip, user_pass, my_orders):
+    if len(my_orders['maker_orders']) + len(my_orders['maker_orders']) == 0:
+        print(colorize("You have no pending orders!", 'red'))
+        wait_continue()
+        return 'back to menu'
     coins_data = rpclib.build_coins_data()
     total_btc_val = 0
+    my_order_list = []
     try:
         row = colorize("-"*174, 'blue')
         print("  "+row)
@@ -228,6 +263,7 @@ def my_orders_table(node_ip, user_pass, my_orders):
         print("  "+row)
         i = 1
         for order in my_orders['maker_orders']:
+            my_order_list.append(my_orders['maker_orders'][order])
             order_type = "MAKER"
             base = my_orders['maker_orders'][order]['base']
             rel = my_orders['maker_orders'][order]['rel']
@@ -263,6 +299,7 @@ def my_orders_table(node_ip, user_pass, my_orders):
             i += 1
             print("  "+row)
         for order in my_orders['taker_orders']:
+            my_order_list.append(my_orders['taker_orders'][order])
             order_type = "TAKER"
             base = my_orders['taker_orders'][order]['base']
             rel = my_orders['taker_orders'][order]['rel']
@@ -297,14 +334,27 @@ def my_orders_table(node_ip, user_pass, my_orders):
                  )
             i += 1
             print("  "+row)
-            while True:
-                bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
-                print(colorize("Your "+rel+" balance: "+str(bal), 'green'))
-                q = input(colorize("Select an order number to cancel a trade, or [E]xit to menu: ", 'orange'))
-                if q == 'e' or q == 'E':
+        while True:
+            q = input(colorize("Select an order number to cancel a trade, Cancel [A]ll trades, or [E]xit to menu: ", 'orange'))
+            if q == 'e' or q == 'E':
+                break
+            elif q == 'a' or q == 'A':
+                resp = rpclib.cancel_all(node_ip, user_pass).json()
+                print(colorize("All orders cancelled!","orange"))
+                break
+            else:
+                try:
+                    selected = my_order_list[int(q)-1]
+                    base = selected['base']
+                    rel = selected['rel']
+                    resp = rpclib.cancel_pair(node_ip, user_pass, base, rel).json()
+                    print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
                     break
-                else:
+                except:
+                    print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook['bids'])), 'red'))
                     pass
+
+                
     except Exception as e:
         print("Orders error: "+str(e))
         pass    
@@ -313,11 +363,6 @@ def my_orders_table(node_ip, user_pass, my_orders):
 def show_orders(node_ip, user_pass):
     resp = rpclib.my_orders(node_ip, user_pass).json()
     my_orders_table(node_ip, user_pass, resp['result'])
-
-def cancel_orders(node_ip, user_pass):
-    resp = rpclib.cancel_orders(node_ip, user_pass).json()
-    print(resp)
-    wait_continue()
 
 def show_balances_table(node_ip, user_pass):
     coin_status = rpclib.check_coins_status(node_ip, user_pass)
