@@ -8,6 +8,10 @@ import subprocess
 from os.path import expanduser
 from . import coinslib, rpclib, binance_api
 
+explorers = {
+    "KMD":"https://www.kmdexplorer.io/tx",
+}
+
 def colorize(string, color):
 
         colors = {
@@ -457,7 +461,7 @@ def withdraw_tui(node_ip, user_pass, active_coins):
                 elif q == 'w' or q == 'W':
                         while True:
                                 cointag = select_coin("Select coin to withdraw funds: ", active_coins)
-                                address = input(colorize("Enter destination address: ",'orange'))
+                                address = input(colorize("Enter destination "+cointag+" address: ",'orange'))
                                 amount = input(colorize("Enter amount to send: ",'orange'))
                                 resp = rpclib.withdraw(node_ip, user_pass, cointag, address, amount).json()
                                 if 'error' in resp:
@@ -471,7 +475,11 @@ def withdraw_tui(node_ip, user_pass, active_coins):
                                         txid = rpclib.send_raw_transaction(node_ip, user_pass, cointag, resp['tx_hex']).json()
                                         if 'tx_hash' in txid:
                                                 print(colorize("Withdrawl successful! TXID: ["+txid['tx_hash']+"]", 'green'))
-                                                print(colorize("Track transaction status at [https://www.kmdexplorer.io/tx/"+txid['tx_hash']+"]", 'cyan'))
+                                                try:
+                                                    print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid['tx_hash']+"]", 'cyan'))
+                                                except:
+                                                    print(colorize("Track transaction status at ["+txid['tx_hash']+"]", 'cyan'))
+                                                    pass
                                                 break
                                         else:
                                                 print(colorize("Error: "+str(txid), 'red'))
