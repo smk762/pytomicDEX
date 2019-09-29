@@ -172,6 +172,13 @@ def setprice(node_ip, user_pass, base, rel, basevolume, relprice, trademax=False
     r = requests.post(node_ip, json=params)
     return r
 
+def recover_stuck_swap(node_ip, user_pass, uuid):
+    params = {'userpass': user_pass,
+              'method': 'recover_funds_of_swap',
+              'params': {'uuid':uuid}
+              }
+    r = requests.post(node_ip, json=params)
+    return r    
 
 def withdraw(node_ip, user_pass, cointag, address, amount, max_amount=False):
     params = {'userpass': user_pass,

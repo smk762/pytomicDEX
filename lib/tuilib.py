@@ -308,7 +308,7 @@ def my_orders_table(node_ip, user_pass, my_orders):
                         else:
                                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
                         rel_price = float(price)
-                        print(colorize("    |"+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
+                        print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
                                              +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
                                              +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
                                              +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
@@ -320,36 +320,38 @@ def my_orders_table(node_ip, user_pass, my_orders):
                 for order in my_orders['taker_orders']:
                         my_order_list.append(my_orders['taker_orders'][order])
                         order_type = "TAKER"
-                        base = my_orders['taker_orders'][order]['base']
-                        rel = my_orders['taker_orders'][order]['rel']
-                        price = my_orders['taker_orders'][order]['price']
-                        volume = my_orders['taker_orders'][order]['available_amount']
+                        base = my_orders['taker_orders'][order]['request']['base']
+                        rel = my_orders['taker_orders'][order]['request']['rel']
+                        base_amount = my_orders['taker_orders'][order]['request']['base_amount']
+                        rel_amount = my_orders['taker_orders'][order]['request']['rel_amount']
+                        price = float(rel_amount)/float(base_amount)
+                        volume = base_amount
                         try:
-                                market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
+                            market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
                         except:
-                                market_rate = 0
+                            market_rate = 0
                         pair = rel+"/"+base
                         btc_price = coins_data[rel]['BTC_price']
                         aud_price = coins_data[rel]['AUD_price']
                         usd_price = coins_data[rel]['USD_price']
                         if market_rate != 0:
-                                differential = float(market_rate)/float(price)-1
+                            differential = float(market_rate)/float(price)-1
                         else:
-                                differential = 0
+                            differential = 0
                         diff_pct = str(differential*100)[:5]+"%"
                         if differential < 0:
-                                differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
                         elif differential > 0.07:
-                                differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
                         else:
-                                differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
                         rel_price = float(price)
-                        print("    |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
+                        print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
                                              +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
                                              +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
                                              +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                                             +hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                                             +str(differential)+hl \
+                                             +'{:^18}'.format(str(market_rate)[:14])+hl \
+                                             +str(differential)+hl, 'blue') \
                                  )
                         i += 1
                         print("    "+row)
@@ -578,4 +580,107 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
     print(" "+aud_row)
     print(" "+table_dash)
     #calculate in / out value
+    wait_continue()
+
+def recover_swap(node_ip, user_pass):
+    uuid = input(colorize("Enter stuck swap UUID: ", 'orange'))
+    print(uuid)
+    resp = rpclib.recover_stuck_swap(node_ip, user_pass, uuid).json()
+    print(resp)
+    wait_continue()
+
+def show_failed_swaps(node_ip, user_pass, swapcount=50):
+    header_list = []
+    swap_json = []
+    failed_swaps = []
+    error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed',
+                                    'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed',
+                                    'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 
+                                    'MakerPaymentRefundFailed']
+    recent_swaps = rpclib.my_recent_swaps(node_ip, user_pass, swapcount).json()
+    swap_list = recent_swaps['result']['swaps']
+    for swap in swap_list:
+        for event in swap['events']:
+            if event['event']['type'] in error_events:
+                failed_swaps.append(swap)
+                break
+    failed_swaps_summary = {}
+    for swap in failed_swaps:
+        timestamps_list = []
+        errors_list = []
+        failed_swap_json = {}
+        swap_type = swap['type']
+        uuid = swap['uuid']
+        failed_swap_json.update({'swap_type':swap_type})
+        failed_swap_json.update({'uuid':uuid})
+        for event in swap['events']:
+            event_type = event['event']['type']
+            event_timestamp = event['timestamp']
+            timestamps_list.append({event_type:event_timestamp})
+            if event['event']['type'] in error_events:
+                error = str(event['event']['data'])
+                errors_list.append({event_type:error})
+            if event['event']['type'] == 'Started':
+                failed_swap_json.update({'lock_duration':event['event']['data']['lock_duration']})
+                failed_swap_json.update({'taker_coin':event['event']['data']['taker_coin']})
+                failed_swap_json.update({'taker_pub':event['event']['data']['taker']})
+                failed_swap_json.update({'maker_coin':event['event']['data']['maker_coin']})
+                failed_swap_json.update({'maker_pub':event['event']['data']['my_persistent_pub']})
+            if 'data' in event['event']:
+                if 'maker_payment_locktime' in event['event']['data']:
+                    failed_swap_json.update({'maker_locktime':event['event']['data']['maker_payment_locktime']})
+                if 'taker_payment_locktime' in event['event']['data']:
+                    failed_swap_json.update({'taker_locktime':event['event']['data']['taker_payment_locktime']})
+            if event['event']['type'] == 'Finished':
+                failed_swap_json.update({'timestamps_list':timestamps_list})
+                failed_swap_json.update({'errors':errors_list})
+                failed_swaps_summary[uuid] = failed_swap_json
+
+    header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
+                        +'{:^25}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
+                        +'{:^7}'.format('TAKER')+hl+'{:^7}'.format('MAKER')+hl \
+                        +'{:^66}'.format('TAKER PUB')+hl
+    table_dash = "-"*191
+    print(colorize(" "+table_dash, 'lightblue'))
+    print(colorize(" "+header, 'lightblue'))
+    print(colorize(" "+table_dash, 'lightblue'))
+    i = 1
+    for uuid in failed_swaps_summary:
+        swap_summary = failed_swaps_summary[uuid]
+        for error in swap_summary['errors']:
+            #swap_time = swap_summary['timestamps_list'][0][1]-swap_summary['timestamps_list'][0][0]
+            start_time = list(swap_summary['timestamps_list'][0].values())[0]
+            end_time = list(swap_summary['timestamps_list'][-1].values())[0]
+            swap_time = ((end_time - start_time)/1000)/60
+            taker_pub = swap_summary['taker_pub']
+            taker_coin = swap_summary['taker_coin']
+            maker_coin = swap_summary['maker_coin']
+            if str(error).find('overwinter') > 0:
+                error_type = "tx-overwinter-active"
+            else:
+                error_type = "other"
+            row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
+                        +'{:^25}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
+                        +'{:^7}'.format(taker_coin)+hl+'{:^7}'.format(maker_coin)+hl \
+                        +'{:^66}'.format(taker_pub)+hl
+            print(colorize(" "+row, 'lightblue'))
+            print(colorize(" "+table_dash, 'lightblue'))
+            #print(error)
+        i += 1
+    q = input(colorize("Enter a swap number to view events log, or [E]xit to menu: ", 'orange'))
+    if q == 'e' or q == 'E':
+        return 'back to menu'
+    else:        
+        try:
+            swap = failed_swaps[int(q)-1]
+            for event in swap['events']:
+                print(colorize("["+event['event']['type']+"]", 'green'))
+                if event['event']['type'] in error_events:
+                    print(colorize(str(event), 'red'))
+                else:
+                    print(colorize(str(event), 'blue'))
+        except Exception as e:
+            print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(failed_swaps)), 'red'))
+            pass
+
     wait_continue()

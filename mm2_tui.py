@@ -43,8 +43,8 @@ mm2_main['menu'] = [
 ]
 mm2_main['author'] = '{:^55}'.format('Welcome to the AtomicDEX TUI v0.1 by Thorn Mennet')
 
-ip_user_params_list = ["Stop MarketMaker 2", "View/withdraw balances", "Activate coins",
-                       "View/buy from orderbook", "View/cancel my orders", "View recent swaps"]
+no_params_list = ["Exit TUI"]
+
 def main():
     menu = mm2_main
     while True:
@@ -64,7 +64,9 @@ def main():
                 menuItems.append({"View/withdraw balances": tuilib.show_balances_table})
                 menuItems.append({"View/buy from orderbook": tuilib.show_orderbook_pair})
                 menuItems.append({"View/cancel my orders": tuilib.show_orders})
-                menuItems.append({"View recent swaps": tuilib.show_recent_swaps})
+                menuItems.append({"Review recent swaps": tuilib.show_recent_swaps})
+                menuItems.append({"Review failed swaps": tuilib.show_failed_swaps})
+                menuItems.append({"Recover stuck swap": tuilib.recover_swap})
 
         menuItems.append({"Exit TUI": tuilib.exit})
         print("\n")
@@ -75,14 +77,12 @@ def main():
             if int(choice) < 0:
                 raise ValueError
             # Call the matching function
-            if list(menuItems[int(choice)].keys())[0] == "Exit TUI":
+            if list(menuItems[int(choice)].keys())[0] in no_params_list:
                 list(menuItems[int(choice)].values())[0]()
             elif list(menuItems[int(choice)].keys())[0].find('Menu') != -1:
                 submenu(list(menuItems[int(choice)].values())[0])
-            elif list(menuItems[int(choice)].keys())[0] in ip_user_params_list:
-                list(menuItems[int(choice)].values())[0](local_ip, userpass)
             else:
-                list(menuItems[int(choice)].values())[0]()
+                list(menuItems[int(choice)].values())[0](local_ip, userpass)
         except (ValueError, IndexError):
             pass
 
