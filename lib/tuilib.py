@@ -667,20 +667,21 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
             print(colorize(" "+table_dash, 'lightblue'))
             #print(error)
         i += 1
-    q = input(colorize("Enter a swap number to view events log, or [E]xit to menu: ", 'orange'))
-    if q == 'e' or q == 'E':
-        return 'back to menu'
-    else:        
-        try:
-            swap = failed_swaps[int(q)-1]
-            for event in swap['events']:
-                print(colorize("["+event['event']['type']+"]", 'green'))
-                if event['event']['type'] in error_events:
-                    print(colorize(str(event), 'red'))
-                else:
-                    print(colorize(str(event), 'blue'))
-        except Exception as e:
-            print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(failed_swaps)), 'red'))
-            pass
+    while True:
+        q = input(colorize("Enter a swap number to view events log, or [E]xit to menu: ", 'orange'))
+        if q == 'e' or q == 'E':
+            return 'back to menu'
+        else:        
+            try:
+                swap = failed_swaps[int(q)-1]
+                for event in swap['events']:
+                    print(colorize("["+event['event']['type']+"]", 'green'))
+                    if event['event']['type'] in error_events:
+                        print(colorize(str(event), 'red'))
+                    else:
+                        print(colorize(str(event), 'blue'))
+            except Exception as e:
+                print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(failed_swaps)), 'red'))
+                pass
 
     wait_continue()
