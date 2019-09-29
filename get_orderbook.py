@@ -114,7 +114,7 @@ def get_orders_json(coins):
             for ask in pair['asks']:
                 print(str(ask['price'])[:12]+" "+pair['rel']+" per "+pair['base']+" ("+str(ask['maxvolume'])+" "+pair['base']+" available)")
                 baserel = pair['base']+"/"+pair['rel']
-                ask_json.append({"pair":baserel, "price":str(ask['price'])[:12], "volume":str(str(ask['maxvolume'])+" "+pair['base'])})
+                ask_json.append({"pair":baserel, "price":str(str(ask['price'])[:12]+" "+pair['rel']), "volume":str(str(ask['maxvolume'])+" "+pair['base'])})
            # for bid in pair['bids']:
             #    print(str(bid['price'])+" "+pair['base']+" per "+pair['rel']+" ("+str(bid['maxvolume'])+" available)")
              #   bid_json.append({"baserel":baserel, "price":bid['price'], "volume":str(bid['maxvolume'])})
