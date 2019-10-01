@@ -8,6 +8,15 @@ coins = {
                      {"url":"electrum2.cipig.net:10001"},
                      {"url":"electrum3.cipig.net:10001"}]
     },
+    "DEX":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "activate_with":"electrum",
+        "tx_explorer":"https://dex.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10006"},
+                     {"url":"electrum2.cipig.net:10006"},
+                     {"url":"electrum3.cipig.net:10006"}]
+    },
     "VRSC":{        
         "min_swap": 0.1,
         "activate_with":"electrum",

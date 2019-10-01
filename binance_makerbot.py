@@ -25,6 +25,10 @@ while True:
     coins_data = mm2lib.build_coins_data(mm2lib.coins)
     mm2lib.show_balances_table(coins_data, trading_coins)
     mm2lib.recent_swaps_table("http://127.0.0.1:7783", mm2lib.userpass, 50, coins_data)
+    for i in range(30):
+        time_left = 900-i*30
+        print("Waiting 30 sec, "+str(time_left)+"sec remaining until refresh..." )
+        time.sleep(30)
     my_orders = mm2lib.my_orders('http://127.0.0.1:7783', mm2lib.userpass).json()
     swaps_in_progress = 0
     for base in mm2lib.trading_list:
@@ -107,8 +111,4 @@ while True:
     total_aud_val = total_btc_val * coins_data['BTC']['AUD_price']
     print("Combined Orderbook Value (USD): $"+str(total_usd_val))
     print("Combined Orderbook Value (AUD): $"+str(total_aud_val))
-    for i in range(30):
-        time_left = 900-i*30
-        print("Waiting 30 sec, "+str(time_left)+"sec remaining until refresh..." )
-        time.sleep(30)
     # TODO: Detect swaps in progress, and make sure to not cancel with new swap.
