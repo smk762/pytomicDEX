@@ -67,6 +67,7 @@ def main():
                 menuItems.append({"View/withdraw balances": tuilib.show_balances_table})
                 menuItems.append({"View/buy from orderbook": tuilib.show_orderbook_pair})
                 menuItems.append({"View/cancel my orders": tuilib.show_orders})
+                menuItems.append({"View swaps in progress": tuilib.show_swaps_in_progress})
                 menuItems.append({"Review recent swaps": tuilib.show_recent_swaps})
                 menuItems.append({"Review failed swaps": tuilib.show_failed_swaps})
                 menuItems.append({"Recover stuck swap": tuilib.recover_swap})

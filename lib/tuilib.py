@@ -249,153 +249,153 @@ def show_orderbook_pair(node_ip, user_pass):
     wait_continue()
 
 def create_buy(node_ip, user_pass, base, rel):
-        try:
-                rel_bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
-                rel_price = float(input(colorize("What "+rel+" price?: ", 'orange')))
-                max_vol = float(rel_bal)/rel_price
-                buy_num = float(input(colorize("How many "+base+" to buy? (max. "+'{:^8}'.format(str(max_vol))+"): ", 'orange')))
-                if buy_num > max_vol:
-                        print(colorize("Can't buy more than max volume! Try again..." , 'red'))
+    try:
+        rel_bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
+        rel_price = float(input(colorize("What "+rel+" price?: ", 'orange')))
+        max_vol = float(rel_bal)/rel_price
+        buy_num = float(input(colorize("How many "+base+" to buy? (max. "+'{:^8}'.format(str(max_vol))+"): ", 'orange')))
+        if buy_num > max_vol:
+            print(colorize("Can't buy more than max volume! Try again..." , 'red'))
+        else:
+            while True:
+                q = input(colorize("Confirm setprice order, "+str(buy_num)+" "+base+" for "+str(float(rel_price)*buy_num)+" "+rel+" (y/n): ",'orange'))
+                if q == 'Y' or q == 'y':
+                    resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, rel_price).json()
+                    if 'error' in resp:
+                        print(colorize("Setprice Error: "+str(resp), 'red'))
+                    else:
+                        print(colorize("Order submitted!", 'green'))
+                    wait_continue()
+                    return 'back to menu'
+                elif q == 'N' or q == 'n':
+                    return 'back to menu'
                 else:
-                        while True:
-                                q = input(colorize("Confirm setprice order, "+str(buy_num)+" "+base+" for "+str(float(rel_price)*buy_num)+" "+rel+" (y/n): ",'orange'))
-                                if q == 'Y' or q == 'y':
-                                        resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, rel_price).json()
-                                        if 'error' in resp:
-                                                print(colorize("Setprice Error: "+str(resp), 'red'))
-                                        else:
-                                                print(colorize("Order submitted!", 'green'))
-                                        wait_continue()
-                                        return 'back to menu'
-                                elif q == 'N' or q == 'n':
-                                        return 'back to menu'
-                                else:
-                                        print(colorize("Invalid selection, must be [Y/y] or [N/n]. Try again...", 'red'))
-        except Exception as e:
-                print("Create setprice error: "+str(e))
-                wait_continue()
-                return 'back to menu'
+                    print(colorize("Invalid selection, must be [Y/y] or [N/n]. Try again...", 'red'))
+    except Exception as e:
+        print("Create setprice error: "+str(e))
+        wait_continue()
+        return 'back to menu'
 
 
 def my_orders_table(node_ip, user_pass, my_orders):
         if len(my_orders['maker_orders']) + len(my_orders['maker_orders']) == 0:
-                print(colorize("You have no pending orders!", 'red'))
-                wait_continue()
-                return 'back to menu'
+            print(colorize("You have no pending orders!", 'red'))
+            wait_continue()
+            return 'back to menu'
         coins_data = rpclib.build_coins_data()
         total_btc_val = 0
         my_order_list = []
         try:
-                row = colorize("-"*174, 'blue')
+            row = colorize("-"*174, 'blue')
+            print("    "+row)
+            print(
+                    "    |"+'{:^11}'.format("ORDER NUM")+hl+'{:^14}'.format('ORDER TYPE')+hl \
+                    +'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
+                    +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
+                    +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('MY PRICE')+hl \
+                    +'{:^18}'.format('MARKET RATE')+hl \
+                    +'{:^16}'.format('DIFFERENTIAL')+hl    \
+                    )
+            print("    "+row)
+            i = 1
+            for order in my_orders['maker_orders']:
+                my_order_list.append(my_orders['maker_orders'][order])
+                order_type = "MAKER"
+                base = my_orders['maker_orders'][order]['base']
+                rel = my_orders['maker_orders'][order]['rel']
+                price = my_orders['maker_orders'][order]['price']
+                volume = my_orders['maker_orders'][order]['available_amount']
+                try:
+                    market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
+                except:
+                    market_rate = 0
+                pair = rel+"/"+base
+                btc_price = coins_data[rel]['BTC_price']
+                aud_price = coins_data[rel]['AUD_price']
+                usd_price = coins_data[rel]['USD_price']
+                if market_rate != 0:
+                    differential = float(price)/float(market_rate)-1
+                else:
+                    differential = 0
+                diff_pct = str(differential*100)[:5]+"%"
+                if differential < 0:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                elif differential > 0.07:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                else:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                rel_price = float(price)
+                print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
+                                     +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
+                                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                                     +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                     +'{:^18}'.format(str(market_rate)[:14])+hl \
+                                     +str(differential)+hl, 'blue') \
+                         )
+                i += 1
                 print("    "+row)
-                print(
-                        "    |"+'{:^11}'.format("ORDER NUM")+hl+'{:^14}'.format('ORDER TYPE')+hl \
-                        +'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
-                        +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
-                        +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('MY PRICE')+hl \
-                        +'{:^18}'.format('MARKET RATE')+hl \
-                        +'{:^16}'.format('DIFFERENTIAL')+hl    \
-                        )
+            for order in my_orders['taker_orders']:
+                my_order_list.append(my_orders['taker_orders'][order])
+                order_type = "TAKER"
+                base = my_orders['taker_orders'][order]['request']['base']
+                rel = my_orders['taker_orders'][order]['request']['rel']
+                base_amount = my_orders['taker_orders'][order]['request']['base_amount']
+                rel_amount = my_orders['taker_orders'][order]['request']['rel_amount']
+                price = float(rel_amount)/float(base_amount)
+                volume = base_amount
+                try:
+                    market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
+                except:
+                    market_rate = 0
+                pair = rel+"/"+base
+                btc_price = coins_data[rel]['BTC_price']
+                aud_price = coins_data[rel]['AUD_price']
+                usd_price = coins_data[rel]['USD_price']
+                if market_rate != 0:
+                    differential = float(market_rate)/float(price)-1
+                else:
+                    differential = 0
+                diff_pct = str(differential*100)[:5]+"%"
+                if differential < 0:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                elif differential > 0.07:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                else:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                rel_price = float(price)
+                print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
+                                     +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
+                                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                                     +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                     +'{:^18}'.format(str(market_rate)[:14])+hl \
+                                     +str(differential)+hl, 'blue') \
+                         )
+                i += 1
                 print("    "+row)
-                i = 1
-                for order in my_orders['maker_orders']:
-                        my_order_list.append(my_orders['maker_orders'][order])
-                        order_type = "MAKER"
-                        base = my_orders['maker_orders'][order]['base']
-                        rel = my_orders['maker_orders'][order]['rel']
-                        price = my_orders['maker_orders'][order]['price']
-                        volume = my_orders['maker_orders'][order]['available_amount']
-                        try:
-                                market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
-                        except:
-                                market_rate = 0
-                        pair = rel+"/"+base
-                        btc_price = coins_data[rel]['BTC_price']
-                        aud_price = coins_data[rel]['AUD_price']
-                        usd_price = coins_data[rel]['USD_price']
-                        if market_rate != 0:
-                                differential = float(price)/float(market_rate)-1
-                        else:
-                                differential = 0
-                        diff_pct = str(differential*100)[:5]+"%"
-                        if differential < 0:
-                                differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
-                        elif differential > 0.07:
-                                differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
-                        else:
-                                differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
-                        rel_price = float(price)
-                        print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
-                                             +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
-                                             +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
-                                             +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                                             +'{:^18}'.format(str(market_rate)[:14])+hl \
-                                             +str(differential)+hl, 'blue') \
-                                 )
-                        i += 1
-                        print("    "+row)
-                for order in my_orders['taker_orders']:
-                        my_order_list.append(my_orders['taker_orders'][order])
-                        order_type = "TAKER"
-                        base = my_orders['taker_orders'][order]['request']['base']
-                        rel = my_orders['taker_orders'][order]['request']['rel']
-                        base_amount = my_orders['taker_orders'][order]['request']['base_amount']
-                        rel_amount = my_orders['taker_orders'][order]['request']['rel_amount']
-                        price = float(rel_amount)/float(base_amount)
-                        volume = base_amount
-                        try:
-                            market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
-                        except:
-                            market_rate = 0
-                        pair = rel+"/"+base
-                        btc_price = coins_data[rel]['BTC_price']
-                        aud_price = coins_data[rel]['AUD_price']
-                        usd_price = coins_data[rel]['USD_price']
-                        if market_rate != 0:
-                            differential = float(market_rate)/float(price)-1
-                        else:
-                            differential = 0
-                        diff_pct = str(differential*100)[:5]+"%"
-                        if differential < 0:
-                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
-                        elif differential > 0.07:
-                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
-                        else:
-                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
-                        rel_price = float(price)
-                        print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
-                                             +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
-                                             +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
-                                             +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                                             +'{:^18}'.format(str(market_rate)[:14])+hl \
-                                             +str(differential)+hl, 'blue') \
-                                 )
-                        i += 1
-                        print("    "+row)
-                while True:
-                        q = input(colorize("Select an order number to cancel a trade, Cancel [A]ll trades, or [E]xit to menu: ", 'orange'))
-                        if q == 'e' or q == 'E':
-                                break
-                        elif q == 'a' or q == 'A':
-                                resp = rpclib.cancel_all(node_ip, user_pass).json()
-                                print(colorize("All orders cancelled!","orange"))
-                                break
-                        else:
-                                try:
-                                        selected = my_order_list[int(q)-1]
-                                        base = selected['base']
-                                        rel = selected['rel']
-                                        resp = rpclib.cancel_pair(node_ip, user_pass, base, rel).json()
-                                        print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
-                                        break
-                                except:
-                                        print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook['bids'])), 'red'))
-                                        pass
+            while True:
+                q = input(colorize("Select an order number to cancel a trade, Cancel [A]ll trades, or [E]xit to menu: ", 'orange'))
+                if q == 'e' or q == 'E':
+                    break
+                elif q == 'a' or q == 'A':
+                    resp = rpclib.cancel_all(node_ip, user_pass).json()
+                    print(colorize("All orders cancelled!","orange"))
+                    break
+                else:
+                    try:
+                        selected = my_order_list[int(q)-1]
+                        base = selected['base']
+                        rel = selected['rel']
+                        resp = rpclib.cancel_pair(node_ip, user_pass, base, rel).json()
+                        print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
+                        break
+                    except:
+                        print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook['bids'])), 'red'))
+                        pass
 
-                                
+                            
         except Exception as e:
-                print("Orders error: "+str(e))
-                pass        
+            print("Orders error: "+str(e))
+            pass        
         wait_continue()
 
 def show_orders(node_ip, user_pass):
@@ -501,6 +501,32 @@ def withdraw_tui(node_ip, user_pass, active_coins):
                         print(colorize("Invalid selection, must be [E/e] or [W/w]! Try again...", 'red'))
                         return 'try again'
 
+def show_swaps_in_progress(node_ip, user_pass):
+    unfinished_swap_list = rpclib.get_unfinished_swap_uuids(node_ip, user_pass)
+    if len(unfinished_swap_list) > 0:
+        i = 1
+        for swap in unfinished_swap_list:
+            print(colorize("["+str(i)+"] "+swap,'blue'))
+            i += 1
+        interrogative = "Select a swap number, or [E]xit to menu: "
+        while True:
+            q = input(colorize(interrogative, 'orange'))
+            if q == 'e' or 'E':
+                return 'back to menu'
+            else:
+                try:
+                    index = int(q)-1
+                    selected = unfinished_swap_list[index]
+                    break
+                except:
+                    print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(unfinished_swap_list)), 'red'))
+                    pass
+        swap_info = rpclib.my_swap_status(node_ip, user_pass, swap_uuid)
+        print(colorize(swap_info,'yellow'))
+    else:
+        print(colorize('No swaps in progress!','red'))
+        wait_continue()
+
 def show_recent_swaps(node_ip, user_pass, swapcount=50):
     recent_swaps = rpclib.my_recent_swaps(node_ip, user_pass, swapcount).json()
     swap_list = recent_swaps['result']['swaps']
@@ -541,7 +567,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                                             "taker_amount":taker_amount
                         })
         delta = {}
-        header = "|"+'{:^26}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
+        header = "|"+'{:^21}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
         for coin in header_list:
             header += '{:^10}'.format(coin)+"|"
             delta[coin] = 0
@@ -550,7 +576,8 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
         print(" "+header)
         print(" "+table_dash)
         for swap in swap_json:
-            row_str = "|"+'{:^26}'.format(swap['time'])+"|"
+            time_str = swap['time'][:-5]
+            row_str = "|"+'{:^21}'.format(time_str)+"|"
             result = '{:^36}'.format(swap['result'])+"|"
             row_str += result
             for coin in header_list:
@@ -565,10 +592,10 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                 else:
                     row_str += '{:^10}'.format('-')+"|"
             print(" "+row_str)
-        delta_row = "|"+'{:^63}'.format("TOTAL")+"|"
-        btc_row = "|"+'{:^63}'.format("BTC")+"|"
-        usd_row = "|"+'{:^63}'.format("USD")+"|"
-        aud_row = "|"+'{:^63}'.format("AUD")+"|"
+        delta_row = "|"+'{:^58}'.format("TOTAL")+"|"
+        btc_row = "|"+'{:^58}'.format("BTC")+"|"
+        usd_row = "|"+'{:^58}'.format("USD")+"|"
+        aud_row = "|"+'{:^58}'.format("AUD")+"|"
         table_dash = "-"*(len(delta_row)+(len(header_list)+1)*11)
         btc_sum = 0
         usd_sum = 0
