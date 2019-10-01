@@ -543,7 +543,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
         delta = {}
         header = "|"+'{:^26}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
         for coin in header_list:
-            header += '{:^14}'.format(coin)+"|"
+            header += '{:^10}'.format(coin)+"|"
             delta[coin] = 0
         table_dash = "-"*len(header)
         print(" "+table_dash)
@@ -551,22 +551,25 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
         print(" "+table_dash)
         for swap in swap_json:
             row_str = "|"+'{:^26}'.format(swap['time'])+"|"
-            row_str += '{:^36}'.format(swap['result'])+"|"
+            result = '{:^36}'.format(swap['result'])+"|"
+            row_str += result
             for coin in header_list:
                 if coin == swap['maker_coin']:
-                    row_str += '\033[91m'+'{:^14}'.format(swap['maker_amount'][:12])+'\033[0m'+"|"
-                    delta[coin] -= float(swap['maker_amount'])
+                    row_str += '\033[91m'+'{:^10}'.format(swap['maker_amount'][:8])+'\033[0m'+"|"
+                    if result.find('Failed') == -1:
+                        delta[coin] -= float(swap['maker_amount'])
                 elif coin == swap['taker_coin']:
-                    row_str += '\033[92m'+'{:^14}'.format(swap['taker_amount'][:12])+'\033[0m'+"|"
-                    delta[coin] += float(swap['taker_amount'])
+                    row_str += '\033[92m'+'{:^10}'.format(swap['taker_amount'][:8])+'\033[0m'+"|"
+                    if result.find('Failed') == -1:
+                        delta[coin] += float(swap['taker_amount'])
                 else:
-                    row_str += '{:^14}'.format('-')+"|"
+                    row_str += '{:^10}'.format('-')+"|"
             print(" "+row_str)
         delta_row = "|"+'{:^63}'.format("TOTAL")+"|"
         btc_row = "|"+'{:^63}'.format("BTC")+"|"
         usd_row = "|"+'{:^63}'.format("USD")+"|"
         aud_row = "|"+'{:^63}'.format("AUD")+"|"
-        table_dash = "-"*(len(delta_row)+(len(header_list)+1)*15)
+        table_dash = "-"*(len(delta_row)+(len(header_list)+1)*11)
         btc_sum = 0
         usd_sum = 0
         aud_sum = 0
@@ -583,14 +586,14 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                     btc_sum += btc_price
                     usd_sum += usd_price
                     aud_sum += aud_price
-                    delta_row += highlight+'{:^14}'.format(str(delta[header_coin])[:12])+'\033[0m'+"|"
-                    btc_row += highlight+'{:^14}'.format(str(btc_price)[:12])+'\033[0m'+"|"
-                    usd_row += highlight+'{:^14}'.format("$"+str(usd_price)[:10])+'\033[0m'+"|"
-                    aud_row += highlight+'{:^14}'.format("$"+str(aud_price)[:10])+'\033[0m'+"|"
-        delta_row += '{:^14}'.format("TOTAL")+"|"
-        btc_row += '{:^14}'.format(str(btc_sum)[:12])+"|"
-        usd_row += '{:^14}'.format("$"+str(usd_sum)[:10])+"|"
-        aud_row += '{:^14}'.format("$"+str(aud_sum)[:10])+"|"
+                    delta_row += highlight+'{:^10}'.format(str(delta[header_coin])[:8])+'\033[0m'+"|"
+                    btc_row += highlight+'{:^10}'.format(str(btc_price)[:8])+'\033[0m'+"|"
+                    usd_row += highlight+'{:^10}'.format("$"+str(usd_price)[:7])+'\033[0m'+"|"
+                    aud_row += highlight+'{:^10}'.format("$"+str(aud_price)[:7])+'\033[0m'+"|"
+        delta_row += '{:^10}'.format("TOTAL")+"|"
+        btc_row += '{:^10}'.format(str(btc_sum)[:8])+"|"
+        usd_row += '{:^10}'.format("$"+str(usd_sum)[:7])+"|"
+        aud_row += '{:^10}'.format("$"+str(aud_sum)[:7])+"|"
 
         print(" "+table_dash)
         print(" "+delta_row)
