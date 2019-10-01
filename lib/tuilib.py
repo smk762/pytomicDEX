@@ -665,6 +665,8 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
             maker_coin = swap_summary['maker_coin']
             if str(error).find('overwinter') > 0:
                 error_type = "tx-overwinter-active"
+            elif str(error).find('timeout') > 0:
+                error_type = "timeout"
             else:
                 error_type = "other"
             row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
