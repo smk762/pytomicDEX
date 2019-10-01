@@ -74,7 +74,7 @@ while True:
                     rel_btc_price = 1
                 else:
                     rel_btc_price = binance_api.get_price(rel+'BTC')
-                trade_vol=bal*0.99
+                trade_vol=bal*0.97
                 for order in my_orders['result']['maker_orders']:
                     if base == my_orders['result']['maker_orders'][order]['base'] and rel == my_orders['result']['maker_orders'][order]['rel']:
                         started_swaps = my_orders['result']['maker_orders'][order]['started_swaps']
