@@ -540,6 +540,8 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                                         'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
         swap_status = "Success" 
         for swap in swap_list:
+            print()
+            role = swap['type']
             swap_data = swap['events'][0]
             maker_coin = swap_data['event']['data']['maker_coin']
             maker_amount = swap_data['event']['data']['maker_amount']
@@ -561,13 +563,14 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                     swap_status = "Success ("+event['event']['type']+")"
             swap_json.append({"result":swap_status,
                                             "time":human_time,
+                                            "role":role,
                                             "maker_coin":maker_coin,
                                             "maker_amount":maker_amount,
                                             "taker_coin":taker_coin,
                                             "taker_amount":taker_amount
                         })
         delta = {}
-        header = "|"+'{:^21}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
+        header = "|"+'{:^21}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
         for coin in header_list:
             header += '{:^10}'.format(coin)+"|"
             delta[coin] = 0
@@ -580,6 +583,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
             row_str = "|"+'{:^21}'.format(time_str)+"|"
             result = '{:^36}'.format(swap['result'])+"|"
             row_str += result
+            row_str += '{:^7}'.format(role)+"|"
             for coin in header_list:
                 if coin == swap['maker_coin']:
                     row_str += '\033[91m'+'{:^10}'.format(swap['maker_amount'][:8])+'\033[0m'+"|"
@@ -592,10 +596,10 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                 else:
                     row_str += '{:^10}'.format('-')+"|"
             print(" "+row_str)
-        delta_row = "|"+'{:^58}'.format("TOTAL")+"|"
-        btc_row = "|"+'{:^58}'.format("BTC")+"|"
-        usd_row = "|"+'{:^58}'.format("USD")+"|"
-        aud_row = "|"+'{:^58}'.format("AUD")+"|"
+        delta_row = "|"+'{:^66}'.format("TOTAL")+"|"
+        btc_row = "|"+'{:^66}'.format("BTC")+"|"
+        usd_row = "|"+'{:^66}'.format("USD")+"|"
+        aud_row = "|"+'{:^66}'.format("AUD")+"|"
         table_dash = "-"*(len(delta_row)+(len(header_list)+1)*11)
         btc_sum = 0
         usd_sum = 0
