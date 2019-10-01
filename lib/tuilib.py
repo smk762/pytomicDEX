@@ -624,20 +624,20 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
         for delta_coin in delta:
             for header_coin in header_list:
                 if delta_coin == header_coin:
-                    if float(delta[header_coin]) > 0:
-                        highlight = '\033[92m'
-                    else:
-                        highlight = '\033[91m'
                     btc_price = coins_data[header_coin]['BTC_price']*delta[header_coin]
                     usd_price = coins_data[header_coin]['USD_price']*delta[header_coin]
                     aud_price = coins_data[header_coin]['AUD_price']*delta[header_coin]
                     btc_sum += btc_price
                     usd_sum += usd_price
                     aud_sum += aud_price
-                    delta_row += highlight+'{:^10}'.format(str(delta[header_coin])[:8])+'\033[0m'+"|"
-                    btc_row += highlight+'{:^10}'.format(str(btc_price)[:8])+'\033[0m'+"|"
-                    usd_row += highlight+'{:^10}'.format("$"+str(usd_price)[:7])+'\033[0m'+"|"
-                    aud_row += highlight+'{:^10}'.format("$"+str(aud_price)[:7])+'\033[0m'+"|"
+                    if float(delta[header_coin]) > 0:
+                        highlight = 'green'
+                    else:
+                        highlight = 'red'
+                    delta_row += colorize('{:^10}'.format(str(delta[header_coin])[:8]),highlight)+"|"
+                    btc_row += colorize('{:^10}'.format(str(btc_price)[:8]),highlight)+"|"
+                    usd_row += colorize('{:^10}'.format("$"+str(usd_price)[:7]),highlight)+"|"
+                    aud_row += colorize('{:^10}'.format("$"+str(aud_price)[:7]),highlight)+"|"
         delta_row += '{:^10}'.format("TOTAL")+"|"
         btc_row += '{:^10}'.format(str(btc_sum)[:8])+"|"
         usd_row += '{:^10}'.format("$"+str(usd_sum)[:7])+"|"
