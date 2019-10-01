@@ -525,7 +525,7 @@ def show_swaps_in_progress(node_ip, user_pass):
         print(colorize(swap_info,'yellow'))
     else:
         print(colorize('No swaps in progress!','red'))
-        wait_continue()
+    wait_continue()
 
 def show_recent_swaps(node_ip, user_pass, swapcount=50):
     recent_swaps = rpclib.my_recent_swaps(node_ip, user_pass, swapcount).json()
