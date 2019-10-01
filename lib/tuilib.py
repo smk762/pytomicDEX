@@ -593,25 +593,19 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                 if role == 'Maker':
                     if coin == swap['maker_coin']:
                         swap_amount = float(swap['maker_amount'])*-1
-                        if result.find('Failed') == -1:
-                            delta[coin] -= swap_amount
                     elif coin == swap['taker_coin']:
                         swap_amount = float(swap['taker_amount'])
-                        if result.find('Failed') == -1:
-                            delta[coin] += swap_amount
                     else:
                         swap_amount = 0
                 elif role == 'Taker':
                     if coin == swap['taker_coin']:
                         swap_amount = float(swap['taker_amount'])*-1
-                        if result.find('Failed') == -1:
-                            delta[coin] -= swap_amount
                     elif coin == swap['maker_coin']:
                         swap_amount = float(swap['maker_amount'])
-                        if result.find('Failed') == -1:
-                            delta[coin] += swap_amount
                     else:
                         swap_amount = 0
+                if result.find('Failed') == -1:
+                    delta[coin] += swap_amount
                 if swap_amount < 0:
                     row_str += colorize('{:^10}'.format(str(swap_amount)[:8]), 'red')+"|"
                 elif swap_amount > 0:
