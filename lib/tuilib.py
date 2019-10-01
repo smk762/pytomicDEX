@@ -540,7 +540,6 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                                         'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
         swap_status = "Success" 
         for swap in swap_list:
-            print()
             role = swap['type']
             swap_data = swap['events'][0]
             maker_coin = swap_data['event']['data']['maker_coin']
@@ -598,11 +597,11 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                         swap_amount = 0
                 elif role == 'Taker':
                     if coin == swap['taker_coin']:
-                        swap_amount = float(swap['taker_amount'])
+                        swap_amount = float(swap['taker_amount'])*-1
                         if result.find('Failed') == -1:
                             delta[coin] -= swap_amount
                     elif coin == swap['maker_coin']:
-                        swap_amount = float(swap['maker_amount'])*-1
+                        swap_amount = float(swap['maker_amount'])
                         if result.find('Failed') == -1:
                             delta[coin] += swap_amount
                     else:
