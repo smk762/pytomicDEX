@@ -538,32 +538,37 @@ def recent_swaps_table(node_ip, userpass, swapcount, coins_data):
   recent_swaps = my_recent_swaps(node_ip, userpass, swapcount).json()
   swap_list = recent_swaps['result']['swaps']
   for swap in swap_list:
-    swap_data = swap['events'][0]
-    maker_coin = swap_data['event']['data']['maker_coin']
-    maker_amount = swap_data['event']['data']['maker_amount']
-    taker_coin = swap_data['event']['data']['taker_coin']
-    taker_amount = swap_data['event']['data']['taker_amount']
-    timestamp = int(int(swap_data['timestamp'])/1000)
-    human_time = time.ctime(timestamp)
-    if maker_coin not in header_list:
-      header_list.append(maker_coin)
-    if taker_coin not in header_list:
-      header_list.append(taker_coin)
-    rate = float(maker_amount)/float(taker_amount)
-    swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
-    for event in swap['events']:
-      if event['event']['type'] in error_events:
-        swap_status = "Failed ("+event['event']['type']+")"
-        break
-      else:
-        swap_status = "Success ("+event['event']['type']+")"
-    swap_json.append({"result":swap_status,
-                    "time":human_time,
-                    "maker_coin":maker_coin,
-                    "maker_amount":maker_amount,
-                    "taker_coin":taker_coin,
-                    "taker_amount":taker_amount
-          })
+    try:
+      swap_data = swap['events'][0]
+      maker_coin = swap_data['event']['data']['maker_coin']
+      maker_amount = swap_data['event']['data']['maker_amount']
+      taker_coin = swap_data['event']['data']['taker_coin']
+      taker_amount = swap_data['event']['data']['taker_amount']
+      timestamp = int(int(swap_data['timestamp'])/1000)
+      human_time = time.ctime(timestamp)
+      if maker_coin not in header_list:
+        header_list.append(maker_coin)
+      if taker_coin not in header_list:
+        header_list.append(taker_coin)
+      rate = float(maker_amount)/float(taker_amount)
+      swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
+      for event in swap['events']:
+        if event['event']['type'] in error_events:
+          swap_status = "Failed ("+event['event']['type']+")"
+          break
+        else:
+          swap_status = "Success ("+event['event']['type']+")"
+      swap_json.append({"result":swap_status,
+                      "time":human_time,
+                      "maker_coin":maker_coin,
+                      "maker_amount":maker_amount,
+                      "taker_coin":taker_coin,
+                      "taker_amount":taker_amount
+            })
+    except Exception as e:
+      print(e)
+      print(swap_data)
+      pass
   delta = {}
   header = "|"+'{:^26}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"
   for coin in header_list:
