@@ -1,4 +1,5 @@
 *.zip
+update_mm2.sh
 __pycache__
 mm2_output.log
 mm2.log
