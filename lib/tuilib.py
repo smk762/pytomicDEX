@@ -118,129 +118,130 @@ def pair_orderbook_table(node_ip, user_pass, orderbook, pair_data):
         base = list(pair_data.keys())[0]
         rel = list(pair_data.keys())[1]
         try:
-                balance_data = my_balance('http://127.0.0.1:7783', userpass, rel).json()
-                addr = balance_data['address']
+            balance_data = my_balance('http://127.0.0.1:7783', userpass, rel).json()
+            addr = balance_data['address']
         except:
-                addr = ''
-                pass
+            addr = ''
+            pass
         try:
-                row = "-"*177
-                print("    "+row)
-                print(
-                        "    |"+'{:^10}'.format('ORDER NUM')+hl+'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
-                        +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
-                        +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('PRICE ('+rel+')')+hl \
-                        +'{:^18}'.format('MM2 RATE')+hl+'{:^18}'.format('MARKET RATE')+hl \
-                        +'{:^16}'.format('DIFFERENTIAL')+hl    \
-                        )
-                print("    "+row)
-                try:
-                        market_rate = pair_data[base]['BTC_price']/pair_data[rel]['BTC_price']
-                except:
-                        market_rate = 0
-                pair = rel+"/"+base
-                btc_price = pair_data[rel]['BTC_price']
-                aud_price = pair_data[rel]['AUD_price']
-                usd_price = pair_data[rel]['USD_price']
-                if len(orderbook['bids']) > 0:
-                        i = 1
-                        for bid in orderbook['bids']:
-                                if bid['address'] == addr:
-                                        highlight = '\033[94m'
-                                else:
-                                        highlight = '\033[0m'
-                                price = str(bid['price'])
-                                volume = str(bid['maxvolume'])
-                                if market_rate != 0:
-                                        differential = float(market_rate)/float(price)-1
-                                else:
-                                        differential = 0
-                                diff_pct = str(differential*100)[:5]+"%"
-                                if differential < 0:
-                                        differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
-                                elif differential > 0.07:
-                                        differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
-                                else:
-                                        differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
-                                rel_price = float(price)
-                                print(highlight+"    |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
-                                                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
-                                                     +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                                                     +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                                                     +str(differential)+"\033[0m"+hl \
-                                                     )
-                                i += 1
-                                print("    "+row)
+            row = "-"*177
+            print("    "+row)
+            print(
+                    "    |"+'{:^10}'.format('ORDER NUM')+hl+'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
+                    +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
+                    +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('PRICE ('+rel+')')+hl \
+                    +'{:^18}'.format('MM2 RATE')+hl+'{:^18}'.format('MARKET RATE')+hl \
+                    +'{:^16}'.format('DIFFERENTIAL')+hl    \
+                    )
+            print("    "+row)
+            try:
+                    market_rate = pair_data[base]['BTC_price']/pair_data[rel]['BTC_price']
+            except:
+                    market_rate = 0
+            pair = rel+"/"+base
+            btc_price = pair_data[rel]['BTC_price']
+            aud_price = pair_data[rel]['AUD_price']
+            usd_price = pair_data[rel]['USD_price']
+            if len(orderbook['bids']) > 0:
+                i = 1
+                for bid in orderbook['bids']:
+                    if bid['address'] == addr:
+                            highlight = '\033[94m'
+                    else:
+                            highlight = '\033[0m'
+                    price = str(bid['price'])
+                    volume = str(bid['maxvolume'])
+                    if market_rate != 0:
+                            differential = float(market_rate)/float(price)-1
+                    else:
+                            differential = 0
+                    diff_pct = str(differential*100)[:5]+"%"
+                    if differential < 0:
+                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                    elif differential > 0.07:
+                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                    else:
+                            differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                    rel_price = float(price)
+                    print(highlight+"    |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
+                                         +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                                         +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                         +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                         +str(differential)+"\033[0m"+hl \
+                                         )
+                    i += 1
+                    print("    "+row)
+                while True:
+                    bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
+                    print(colorize("Your "+rel+" balance: "+str(bal), 'green'))
+                    q = input(colorize("Select an order number to start a trade, [C]reate one manually, or [E]xit to menu: ", 'orange'))
+                    if q == 'e' or q == 'E':
+                        break
+                    elif q == 'c' or q == 'C':
                         while True:
-                                bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
-                                print(colorize("Your "+rel+" balance: "+str(bal), 'green'))
-                                q = input(colorize("Select an order number to start a trade, [C]reate one manually, or [E]xit to menu: ", 'orange'))
-                                if q == 'e' or q == 'E':
-                                        break
-                                elif q == 'c' or q == 'C':
+                            outcome = create_buy(node_ip, user_pass, base, rel)
+                            if outcome == 'back to menu':
+                                    break
+                        break
+                    else:
+                        try:
+                            selected = orderbook['bids'][int(q)-1]
+                            while True:
+                                try:
+                                    max_afforded_val = float(bal)/float(selected['price'])
+                                    buy_num = float(input(colorize("How many "+base+" to buy at "+selected['price'][:6]+"? (max. "+str(max_afforded_val)[:8]+"): ", 'orange')))
+                                    if buy_num > selected['maxvolume']:
+                                            print(colorize("Can't buy more than max volume! Try again..." , 'red'))
+                                    else:
                                         while True:
-                                                outcome = create_buy(node_ip, user_pass, base, rel)
-                                                if outcome == 'back to menu':
-                                                        break
-                                        break
-                                else:
-                                        try:
-                                                selected = orderbook['bids'][int(q)-1]
-                                                while True:
-                                                        try:
-                                                                buy_num = float(input(colorize("How many "+base+" to buy at "+selected['price'][:6]+"? (max. "+str(selected['maxvolume'])[:6]+"): ", 'orange')))
-                                                                if buy_num > selected['maxvolume']:
-                                                                        print(colorize("Can't buy more than max volume! Try again..." , 'red'))
-                                                                else:
-                                                                        while True:
-                                                                                q = input(colorize("Confirm buy order, "+str(buy_num)+" "+base+" for "+str(float(price)*buy_num)+" "+rel+" (y/n): ",'orange'))
-                                                                                if q == 'Y' or q == 'y':
-                                                                                        resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, price).json()
-                                                                                        if 'error' not in resp:
-                                                                                                print(colorize("Order submitted!", 'green'))
-                                                                                        else:
-                                                                                                print(resp)
-                                                                                        wait_continue()
-                                                                                        return 'back to menu'
-                                                                                elif q == 'N' or q == 'n':
-                                                                                        return 'back to menu'
-                                                                                else:
-                                                                                        print(colorize("Invalid selection, must be [Y/y] or [N/n]. Try again...", 'red'))
-                                                        except Exception as e:
-                                                                print(e)
-                                                                pass
-                                                break
-                                        except:
-                                                print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook['bids'])), 'red'))
-                                                pass
-                else:
-                        print("    |"+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^18}'.format(0)+hl \
-                                             +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
-                                             +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                                             +'{:^18}'.format(str('-')[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                                             +'{:^18}'.format(str('-')+"\033[0m")+"    |" \
-                                             )
-                        print("    "+row)
-                        q = input(colorize("No orders in orderbook for "+base+"/"+rel+"! Create one manually? (y/n): ", 'red'))
+                                            q = input(colorize("Confirm buy order, "+str(buy_num)+" "+base+" for "+str(float(price)*buy_num)+" "+rel+" (y/n): ",'orange'))
+                                            if q == 'Y' or q == 'y':
+                                                resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, price).json()
+                                                if 'error' not in resp:
+                                                    print(colorize("Order submitted!", 'green'))
+                                                else:
+                                                    print(resp)
+                                                wait_continue()
+                                                return 'back to menu'
+                                            elif q == 'N' or q == 'n':
+                                                return 'back to menu'
+                                            else:
+                                                print(colorize("Invalid selection, must be [Y/y] or [N/n]. Try again...", 'red'))
+                                except Exception as e:
+                                    print(e)
+                                    pass
+                            break
+                        except:
+                            print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook['bids'])), 'red'))
+                            pass
+            else:
+                print("    |"+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^18}'.format(0)+hl \
+                                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
+                                     +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                     +'{:^18}'.format(str('-')[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                     +'{:^18}'.format(str('-')+"\033[0m")+"    |" \
+                                     )
+                print("    "+row)
+                q = input(colorize("No orders in orderbook for "+base+"/"+rel+"! Create one manually? (y/n): ", 'red'))
+                while True:
+                    if q == 'N' or q == 'n':
+                        break
+                    if q == 'Y' or q == 'y':
                         while True:
-                                if q == 'N' or q == 'n':
-                                        break
-                                if q == 'Y' or q == 'y':
-                                        while True:
-                                                outcome = create_buy(node_ip, user_pass, base, rel)
-                                                if outcome == 'back to menu':
-                                                        break
-                                        break
+                            outcome = create_buy(node_ip, user_pass, base, rel)
+                            if outcome == 'back to menu':
+                                break
+                        break
         except Exception as e:
-                print("Orderbooks error: "+str(e))
-                pass
+            print("Orderbooks error: "+str(e))
+            pass
 
 def create_buy(node_ip, user_pass, base, rel):
         try:
                 rel_bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
                 rel_price = float(input(colorize("What "+rel+" price?: ", 'orange')))
                 max_vol = float(rel_bal)/rel_price
-                buy_num = float(input(colorize("How many "+base+" to buy? (max. "+'{:^6}'.format(str(max_vol))+"): ", 'orange')))
+                buy_num = float(input(colorize("How many "+base+" to buy? (max. "+'{:^8}'.format(str(max_vol))+"): ", 'orange')))
                 if buy_num > max_vol:
                         print(colorize("Can't buy more than max volume! Try again..." , 'red'))
                 else:
