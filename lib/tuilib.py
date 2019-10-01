@@ -585,16 +585,34 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
             row_str += result
             row_str += '{:^7}'.format(role)+"|"
             for coin in header_list:
-                if coin == swap['maker_coin']:
-                    row_str += '\033[91m'+'{:^10}'.format(swap['maker_amount'][:8])+'\033[0m'+"|"
-                    if result.find('Failed') == -1:
-                        delta[coin] -= float(swap['maker_amount'])
-                elif coin == swap['taker_coin']:
-                    row_str += '\033[92m'+'{:^10}'.format(swap['taker_amount'][:8])+'\033[0m'+"|"
-                    if result.find('Failed') == -1:
-                        delta[coin] += float(swap['taker_amount'])
+                if role == 'Maker':
+                    if coin == swap['maker_coin']:
+                        swap_amount = float(swap['maker_amount'])*-1
+                        if result.find('Failed') == -1:
+                            delta[coin] -= swap_amount
+                    elif coin == swap['taker_coin']:
+                        swap_amount = float(swap['taker_amount'])
+                        if result.find('Failed') == -1:
+                            delta[coin] += swap_amount
+                    else:
+                        swap_amount = 0
+                elif role == 'Taker':
+                    if coin == swap['taker_coin']:
+                        swap_amount = float(swap['taker_amount'])
+                        if result.find('Failed') == -1:
+                            delta[coin] -= swap_amount
+                    elif coin == swap['maker_coin']:
+                        swap_amount = float(swap['maker_amount'])*-1
+                        if result.find('Failed') == -1:
+                            delta[coin] += swap_amount
+                    else:
+                        swap_amount = 0
+                if swap_amount < 0:
+                    row_str += colorize('{:^10}'.format(str(swap_amount)[:8]), 'red')+"|"
+                elif swap_amount > 0:
+                    row_str += colorize('{:^10}'.format(str(swap_amount)[:8]), 'green')+"|"
                 else:
-                    row_str += '{:^10}'.format('-')+"|"
+                    row_str += colorize('{:^10}'.format('-'), 'darkgrey')+"|"
             print(" "+row_str)
         delta_row = "|"+'{:^66}'.format("TOTAL")+"|"
         btc_row = "|"+'{:^66}'.format("BTC")+"|"
