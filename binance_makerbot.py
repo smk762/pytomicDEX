@@ -9,7 +9,7 @@ import mm2lib
 home = expanduser("~")
 mm2_path = home+'/pytomicDEX'
 
-trading_coins = list(mm2lib.trading_list.keys())
+trading_coins = list(mm2coins.trading_list.keys())
 accepted_coins = trading_coins[:]
 accepted_coins.append('BTC')
 try:
@@ -27,7 +27,7 @@ while True:
     mm2lib.recent_swaps_table("http://127.0.0.1:7783", mm2lib.userpass, 50, coins_data)
     my_orders = mm2lib.my_orders('http://127.0.0.1:7783', mm2lib.userpass).json()
     swaps_in_progress = 0
-    for base in mm2lib.trading_list:
+    for base in mm2coins.trading_list:
         try:
             balance_data = mm2lib.my_balance('http://127.0.0.1:7783', mm2lib.userpass, base).json()
             base_addr = balance_data['address']
@@ -42,8 +42,8 @@ while True:
             base_btc_price = binance_api.get_price('BCHABCBTC')
         else:
             base_btc_price = binance_api.get_price(base+'BTC')
-        if bal > mm2lib.trading_list[base]['reserve_balance']*1.2:
-            qty = bal - mm2lib.trading_list[base]['reserve_balance']
+        if bal > mm2coins.trading_list[base]['reserve_balance']*1.2:
+            qty = bal - mm2coins.trading_list[base]['reserve_balance']
             bal = bal - qty
             # Send Funds to Binance
             if base == "BCH":
@@ -54,8 +54,8 @@ while True:
             send_resp = mm2lib.send_raw_transaction("http://127.0.0.1:7783", mm2lib.userpass, base, withdraw_tx['tx_hex']).json()
             print("Sent "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
             print("TXID: "+send_resp['tx_hash'])
-        elif bal < mm2lib.trading_list[base]['reserve_balance']*0.8:
-            qty = mm2lib.trading_list[base]['reserve_balance'] - bal
+        elif bal < mm2coins.trading_list[base]['reserve_balance']*0.8:
+            qty = mm2coins.trading_list[base]['reserve_balance'] - bal
             if base_addr != '':
                 if base == "BCH":
                     withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
@@ -93,8 +93,12 @@ while True:
                     else:
                         rel_price = rel_btc_price['price']
                     pair_price = float(base_price)/float(rel_price)
-                    if trade_vol > mm2lib.trading_list[base]['min_swap']:
-                        resp = mm2lib.setprice('http://127.0.0.1:7783', mm2lib.userpass, base, rel, trade_vol, pair_price*mm2lib.trading_list[base]['premium']).json()
+                    try:
+                        min_swap = mm2coins.trading_list[base]['min_swap']
+                    except:
+                        min_swap = 0
+                    if trade_vol > min_swap:
+                        resp = mm2lib.setprice('http://127.0.0.1:7783', mm2lib.userpass, base, rel, trade_vol, pair_price*mm2coins.trading_list[base]['premium']).json()
                         time.sleep(1)
     
     total_btc_val = mm2lib.orderbooks('http://127.0.0.1:7783', mm2lib.userpass, mm2lib.coins, coins_data)

@@ -568,7 +568,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                                             "taker_amount":taker_amount
                         })
         delta = {}
-        header = "|"+'{:^17}'.format("TIME")+"|"+'{:^25}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
+        header = "|"+'{:^17}'.format("TIME")+"|"+'{:^28}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
         for coin in header_list:
             header += '{:^10}'.format(coin)+"|"
             delta[coin] = 0
@@ -586,7 +586,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                 highlight = 'green'
             else:
                 highlight = 'orange'
-            result = colorize('{:^25}'.format(swap['result']), highlight)+"|"
+            result = colorize('{:^28}'.format(swap['result']), highlight)+"|"
             row_str += result
             row_str += '{:^7}'.format(role)+"|"
             for coin in header_list:
@@ -613,10 +613,10 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                 else:
                     row_str += colorize('{:^10}'.format('-'), 'darkgrey')+"|"
             print(" "+row_str)
-        delta_row = "|"+'{:^51}'.format("TOTAL")+"|"
-        btc_row = "|"+'{:^51}'.format("BTC")+"|"
-        usd_row = "|"+'{:^51}'.format("USD")+"|"
-        aud_row = "|"+'{:^51}'.format("AUD")+"|"
+        delta_row = "|"+'{:^54}'.format("TOTAL")+"|"
+        btc_row = "|"+'{:^54}'.format("BTC")+"|"
+        usd_row = "|"+'{:^54}'.format("USD")+"|"
+        aud_row = "|"+'{:^54}'.format("AUD")+"|"
         table_dash = "-"*(len(delta_row)+(len(header_list)+1)*11)
         btc_sum = 0
         usd_sum = 0
