@@ -83,12 +83,12 @@ def check_coins_status(node_ip, user_pass):
 def get_status(node_ip, user_pass):
     mm2_status = check_mm2_status(node_ip, user_pass)
     if mm2_status:
-        mm2_msg = tuilib.colorize('{:^20}'.format("[MM2 active]"), 'green')
+        mm2_msg = tuilib.colorize("[MM2 active]", 'green')
     else:
-        mm2_msg = tuilib.colorize('{:^20}'.format("[MM2 disabled]"), 'red')
+        mm2_msg = tuilib.colorize("[MM2 disabled]", 'red')
     coins_status = check_coins_status(node_ip, user_pass)
-    coin_msg = tuilib.colorize('{:^35}'.format("["+coins_status[0]+"]"), coins_status[1])
-    status_msg = mm2_msg+" "+coin_msg
+    coin_msg = tuilib.colorize("["+coins_status[0]+"]", coins_status[1])
+    status_msg = mm2_msg+"   "+coin_msg
     return status_msg, mm2_status, coins_status[2], coins_status[3], coins_status[4], 
 
 def enable(node_ip, user_pass, cointag, tx_history=True):
@@ -267,3 +267,35 @@ def gecko_fiat_prices(gecko_ids, fiat):
     params = dict(ids=str(gecko_ids),vs_currencies=fiat)
     r = requests.get(url=url, params=params)
     return r
+
+def my_swap_status(node_ip, user_pass, swap_uuid):
+    params = {'userpass': user_pass,
+              'method': 'my_swap_status',
+              'params': {"uuid": swap_uuid},}
+    r = requests.post(node_ip,json=params)
+    return r
+
+def get_unfinished_swap_uuids(node_ip, user_pass):
+    unfinished_swap_uuids = []
+    orders = my_orders(node_ip, user_pass).json()
+    for order in orders['result']['maker_orders']:
+        started_swaps = orders['result']['maker_orders'][order]['started_swaps']
+        if len(started_swaps) > 0:
+            for swap_uuid in started_swaps:
+                swap_events = []
+                swap_data = my_swap_status(node_ip, user_pass, swap_uuid).json()
+                for event in swap_data['result']['events']:
+                    swap_events.append(event['event']['type'])
+                if 'Finished' not in swap_events:
+                    unfinished_swap_uuids.append(swap_uuid)
+    for order in orders['result']['taker_orders']:
+        started_swaps = orders['result']['taker_orders'][order]['started_swaps']
+        if len(started_swaps) > 0:
+            for swap_uuid in started_swaps:
+                swap_events = []
+                swap_data = my_swap_status(node_ip, user_pass, swap_uuid).json()
+                for event in swap_data['result']['events']:
+                    swap_events.append(event['event']['type'])
+                if 'Finished' not in swap_events:
+                    unfinished_swap_uuids.append(swap_uuid)
+    return unfinished_swap_uuids 

@@ -52,7 +52,9 @@ def main():
         print(tuilib.colorize(menu['header'], 'lightgreen'))
         print(tuilib.colorize(menu['author'], 'cyan'))
         status = rpclib.get_status(local_ip, userpass)
-        print(status[0])
+        print('{:^75}'.format(status[0]))
+        swaps_in_progress = len(rpclib.get_unfinished_swap_uuids(local_ip, userpass))
+        print(tuilib.colorize('{:^55}'.format("["+str(swaps_in_progress)+" swaps in progress]"), 'orange'))
         # Build Menu
         if status[1] is False:
             menuItems = [{"Start MarketMaker 2": tuilib.start_mm2}]

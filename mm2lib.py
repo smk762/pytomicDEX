@@ -187,10 +187,6 @@ def orderbook(node_ip, user_pass, base, rel):
     r = requests.post(node_ip, json=params)
     return r
 
-def my_orders(node_ip, user_pass):
-    params = {'userpass': user_pass, 'method': 'my_orders',}
-    r = requests.post(node_ip, json=params)
-    return r
 
 def cancel_all(node_ip, user_pass):
     params = {'userpass': user_pass,

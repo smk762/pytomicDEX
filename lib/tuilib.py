@@ -613,86 +613,88 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
             if event['event']['type'] in error_events:
                 failed_swaps.append(swap)
                 break
-    failed_swaps_summary = {}
-    for swap in failed_swaps:
-        timestamps_list = []
-        errors_list = []
-        failed_swap_json = {}
-        swap_type = swap['type']
-        uuid = swap['uuid']
-        failed_swap_json.update({'swap_type':swap_type})
-        failed_swap_json.update({'uuid':uuid})
-        for event in swap['events']:
-            event_type = event['event']['type']
-            event_timestamp = event['timestamp']
-            timestamps_list.append({event_type:event_timestamp})
-            if event['event']['type'] in error_events:
-                error = str(event['event']['data'])
-                errors_list.append({event_type:error})
-            if event['event']['type'] == 'Started':
-                failed_swap_json.update({'lock_duration':event['event']['data']['lock_duration']})
-                failed_swap_json.update({'taker_coin':event['event']['data']['taker_coin']})
-                failed_swap_json.update({'taker_pub':event['event']['data']['taker']})
-                failed_swap_json.update({'maker_coin':event['event']['data']['maker_coin']})
-                failed_swap_json.update({'maker_pub':event['event']['data']['my_persistent_pub']})
-            if 'data' in event['event']:
-                if 'maker_payment_locktime' in event['event']['data']:
-                    failed_swap_json.update({'maker_locktime':event['event']['data']['maker_payment_locktime']})
-                if 'taker_payment_locktime' in event['event']['data']:
-                    failed_swap_json.update({'taker_locktime':event['event']['data']['taker_payment_locktime']})
-            if event['event']['type'] == 'Finished':
-                failed_swap_json.update({'timestamps_list':timestamps_list})
-                failed_swap_json.update({'errors':errors_list})
-                failed_swaps_summary[uuid] = failed_swap_json
+    if len(failed_swaps) > 0:
+        failed_swaps_summary = {}
+        for swap in failed_swaps:
+            timestamps_list = []
+            errors_list = []
+            failed_swap_json = {}
+            swap_type = swap['type']
+            uuid = swap['uuid']
+            failed_swap_json.update({'swap_type':swap_type})
+            failed_swap_json.update({'uuid':uuid})
+            for event in swap['events']:
+                event_type = event['event']['type']
+                event_timestamp = event['timestamp']
+                timestamps_list.append({event_type:event_timestamp})
+                if event['event']['type'] in error_events:
+                    error = str(event['event']['data'])
+                    errors_list.append({event_type:error})
+                if event['event']['type'] == 'Started':
+                    failed_swap_json.update({'lock_duration':event['event']['data']['lock_duration']})
+                    failed_swap_json.update({'taker_coin':event['event']['data']['taker_coin']})
+                    failed_swap_json.update({'taker_pub':event['event']['data']['taker']})
+                    failed_swap_json.update({'maker_coin':event['event']['data']['maker_coin']})
+                    failed_swap_json.update({'maker_pub':event['event']['data']['my_persistent_pub']})
+                if 'data' in event['event']:
+                    if 'maker_payment_locktime' in event['event']['data']:
+                        failed_swap_json.update({'maker_locktime':event['event']['data']['maker_payment_locktime']})
+                    if 'taker_payment_locktime' in event['event']['data']:
+                        failed_swap_json.update({'taker_locktime':event['event']['data']['taker_payment_locktime']})
+                if event['event']['type'] == 'Finished':
+                    failed_swap_json.update({'timestamps_list':timestamps_list})
+                    failed_swap_json.update({'errors':errors_list})
+                    failed_swaps_summary[uuid] = failed_swap_json
 
-    header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
-                        +'{:^28}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
-                        +'{:^7}'.format('TAKER')+hl+'{:^7}'.format('MAKER')+hl \
-                        +'{:^66}'.format('TAKER PUB')+hl
-    table_dash = "-"*194
-    print(colorize(" "+table_dash, 'lightblue'))
-    print(colorize(" "+header, 'lightblue'))
-    print(colorize(" "+table_dash, 'lightblue'))
-    i = 1
-    for uuid in failed_swaps_summary:
-        swap_summary = failed_swaps_summary[uuid]
-        for error in swap_summary['errors']:
-            #swap_time = swap_summary['timestamps_list'][0][1]-swap_summary['timestamps_list'][0][0]
-            start_time = list(swap_summary['timestamps_list'][0].values())[0]
-            end_time = list(swap_summary['timestamps_list'][-1].values())[0]
-            swap_time = ((end_time - start_time)/1000)/60
-            taker_pub = swap_summary['taker_pub']
-            taker_coin = swap_summary['taker_coin']
-            maker_coin = swap_summary['maker_coin']
-            if str(error).find('overwinter') > 0:
-                error_type = "tx-overwinter-active"
-            elif str(error).find('timeout') > 0:
-                error_type = "timeout"
-            else:
-                error_type = "other"
-            row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
-                        +'{:^28}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
-                        +'{:^7}'.format(taker_coin)+hl+'{:^7}'.format(maker_coin)+hl \
-                        +'{:^66}'.format(taker_pub)+hl
-            print(colorize(" "+row, 'lightblue'))
-            print(colorize(" "+table_dash, 'lightblue'))
-            #print(error)
-        i += 1
-    while True:
-        q = input(colorize("Enter a swap number to view events log, or [E]xit to menu: ", 'orange'))
-        if q == 'e' or q == 'E':
-            return 'back to menu'
-        else:        
-            try:
-                swap = failed_swaps[int(q)-1]
-                for event in swap['events']:
-                    print(colorize("["+event['event']['type']+"]", 'green'))
-                    if event['event']['type'] in error_events:
-                        print(colorize(str(event), 'red'))
-                    else:
-                        print(colorize(str(event), 'blue'))
-            except Exception as e:
-                print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(failed_swaps)), 'red'))
-                pass
-
+        header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
+                            +'{:^28}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
+                            +'{:^7}'.format('TAKER')+hl+'{:^7}'.format('MAKER')+hl \
+                            +'{:^66}'.format('TAKER PUB')+hl
+        table_dash = "-"*194
+        print(colorize(" "+table_dash, 'lightblue'))
+        print(colorize(" "+header, 'lightblue'))
+        print(colorize(" "+table_dash, 'lightblue'))
+        i = 1
+        for uuid in failed_swaps_summary:
+            swap_summary = failed_swaps_summary[uuid]
+            for error in swap_summary['errors']:
+                #swap_time = swap_summary['timestamps_list'][0][1]-swap_summary['timestamps_list'][0][0]
+                start_time = list(swap_summary['timestamps_list'][0].values())[0]
+                end_time = list(swap_summary['timestamps_list'][-1].values())[0]
+                swap_time = ((end_time - start_time)/1000)/60
+                taker_pub = swap_summary['taker_pub']
+                taker_coin = swap_summary['taker_coin']
+                maker_coin = swap_summary['maker_coin']
+                if str(error).find('overwinter') > 0:
+                    error_type = "tx-overwinter-active"
+                elif str(error).find('timeout') > 0:
+                    error_type = "timeout"
+                else:
+                    error_type = "other"
+                row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
+                            +'{:^28}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
+                            +'{:^7}'.format(taker_coin)+hl+'{:^7}'.format(maker_coin)+hl \
+                            +'{:^66}'.format(taker_pub)+hl
+                print(colorize(" "+row, 'lightblue'))
+                print(colorize(" "+table_dash, 'lightblue'))
+                #print(error)
+            i += 1
+        while True:
+            q = input(colorize("Enter a swap number to view events log, or [E]xit to menu: ", 'orange'))
+            if q == 'e' or q == 'E':
+                return 'back to menu'
+            else:        
+                try:
+                    swap = failed_swaps[int(q)-1]
+                    for event in swap['events']:
+                        print(colorize("["+event['event']['type']+"]", 'green'))
+                        if event['event']['type'] in error_events:
+                            print(colorize(str(event), 'red'))
+                        else:
+                            print(colorize(str(event), 'blue'))
+                except Exception as e:
+                    print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(failed_swaps)), 'red'))
+                    pass
+    else:
+        print(colorize("You have no failed swaps in your history!", 'orange'))
     wait_continue()
