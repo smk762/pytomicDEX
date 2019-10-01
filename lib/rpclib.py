@@ -289,13 +289,5 @@ def get_unfinished_swap_uuids(node_ip, user_pass):
                 if 'Finished' not in swap_events:
                     unfinished_swap_uuids.append(swap_uuid)
     for order in orders['result']['taker_orders']:
-        started_swaps = orders['result']['taker_orders'][order]['started_swaps']
-        if len(started_swaps) > 0:
-            for swap_uuid in started_swaps:
-                swap_events = []
-                swap_data = my_swap_status(node_ip, user_pass, swap_uuid).json()
-                for event in swap_data['result']['events']:
-                    swap_events.append(event['event']['type'])
-                if 'Finished' not in swap_events:
-                    unfinished_swap_uuids.append(swap_uuid)
+        unfinished_swap_uuids.append(order)
     return unfinished_swap_uuids 

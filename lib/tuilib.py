@@ -538,7 +538,6 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                                         'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed',
                                         'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 
                                         'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
-        swap_status = "Success" 
         for swap in swap_list:
             role = swap['type']
             swap_data = swap['events'][0]
@@ -556,10 +555,10 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
             swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
             for event in swap['events']:
                 if event['event']['type'] in error_events:
-                    swap_status = "Failed ("+event['event']['type']+")"
+                    swap_status = event['event']['type']
                     break
                 else:
-                    swap_status = "Success ("+event['event']['type']+")"
+                    swap_status = event['event']['type']
             swap_json.append({"result":swap_status,
                                             "time":human_time,
                                             "role":role,
@@ -569,7 +568,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                                             "taker_amount":taker_amount
                         })
         delta = {}
-        header = "|"+'{:^21}'.format("TIME")+"|"+'{:^36}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
+        header = "|"+'{:^17}'.format("TIME")+"|"+'{:^25}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
         for coin in header_list:
             header += '{:^10}'.format(coin)+"|"
             delta[coin] = 0
@@ -579,8 +578,15 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
         print(" "+table_dash)
         for swap in swap_json:
             time_str = swap['time'][:-5]
-            row_str = "|"+'{:^21}'.format(time_str)+"|"
-            result = '{:^36}'.format(swap['result'])+"|"
+            time_str = time_str[4:]
+            row_str = "|"+'{:^17}'.format(time_str)+"|"
+            if swap['result'].find('Failed') > 0:
+                highlight = 'red'
+            elif swap['result'].find('Finished') > -1:
+                highlight = 'green'
+            else:
+                highlight = 'orange'
+            result = colorize('{:^25}'.format(swap['result']), highlight)+"|"
             row_str += result
             row_str += '{:^7}'.format(role)+"|"
             for coin in header_list:
@@ -613,10 +619,10 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
                 else:
                     row_str += colorize('{:^10}'.format('-'), 'darkgrey')+"|"
             print(" "+row_str)
-        delta_row = "|"+'{:^66}'.format("TOTAL")+"|"
-        btc_row = "|"+'{:^66}'.format("BTC")+"|"
-        usd_row = "|"+'{:^66}'.format("USD")+"|"
-        aud_row = "|"+'{:^66}'.format("AUD")+"|"
+        delta_row = "|"+'{:^51}'.format("TOTAL")+"|"
+        btc_row = "|"+'{:^51}'.format("BTC")+"|"
+        usd_row = "|"+'{:^51}'.format("USD")+"|"
+        aud_row = "|"+'{:^51}'.format("AUD")+"|"
         table_dash = "-"*(len(delta_row)+(len(header_list)+1)*11)
         btc_sum = 0
         usd_sum = 0
