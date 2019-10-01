@@ -645,10 +645,10 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                 failed_swaps_summary[uuid] = failed_swap_json
 
     header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
-                        +'{:^25}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
+                        +'{:^28}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
                         +'{:^7}'.format('TAKER')+hl+'{:^7}'.format('MAKER')+hl \
                         +'{:^66}'.format('TAKER PUB')+hl
-    table_dash = "-"*191
+    table_dash = "-"*194
     print(colorize(" "+table_dash, 'lightblue'))
     print(colorize(" "+header, 'lightblue'))
     print(colorize(" "+table_dash, 'lightblue'))
@@ -670,7 +670,7 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
             else:
                 error_type = "other"
             row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
-                        +'{:^25}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
+                        +'{:^28}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
                         +'{:^7}'.format(taker_coin)+hl+'{:^7}'.format(maker_coin)+hl \
                         +'{:^66}'.format(taker_pub)+hl
             print(colorize(" "+row, 'lightblue'))
