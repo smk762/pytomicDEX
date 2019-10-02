@@ -45,7 +45,7 @@ def exit(node_ip, user_pass):
     while True:
         q = input(colorize("Stop Marketmaker 2? (y/n): ", 'orange'))
         if q == 'y' or q == 'Y':
-            stop_mm2()
+            stop_mm2(node_ip, user_pass)
             sys.exit()
         elif q == 'n' or q == 'N':
             sys.exit()
