@@ -43,7 +43,7 @@ mm2_main['menu'] = [
 ]
 mm2_main['author'] = '{:^55}'.format('Welcome to the AtomicDEX TUI v0.1 by Thorn Mennet')
 
-no_params_list = ["Start MarketMaker 2","Exit TUI"]
+no_params_list = ["Start MarketMaker 2"]
 
 def main():
     menu = mm2_main
