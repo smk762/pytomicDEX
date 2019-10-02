@@ -41,7 +41,7 @@ hl = colorize("|", 'lightblue')
 def wait_continue(msg=''):
     return input(colorize(msg+"Press [Enter] to continue...", 'orange'))
 
-def exit():
+def exit(node_ip, user_pass):
     while True:
         q = input(colorize("Stop Marketmaker 2? (y/n): ", 'orange'))
         if q == 'y' or q == 'Y':
