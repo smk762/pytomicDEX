@@ -42,7 +42,7 @@ def wait_continue(msg=''):
     return input(colorize(msg+"Press [Enter] to continue...", 'orange'))
 
 def exit(node_ip, user_pass):
-    mm2_active = rpclib.get_status(local_ip, userpass)[1]
+    mm2_active = rpclib.get_status(node_ip, user_pass)[1]
     if mm2_active:
         while True:
             q = input(colorize("Stop Marketmaker 2? (y/n): ", 'orange'))
