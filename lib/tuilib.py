@@ -473,41 +473,45 @@ def show_balances_table(node_ip, user_pass):
                 break
 
 def withdraw_tui(node_ip, user_pass, active_coins):
-                q = input(colorize("[W]ithdraw funds, or [E]xit to menu: ", 'orange'))
-                if q == 'e' or q == 'E':
-                        return 'back to menu'
-                elif q == 'w' or q == 'W':
-                        while True:
-                                cointag = select_coin("Select coin to withdraw funds: ", active_coins)
-                                address = input(colorize("Enter destination "+cointag+" address: ",'orange'))
-                                amount = input(colorize("Enter amount to send, or [A] for all: ",'orange'))
-                                if amount == 'A' or amount == 'a':
-                                    resp = rpclib.withdraw_all(node_ip, user_pass, cointag, address).json()
-                                else:
-                                    resp = rpclib.withdraw(node_ip, user_pass, cointag, address, amount).json()
-                                if 'error' in resp:
-                                        if resp['error'].find("Invalid Address") > 0:
-                                                print(colorize("Invalid address! Try again...", 'red'))
-                                        elif resp['error'].find("Not sufficient balance") > 0:
-                                                print(colorize("Insufficient balance! Try again...", 'red'))
-                                        else:
-                                                print(colorize("Error: "+str(resp['error']), 'red'))
-                                else:
-                                        txid = rpclib.send_raw_transaction(node_ip, user_pass, cointag, resp['tx_hex']).json()
-                                        if 'tx_hash' in txid:
-                                                print(colorize("Withdrawl successful! TXID: ["+txid['tx_hash']+"]", 'green'))
-                                                try:
-                                                    print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid['tx_hash']+"]", 'cyan'))
-                                                except:
-                                                    print(colorize("Track transaction status at ["+txid['tx_hash']+"]", 'cyan'))
-                                                    pass
-                                                break
-                                        else:
-                                                print(colorize("Error: "+str(txid), 'red'))
-                                                break
+    q = input(colorize("[W]ithdraw funds, or [E]xit to menu: ", 'orange'))
+    if q == 'e' or q == 'E':
+        return 'back to menu'
+    elif q == 'w' or q == 'W':
+        while True:
+            cointag = select_coin("Select coin to withdraw funds: ", active_coins)
+            address = input(colorize("Enter destination "+cointag+" address: ",'orange'))
+            amount = input(colorize("Enter amount to send, or [A] for all: ",'orange'))
+            if amount == 'A' or amount == 'a':
+                resp = rpclib.withdraw_all(node_ip, user_pass, cointag, address).json()
+            else:
+                resp = rpclib.withdraw(node_ip, user_pass, cointag, address, amount).json()
+            if 'error' in resp:
+                if resp['error'].find("Invalid Address") > 0:
+                    print(colorize("Invalid address! Try again...", 'red'))
+                elif resp['error'].find("Not sufficient balance") > 0:
+                    print(colorize("Insufficient balance! Try again...", 'red'))
                 else:
-                        print(colorize("Invalid selection, must be [E/e] or [W/w]! Try again...", 'red'))
-                        return 'try again'
+                    print(colorize("Error: "+str(resp['error']), 'red'))
+            else:
+                txid = rpclib.send_raw_transaction(node_ip, user_pass, cointag, resp['tx_hex']).json()
+                if 'tx_hash' in txid:
+                    if address.startswith('0x'):
+                        txid_str = '0x'+txid['tx_hash']
+                    else:
+                        txid_str = txid['tx_hash']
+                    print(colorize("Withdrawl successful! TXID: ["+txid['tx_hash']+"]", 'green'))
+                    try:
+                        print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid['tx_hash']+"]", 'cyan'))
+                    except:
+                        print(colorize("Track transaction status at ["+txid['tx_hash']+"]", 'cyan'))
+                        pass
+                    break
+                else:
+                    print(colorize("Error: "+str(txid), 'red'))
+                    break
+    else:
+        print(colorize("Invalid selection, must be [E/e] or [W/w]! Try again...", 'red'))
+        return 'try again'
 
 def show_swaps_in_progress(node_ip, user_pass):
     unfinished_swap_list = rpclib.get_unfinished_swap_uuids(node_ip, user_pass)
