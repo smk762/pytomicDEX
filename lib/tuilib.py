@@ -580,7 +580,7 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                                                 "taker_amount":taker_amount
                             })
             except Exception as e:
-                print(e)
+                #print(e)
                 pass
         num_swaps = len(swap_json)
         for swap in swap_json:
@@ -715,35 +715,38 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
     if len(failed_swaps) > 0:
         failed_swaps_summary = {}
         for swap in failed_swaps:
-            timestamps_list = []
-            errors_list = []
-            failed_swap_json = {}
-            swap_type = swap['type']
-            uuid = swap['uuid']
-            failed_swap_json.update({'swap_type':swap_type})
-            failed_swap_json.update({'uuid':uuid})
-            for event in swap['events']:
-                event_type = event['event']['type']
-                event_timestamp = event['timestamp']
-                timestamps_list.append({event_type:event_timestamp})
-                if event['event']['type'] in error_events:
-                    error = str(event['event']['data'])
-                    errors_list.append({event_type:error})
-                if event['event']['type'] == 'Started':
-                    failed_swap_json.update({'lock_duration':event['event']['data']['lock_duration']})
-                    failed_swap_json.update({'taker_coin':event['event']['data']['taker_coin']})
-                    failed_swap_json.update({'taker_pub':event['event']['data']['taker']})
-                    failed_swap_json.update({'maker_coin':event['event']['data']['maker_coin']})
-                    failed_swap_json.update({'maker_pub':event['event']['data']['my_persistent_pub']})
-                if 'data' in event['event']:
-                    if 'maker_payment_locktime' in event['event']['data']:
-                        failed_swap_json.update({'maker_locktime':event['event']['data']['maker_payment_locktime']})
-                    if 'taker_payment_locktime' in event['event']['data']:
-                        failed_swap_json.update({'taker_locktime':event['event']['data']['taker_payment_locktime']})
-                if event['event']['type'] == 'Finished':
-                    failed_swap_json.update({'timestamps_list':timestamps_list})
-                    failed_swap_json.update({'errors':errors_list})
-                    failed_swaps_summary[uuid] = failed_swap_json
+            try:
+                timestamps_list = []
+                errors_list = []
+                failed_swap_json = {}
+                swap_type = swap['type']
+                uuid = swap['uuid']
+                failed_swap_json.update({'swap_type':swap_type})
+                failed_swap_json.update({'uuid':uuid})
+                for event in swap['events']:
+                    event_type = event['event']['type']
+                    event_timestamp = event['timestamp']
+                    timestamps_list.append({event_type:event_timestamp})
+                    if event['event']['type'] in error_events:
+                        error = str(event['event']['data'])
+                        errors_list.append({event_type:error})
+                    if event['event']['type'] == 'Started':
+                        failed_swap_json.update({'lock_duration':event['event']['data']['lock_duration']})
+                        failed_swap_json.update({'taker_coin':event['event']['data']['taker_coin']})
+                        failed_swap_json.update({'taker_pub':event['event']['data']['taker']})
+                        failed_swap_json.update({'maker_coin':event['event']['data']['maker_coin']})
+                        failed_swap_json.update({'maker_pub':event['event']['data']['my_persistent_pub']})
+                    if 'data' in event['event']:
+                        if 'maker_payment_locktime' in event['event']['data']:
+                            failed_swap_json.update({'maker_locktime':event['event']['data']['maker_payment_locktime']})
+                        if 'taker_payment_locktime' in event['event']['data']:
+                            failed_swap_json.update({'taker_locktime':event['event']['data']['taker_payment_locktime']})
+                    if event['event']['type'] == 'Finished':
+                        failed_swap_json.update({'timestamps_list':timestamps_list})
+                        failed_swap_json.update({'errors':errors_list})
+                        failed_swaps_summary[uuid] = failed_swap_json
+            except:
+                pass
 
         header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
                             +'{:^28}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
