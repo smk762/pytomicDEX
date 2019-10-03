@@ -14,8 +14,8 @@ https://komodoplatform.com/atomic-swaps/
 
 ## Setup  
 
-### MM2.json  
-This file needs to be customised with your own RPC password and wallet passphrase. 
+### MM2.json
+This file needs to be customised with your own RPC password and wallet passphrase. If you run the TUI without an MM2.json file, a menu option to create one will be available.   
 The netid value is set to 9999 by default (used for public beta testing), but can be changed to a different value to allow for testing privately (e.g. between two nodes with a unique shared netid).  
 ```
 cp MM2_example.json MM2.json  
@@ -40,14 +40,18 @@ You can use Luke Child's https://dogeseed.com/ to generate these words (preferab
 "userhome":"/home/YOURUSERNAME/"
 }
 ```
-### mm2coins.py  
-Contains additional coin parameters to activate them with mm2.  
+
+### lib/coinslib.py  
+
+Contains additional coin parameters to activate them with mm2, defines block explorers, binance trade parameters, and which coins you want to buy/sell using the bot. The default file is populated with 20 mm2 compatible coins, iuncluding those present in the mobile app.   
 NOTE: You will also need a copy of the `coins` file from https://github.com/jl777/coins/blob/master/coins  
+
 ```
 cd ~/pytomicDEX  
 wget https://raw.githubusercontent.com/jl777/coins/master/coins  
 ```
-Each coin in mm2coins.py needs values as per the examples below:  
+
+Each coin in coinslib.py needs values as per the examples below:  
 `tag` The ticker for the coin. Must be the same as the `name` value in `coins` value.  
 `min_swap` Should be higher than the `fee` value in the `coins` file, to ensure you are sending enough funds for a successful transaction.  
 `api-id` Used to get current pricing data from the CoinGecko API.   
@@ -55,6 +59,10 @@ Should be the same as the `id` value for the coin from  https://www.coingecko.co
 NOTE: this feature is not yet fully implemented.   
 `activate_with` Defines whether to use a native coin daemon, or an Electrum (SPV) server.   
 NOTE: Native mode requires the local chain to be fully sync'd, the deamon running, and the private key for your addresses imported.   
+`reserve_balance:` number of coins to keep in MM2 wallet (excess will be sent your to Binance wallet)   
+`premium:` Value relative to Binance market rate to setprices as marketmaker. E.g. a value of 1.05 will set your sell price 5% above Binance market price.   
+`minQty; maxQty; stepSize:` Values as required for setting orders on Binance, available from https://api.binance.com/api/v1/exchangeInfo   
+`bot_sell; bot_buy:` Set to True or False to indicate whether or not you want the bot to buy/sell the coin.   
 `electrum` Defines the server and port to use for interacting with mm2 in lite mode.   
 Electrum server details can be found at https://github.com/jl777/coins/tree/master/electrums (for Komodo ecosystem coins), and online for external coins (check the coin's website, github or ask the coin community).   
 Note the different format that is used for ETH/ERC20 tokens in the examples below.   
@@ -64,85 +72,70 @@ ETH/ERC20 tokens can all use the same Electrum SPV servers as each other.
 NOTE: Trading ETH/ERC20 coins requires a sufficient ETH balance in your mm2 ETH address to cover gas fees.   
 
 ##### Native example *(needs native daemon installed with a sync'd blockchain)*
-```
-    {
-        'tag': 'KMD',
-        'min_swap': 0.01,
-        'api-id': 'komodo',
-        'activate_with':'native'
-    }
-```
-##### Electrum example
-```
-    {
-        'tag': 'DGB',
-        'api-id': 'digibyte',
-        'min_swap': 10,
-        'activate_with':'electrum',
-        'electrum': [{"url":"electrum1.cipig.net:10059"},
-                     {"url":"electrum2.cipig.net:10059"},
-                     {"url":"electrum3.cipig.net:10059"}]
-    }
-```
-##### Electrum example for Etherum and ERC20 tokens
-```
-    {
-        'tag': 'ETH',
-        'api-id': 'ethereum',
-        'activate_with':'electrum',
-        'min_swap': 0.01,
-        'electrum': ["http://eth1.cipig.net:8555",
-                     "http://eth2.cipig.net:8555",
-                     "http://eth3.cipig.net:8555"],
-        'contract': "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
-    }
-```
-If using the Binance API, you also need to populate the values for coins in your trading list.
-`reserve_balance:` number of coins to keep in MM2 wallet (excess will be sent your to Binance wallet)
-`premium:` Value relative to Binance market rate to setprices as marketmaker. E.g. a value of 1.05 will set your sell price 5% above Binance market price.
-`minQty; maxQty; steSize:` Values as required for setting orders on Binance, available from https://api.binance.com/api/v1/exchangeInfo
-
-For example:
-```
+```json
     "KMD":{
+        "min_swap": 0.01,
+        "api-id": "komodo",
+        "activate_with":"native",
+        "tx_explorer":"https://www.kmdexplorer.io/tx",
         "reserve_balance":1000,
-        "premium":1.0377,
+        "premium":1.03,
+        "min_swap":0.1,
         "minQty":"0.01000000",
         "maxQty":"90000000.00000000",
-        "stepSize":"0.01000000"
+        "stepSize":"0.01000000",
+        "bot_sell": True,
+        "bot_buy": True
+    },
+```
+##### Electrum example
+```json
+    "KMD":{
+        "min_swap": 0.01,
+        "api-id": "komodo",
+        "activate_with":"electrum",
+        "tx_explorer":"https://www.kmdexplorer.io/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10001"},
+                     {"url":"electrum2.cipig.net:10001"},
+                     {"url":"electrum3.cipig.net:10001"}],
+        "reserve_balance":1000,
+        "premium":1.03,
+        "min_swap":0.1,
+        "minQty":"0.01000000",
+        "maxQty":"90000000.00000000",
+        "stepSize":"0.01000000",
+        "bot_sell": True,
+        "bot_buy": True
+    },
+```
+##### Electrum example for Etherum and ERC20 tokens
+```json
+    "ETH":{
+        "api-id": "ethereum",
+        "activate_with":"electrum",
+        "min_swap": 0.01,
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "reserve_balance":2,
+        "premium":1.03,
+        "min_swap":0.01,
+        "minQty":"0.001000000",
+        "maxQty":"100000.00000000",
+        "stepSize":"0.001000000",
+        "bot_sell": True,
+        "bot_buy": True
     },
 ```
 
-## Command Line Usage  
-### atomicDEX-cli  
-Use like `./atomicDEX-cli METHOD [PARAMETERS]`  
-If you use `./atomicDEX-cli` without a method, it will list the available methods.  
-If you use `./atomicDEX-cli METHOD` for methods that require parameters, it will list the parameters required (and the order they need to be in).  
+### api_keys.json 
+This file is needed to get prices from the Binance API, and could also be used to manage deposits and withdrawls between your MM2 wallet and Binance wallets (work in progress).
 
-## Additional files
-### mm2lib.py  
-Contains functions to translate mm2 curl methods to use the python requests library.   
-Not all methods or optional parameters are exposed in the CLI as yet.  
-
-### mm2_balances_table.py
-
-![MM2 Balances](https://i.imgur.com/1zN7nwD.png)
-
-Display your MM2 addresses, balances and fiat value.
-
-### mm2_orderbook_table.py
-
-![MM2 Orderbook](https://i.imgur.com/aIuDqcE.png)
-
-Display current MM2 orderbook. 
-
-### mm2_swaps_table.py
-
-![MM2 Swaps](https://i.imgur.com/KrsOHDj.png)
-
-Display your 50 most recent swaps, and combined trade values.
-
-### binance_makerbot.py
-
-Sets maker orders on MM2 based on coins and values in `mm2coins.py`, and periodically displays the balance, orderbook and swaps tables.
-
+```json
+{
+        "binance_key":"YOUR_BINANCE_KEY",
+        "binance_secret":"YOUR_BINANCE_SECRET"
+}
+```
