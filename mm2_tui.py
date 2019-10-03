@@ -55,8 +55,8 @@ def main():
                 swaps_info = tuilib.swaps_info(local_ip, userpass)
                 num_swaps = swaps_info[1]
                 num_finished = swaps_info[2]
-                num_in_progress = swaps_info[4]
                 num_failed = swaps_info[3]
+                num_in_progress = swaps_info[4]
                 print(tuilib.colorize('{:^68}'.format("[Total swaps: "+str(num_swaps)+"]  [Failed swaps: "+str(num_failed)+"]  [In Progress: "+str(num_in_progress)+"]  "), 'orange'))
             # Build Menu
             if status[1] is False:
@@ -68,8 +68,8 @@ def main():
                 if len(status[3]) > 0:
                     menuItems.append({"View/withdraw balances": tuilib.show_balances_table})
                     menuItems.append({"View/buy from orderbook": tuilib.show_orderbook_pair})
-                    menuItems.append({"View/cancel my orders": tuilib.show_orders})
-                    menuItems.append({"View swaps in progress": tuilib.show_swaps_in_progress})
+                    menuItems.append({"View/cancel my orders": tuilib.show_orders_table})
+                    menuItems.append({"View swaps in progress": tuilib.show_pending_swaps})
                     menuItems.append({"Review recent swaps": tuilib.show_recent_swaps})
                     menuItems.append({"Review failed swaps": tuilib.show_failed_swaps})
                     menuItems.append({"Recover stuck swap": tuilib.recover_swap})
