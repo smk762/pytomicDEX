@@ -54,6 +54,12 @@ def check_coins_status(node_ip, user_pass):
         print(tuilib.colorize("\n'coins' file not found in "+os.getcwd()+"!",'red'))
         print(tuilib.colorize("Use 'wget https://raw.githubusercontent.com/jl777/coins/master/coins' to download.", 'orange'))
         print(tuilib.colorize("Exiting...\n", 'blue'))
+        sys.exit()
+    elif os.path.exists(cwd+"/api_keys.json") is False:
+        print(tuilib.colorize("\n'api_keys.json' file not found in "+os.getcwd()+"!",'red'))
+        print(tuilib.colorize("Use 'cp api_keys_example.json api_keys.json' to copy it.", 'orange'))
+        print(tuilib.colorize("You can leave the values blank, or input your own Binance API keys", 'orange'))
+        print(tuilib.colorize("Exiting...\n", 'blue'))
         sys.exit()     
     else:
         cointag_list = []
