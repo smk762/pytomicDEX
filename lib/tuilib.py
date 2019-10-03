@@ -551,12 +551,20 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                                         'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
         for swap in swap_list:
             try:
+                maker_coin = ''
+                maker_amount = ''
+                taker_coin = ''
+                taker_amount = ''
                 role = swap['type']
                 swap_data = swap['events'][0]
-                maker_coin = swap_data['event']['data']['maker_coin']
-                maker_amount = swap_data['event']['data']['maker_amount']
-                taker_coin = swap_data['event']['data']['taker_coin']
-                taker_amount = swap_data['event']['data']['taker_amount']
+                if 'maker_coin' in swap_data['event']['data']:
+                    maker_coin = swap_data['event']['data']['maker_coin']
+                if 'maker_amount' in swap_data['event']['data']:
+                    maker_amount = swap_data['event']['data']['maker_amount']
+                if 'taker_coin' in swap_data['event']['data']:
+                    taker_coin = swap_data['event']['data']['taker_coin']
+                if 'taker_amount' in swap_data['event']['data']:
+                    taker_amount = swap_data['event']['data']['taker_amount']
                 timestamp = int(int(swap_data['timestamp'])/1000)
                 human_time = time.ctime(timestamp)
                 if maker_coin not in header_list:
@@ -773,7 +781,6 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                     taker_coin = swap_summary['taker_coin']
                 if 'maker_coin' in swap_summary:
                     maker_coin = swap_summary['maker_coin']
-
                 if str(error).find('overwinter') > 0:
                     error_type = "tx-overwinter-active"
                 elif str(error).find('timeout') > 0:
