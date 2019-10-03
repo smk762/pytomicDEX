@@ -760,13 +760,20 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
         for uuid in failed_swaps_summary:
             swap_summary = failed_swaps_summary[uuid]
             for error in swap_summary['errors']:
+                taker_pub = ''
+                taker_coin = ''
+                maker_coin = ''
                 #swap_time = swap_summary['timestamps_list'][0][1]-swap_summary['timestamps_list'][0][0]
                 start_time = list(swap_summary['timestamps_list'][0].values())[0]
                 end_time = list(swap_summary['timestamps_list'][-1].values())[0]
                 swap_time = ((end_time - start_time)/1000)/60
-                taker_pub = swap_summary['taker_pub']
-                taker_coin = swap_summary['taker_coin']
-                maker_coin = swap_summary['maker_coin']
+                if 'taker_pub' in swap_summary:
+                    taker_pub = swap_summary['taker_pub']
+                if 'taker_coin' in swap_summary:
+                    taker_coin = swap_summary['taker_coin']
+                if 'maker_coin' in swap_summary:
+                    maker_coin = swap_summary['maker_coin']
+
                 if str(error).find('overwinter') > 0:
                     error_type = "tx-overwinter-active"
                 elif str(error).find('timeout') > 0:
