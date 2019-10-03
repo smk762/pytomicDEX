@@ -475,8 +475,11 @@ def withdraw_tui(node_ip, user_pass, active_coins):
                         while True:
                                 cointag = select_coin("Select coin to withdraw funds: ", active_coins)
                                 address = input(colorize("Enter destination "+cointag+" address: ",'orange'))
-                                amount = input(colorize("Enter amount to send: ",'orange'))
-                                resp = rpclib.withdraw(node_ip, user_pass, cointag, address, amount).json()
+                                amount = input(colorize("Enter amount to send, or [A] for all: ",'orange'))
+                                if amount == 'A':
+                                    resp = rpclib.withdraw(node_ip, user_pass, cointag, address, amount).json()
+                                else:
+                                    resp = rpclib.withdraw_all(node_ip, user_pass, cointag, address).json()
                                 if 'error' in resp:
                                         if resp['error'].find("Invalid Address") > 0:
                                                 print(colorize("Invalid address! Try again...", 'red'))

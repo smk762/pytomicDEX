@@ -180,12 +180,20 @@ def recover_stuck_swap(node_ip, user_pass, uuid):
     r = requests.post(node_ip, json=params)
     return r    
 
-def withdraw(node_ip, user_pass, cointag, address, amount, max_amount=False):
+def withdraw(node_ip, user_pass, cointag, address, amount):
     params = {'userpass': user_pass,
               'method': 'withdraw',
               'coin': cointag,
               'to': address,
-              'amount': amount,
+              'amount': amount,}
+    r = requests.post(node_ip, json=params)
+    return r 
+
+def withdraw_all(node_ip, user_pass, cointag, address, max_amount=True):
+    params = {'userpass': user_pass,
+              'method': 'withdraw',
+              'coin': cointag,
+              'to': address,
               'max': max_amount,}
     r = requests.post(node_ip, json=params)
     return r 
