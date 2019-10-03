@@ -559,18 +559,18 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                 swap_data = swap['events'][0]
                 if 'maker_coin' in swap_data['event']['data']:
                     maker_coin = swap_data['event']['data']['maker_coin']
+                    if maker_coin not in header_list:
+                        header_list.append(maker_coin)
                 if 'maker_amount' in swap_data['event']['data']:
                     maker_amount = swap_data['event']['data']['maker_amount']
                 if 'taker_coin' in swap_data['event']['data']:
                     taker_coin = swap_data['event']['data']['taker_coin']
+                    if taker_coin not in header_list:
+                        header_list.append(taker_coin)
                 if 'taker_amount' in swap_data['event']['data']:
                     taker_amount = swap_data['event']['data']['taker_amount']
                 timestamp = int(int(swap_data['timestamp'])/1000)
                 human_time = time.ctime(timestamp)
-                if maker_coin not in header_list:
-                    header_list.append(maker_coin)
-                if taker_coin not in header_list:
-                    header_list.append(taker_coin)
                 rate = float(maker_amount)/float(taker_amount)
                 swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
                 for event in swap['events']:
@@ -588,7 +588,7 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                                                 "taker_amount":taker_amount
                             })
             except Exception as e:
-                #print(e)
+                print(e)
                 pass
         num_swaps = len(swap_json)
         for swap in swap_json:
