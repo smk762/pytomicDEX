@@ -42,15 +42,21 @@ def wait_continue(msg=''):
     return input(colorize(msg+"Press [Enter] to continue...", 'orange'))
 
 def exit(node_ip, user_pass):
-    while True:
-        q = input(colorize("Stop Marketmaker 2? (y/n): ", 'orange'))
-        if q == 'y' or q == 'Y':
-            stop_mm2(node_ip, user_pass)
-            sys.exit()
-        elif q == 'n' or q == 'N':
-            sys.exit()
-        else:
-            print(colorize("Invalid response, use [Y/y] or [N/n]...", 'red'))
+    mm2_active = rpclib.get_status(local_ip, userpass)[1]
+    if mm2_active:
+        while True:
+            q = input(colorize("Stop Marketmaker 2? (y/n): ", 'orange'))
+            if q == 'y' or q == 'Y':
+                stop_mm2(node_ip, user_pass)
+                print(colorize("Goodbye!", 'blue'))
+                sys.exit()
+            elif q == 'n' or q == 'N':
+                sys.exit()
+            else:
+                print(colorize("Invalid response, use [Y/y] or [N/n]...", 'red'))
+    else:
+        print(colorize("Goodbye!", 'blue'))
+        sys.exit()
 
 ## MM2 management
 def start_mm2(logfile='mm2_output.log'):
@@ -67,7 +73,6 @@ def stop_mm2(node_ip, user_pass):
             msg = "MM2 stopped. "
         except:
             msg = "MM2 was not running. "
-        wait_continue(msg)
 
 def activate_all(node_ip, user_pass):
     for coin in coinslib.coins:

@@ -81,15 +81,15 @@ def check_coins_status(node_ip, user_pass):
         return msg, color, all_active, active_coins[0], active_coins[1]
 
 def get_status(node_ip, user_pass):
-    mm2_status = check_mm2_status(node_ip, user_pass)
-    if mm2_status:
+    mm2_active = check_mm2_status(node_ip, user_pass)
+    if mm2_active:
         mm2_msg = tuilib.colorize("[MM2 active]", 'green')
     else:
         mm2_msg = tuilib.colorize("[MM2 disabled]", 'red')
     coins_status = check_coins_status(node_ip, user_pass)
     coin_msg = tuilib.colorize("["+coins_status[0]+"]", coins_status[1])
     status_msg = mm2_msg+"   "+coin_msg
-    return status_msg, mm2_status, coins_status[2], coins_status[3], coins_status[4], 
+    return status_msg, mm2_active, coins_status[2], coins_status[3], coins_status[4], 
 
 def enable(node_ip, user_pass, cointag, tx_history=True):
     coin = coinslib.coins[cointag]
