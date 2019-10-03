@@ -543,8 +543,8 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
     num_in_progress = 0
     num_failed = 0
     num_swaps = 0
+    header_list = []
     if len(swap_list) > 0:
-        header_list = []
         error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed',
                                         'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed',
                                         'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 
