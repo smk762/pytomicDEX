@@ -6,75 +6,73 @@ import time
 import requests
 import subprocess
 from os.path import expanduser
-from lib import rpclib, tuilib, coinslib
-import binance_api
+from lib import rpclib, tuilib, coinslib, binance_api
 
 # Get and set config
 cwd = os.getcwd()
 home = expanduser("~")
-with open(cwd+"/MM2.json") as j:
-  mm2json = json.load(j)
 
-gui = mm2json['gui']
-netid = mm2json['netid']
-passphrase = mm2json['passphrase']
-userpass = mm2json['rpc_password']
-rpc_password = mm2json['rpc_password']
-local_ip = "http://127.0.0.1:7783"
+header = "\
+                _                  _      _____  ________   __  \n\
+           /\  | |                (_)    |  __ \|  ____\ \ / /  \n\
+          /  \ | |_ ___  _ __ ___  _  ___| |  | | |__   \ V /   \n\
+         / /\ \| __/ _ \| '_ ` _ \| |/ __| |  | |  __|   > <    \n\
+        / ____ \ || (_) | | | | | | | (__| |__| | |____ / . \   \n\
+       /_/    \_\__\___/|_| |_| |_|_|\___|_____/|______/_/ \_\  \n\
+    \n"
 
-mm2_main = {}
-mm2_main['header'] = "\
-              _                  _      _____  ________   __  \n\
-         /\  | |                (_)    |  __ \|  ____\ \ / /  \n\
-        /  \ | |_ ___  _ __ ___  _  ___| |  | | |__   \ V /   \n\
-       / /\ \| __/ _ \| '_ ` _ \| |/ __| |  | |  __|   > <    \n\
-      / ____ \ || (_) | | | | | | | (__| |__| | |____ / . \   \n\
-     /_/    \_\__\___/|_| |_| |_|_|\___|_____/|______/_/ \_\  \n\
-   \n"
-                                                                                                              
-mm2_main['menu'] = [
-    # TODO: Have to implement here native oracle file uploader / reader, should be dope
-    # TODO: data publisher / converter for different types
-    {"Stop MarketMaker 2": tuilib.stop_mm2},
-    {"Activate coins": tuilib.activate_all},
-    {"Show balances table": tuilib.show_balances_table}
-    
-]
-mm2_main['author'] = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.1 by Thorn Mennet')
+
+author = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.2 by Thorn Mennet')
 
 no_params_list = ["Start MarketMaker 2"]
 
 def main():
-    menu = mm2_main
+    try:
+        with open(cwd+"/MM2.json") as j:
+          mm2json = json.load(j)
+        gui = mm2json['gui']
+        netid = mm2json['netid']
+        passphrase = mm2json['passphrase']
+        userpass = mm2json['rpc_password']
+        rpc_password = mm2json['rpc_password']
+        local_ip = "http://127.0.0.1:7783"
+        MM2_json_exists = True
+    except:
+        MM2_json_exists = False
+        pass
     while True:
         os.system('clear')
-        print(tuilib.colorize(menu['header'], 'lightgreen'))
-        print(tuilib.colorize(menu['author'], 'cyan'))
-        status = rpclib.get_status(local_ip, userpass)
-        print('{:^84}'.format(status[0]))
-        if status[1]:
-            swaps_info = tuilib.swaps_info(local_ip, userpass)
-            num_swaps = swaps_info[1]
-            num_finished = swaps_info[2]
-            num_in_progress = swaps_info[4]
-            num_failed = swaps_info[3]
-            print(tuilib.colorize('{:^68}'.format("[Total swaps: "+str(num_swaps)+"]  [Failed swaps: "+str(num_failed)+"]  [In Progress: "+str(num_in_progress)+"]  "), 'orange'))
-
-        # Build Menu
-        if status[1] is False:
-            menuItems = [{"Start MarketMaker 2": tuilib.start_mm2}]
+        print(tuilib.colorize(header, 'lightgreen'))
+        print(tuilib.colorize(author, 'cyan'))
+        menuItems = []
+        if not MM2_json_exists:
+            print(tuilib.colorize("No MM2.json file!", 'red'))
+            menuItems.append({"Setup MM2.json file": tuilib.create_MM2_json})
         else:
-            menuItems = [{"Stop MarketMaker 2": tuilib.stop_mm2}]
-            if status[2] is False:
-                menuItems.append({"Activate coins": tuilib.activate_all})
-            if len(status[3]) > 0:
-                menuItems.append({"View/withdraw balances": tuilib.show_balances_table})
-                menuItems.append({"View/buy from orderbook": tuilib.show_orderbook_pair})
-                menuItems.append({"View/cancel my orders": tuilib.show_orders})
-                menuItems.append({"View swaps in progress": tuilib.show_swaps_in_progress})
-                menuItems.append({"Review recent swaps": tuilib.show_recent_swaps})
-                menuItems.append({"Review failed swaps": tuilib.show_failed_swaps})
-                menuItems.append({"Recover stuck swap": tuilib.recover_swap})
+            status = rpclib.get_status(local_ip, userpass)
+            print('{:^84}'.format(status[0]))
+            if status[1]:
+                swaps_info = tuilib.swaps_info(local_ip, userpass)
+                num_swaps = swaps_info[1]
+                num_finished = swaps_info[2]
+                num_in_progress = swaps_info[4]
+                num_failed = swaps_info[3]
+                print(tuilib.colorize('{:^68}'.format("[Total swaps: "+str(num_swaps)+"]  [Failed swaps: "+str(num_failed)+"]  [In Progress: "+str(num_in_progress)+"]  "), 'orange'))
+            # Build Menu
+            if status[1] is False:
+                menuItems.append({"Start MarketMaker 2": tuilib.start_mm2})
+            else:
+                menuItems.append({"Stop MarketMaker 2": tuilib.stop_mm2})
+                if status[2] is False:
+                    menuItems.append({"Activate coins": tuilib.activate_all})
+                if len(status[3]) > 0:
+                    menuItems.append({"View/withdraw balances": tuilib.show_balances_table})
+                    menuItems.append({"View/buy from orderbook": tuilib.show_orderbook_pair})
+                    menuItems.append({"View/cancel my orders": tuilib.show_orders})
+                    menuItems.append({"View swaps in progress": tuilib.show_swaps_in_progress})
+                    menuItems.append({"Review recent swaps": tuilib.show_recent_swaps})
+                    menuItems.append({"Review failed swaps": tuilib.show_failed_swaps})
+                    menuItems.append({"Recover stuck swap": tuilib.recover_swap})
 
         menuItems.append({"Exit TUI": tuilib.exit})
         print("\n")
@@ -85,7 +83,23 @@ def main():
             if int(choice) < 0:
                 raise ValueError
             # Call the matching function
-            if list(menuItems[int(choice)].keys())[0] in no_params_list:
+            if list(menuItems[int(choice)].keys())[0] == "Setup MM2.json file":
+                list(menuItems[int(choice)].values())[0]()
+                try:
+                    with open(cwd+"/MM2.json") as j:
+                      mm2json = json.load(j)
+                    gui = mm2json['gui']
+                    netid = mm2json['netid']
+                    passphrase = mm2json['passphrase']
+                    userpass = mm2json['rpc_password']
+                    rpc_password = mm2json['rpc_password']
+                    local_ip = "http://127.0.0.1:7783"
+                    MM2_json_exists = True
+                except:
+                    input(colorize("Error in MM2.json file! See MM2_example.json for a valid example..."))
+                    MM2_json_exists = False
+                    pass
+            elif list(menuItems[int(choice)].keys())[0] in no_params_list:
                 list(menuItems[int(choice)].values())[0]()
             elif list(menuItems[int(choice)].keys())[0].find('Menu') != -1:
                 submenu(list(menuItems[int(choice)].values())[0])

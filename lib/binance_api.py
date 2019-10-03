@@ -7,7 +7,6 @@ import hmac
 import hashlib
 import requests
 from urllib.parse import urljoin, urlencode
-import mm2lib
 
 # Get and set config
 cwd = os.getcwd()

@@ -8,9 +8,9 @@ import subprocess
 from os.path import expanduser
 from . import coinslib, rpclib, binance_api
 
-explorers = {
-    "KMD":"https://www.kmdexplorer.io/tx",
-}
+
+cwd = os.getcwd()
+home = expanduser("~")
 
 def colorize(string, color):
 
@@ -41,6 +41,46 @@ hl = colorize("|", 'lightblue')
 def wait_continue(msg=''):
     return input(colorize(msg+"Press [Enter] to continue...", 'orange'))
 
+def create_MM2_json():
+    data = {}
+    rpc_pass = input(colorize("Enter an RPC password: ", 'orange'))
+    netid = input(colorize("Enter a NET ID (default = 9999): ", 'orange'))
+    userhome = expanduser("~")
+    passphrase = input(colorize("Enter a wallet seed: ", 'orange'))
+    data.update({"gui":"pytomicDEX_tui"})
+    data.update({"rpc_password":rpc_pass})
+    data.update({"netid":netid})
+    data.update({"userhome":userhome})
+    data.update({"passphrase":passphrase})
+    with open('MM2.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    print(colorize("MM2.json file created!", 'green'))
+    wait_continue()
+
+
+## MM2 management
+def start_mm2(logfile='mm2_output.log'):
+        if os.path.isfile('mm2'):
+            mm2_output = open(logfile,'w+')
+            subprocess.Popen(["./mm2"], stdout=mm2_output, stderr=mm2_output, universal_newlines=True)
+            msg = "Marketmaker 2 starting. Use 'tail -f "+logfile+"' for mm2 console messages. "
+            time.sleep(1)
+            wait_continue(msg)
+        else:
+            print(colorize("\nmm2 binary not found in "+os.getcwd()+"!", 'red'))
+            print(colorize("See https://developers.komodoplatform.com/basic-docs/atomicdex/atomicdex-setup/get-started-atomicdex.html for install instructions.", 'orange'))
+            print(colorize("Exiting...\n", 'blue'))
+            sys.exit()        
+
+def stop_mm2(node_ip, user_pass):
+        params = {'userpass': user_pass, 'method': 'stop'}
+        try:
+            r = requests.post(node_ip, json=params)
+            msg = "MM2 stopped. "
+        except:
+            msg = "MM2 was not running. "
+
+
 def exit(node_ip, user_pass):
     mm2_active = rpclib.get_status(node_ip, user_pass)[1]
     if mm2_active:
@@ -58,30 +98,14 @@ def exit(node_ip, user_pass):
         print(colorize("Goodbye!", 'blue'))
         sys.exit()
 
-## MM2 management
-def start_mm2(logfile='mm2_output.log'):
-        mm2_output = open(logfile,'w+')
-        subprocess.Popen(["./mm2"], stdout=mm2_output, stderr=mm2_output, universal_newlines=True)
-        msg = "Marketmaker 2 starting. Use 'tail -f "+logfile+"' for mm2 console messages. "
-        time.sleep(1)
-        wait_continue(msg)
-
-def stop_mm2(node_ip, user_pass):
-        params = {'userpass': user_pass, 'method': 'stop'}
-        try:
-            r = requests.post(node_ip, json=params)
-            msg = "MM2 stopped. "
-        except:
-            msg = "MM2 was not running. "
-
 def activate_all(node_ip, user_pass):
     for coin in coinslib.coins:
         if coinslib.coins[coin]['activate_with'] == 'native':
             r = rpclib.enable(node_ip, user_pass, coin)
-            print("Activating "+coin+" in native mode")
+            print(colorize("Activating "+coin+" in native mode", 'orange'))
         else:
             r = rpclib.electrum(node_ip, user_pass, coin)
-            print("Activating "+coin+" with electrum")
+            print(colorize("Activating "+coin+" with electrum", 'orange'))
 
 def validate_selection(interrogative, selection_list):
     while True:
