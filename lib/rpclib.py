@@ -36,39 +36,39 @@ def orderbook(node_ip, user_pass, base, rel):
     r = requests.post(node_ip, json=params)
     return r
 
-def check_active_coins(node_ip, user_pass, cointag_list, trading_cointag_list):
+def check_active_coins(node_ip, user_pass, cointag_list):
     active_cointags = []
-    active_trading_cointags = []
     for cointag in cointag_list:
         try:
             # Dirty way to detect activation (rel is checked first by mm2)
             resp = orderbook(node_ip, user_pass, 'XXXX', cointag).json()
             if resp['error'] == 'Base coin is not found or inactive':
                 active_cointags.append(cointag)
-                if cointag in trading_cointag_list:
-                    active_trading_cointags.append(cointag)
         except Exception as e:
             #print(e)
             pass
-    return active_cointags, active_trading_cointags
+    return active_cointags 
 
 def check_coins_status(node_ip, user_pass):
     if os.path.exists(cwd+"/coins") is False:
-        msg = "'coins' file not found in "+cwd+"!"
-        return msg, 'red'
+        print(tuilib.colorize("\n'coins' file not found in "+os.getcwd()+"!",'red'))
+        print(tuilib.colorize("Use 'wget https://raw.githubusercontent.com/jl777/coins/master/coins' to download.", 'orange'))
+        print(tuilib.colorize("Exiting...\n", 'blue'))
+        sys.exit()
+    elif os.path.exists(cwd+"/api_keys.json") is False:
+        print(tuilib.colorize("\n'api_keys.json' file not found in "+os.getcwd()+"!",'red'))
+        print(tuilib.colorize("Use 'cp api_keys_example.json api_keys.json' to copy it.", 'orange'))
+        print(tuilib.colorize("You can leave the values blank, or input your own Binance API keys", 'orange'))
+        print(tuilib.colorize("Exiting...\n", 'blue'))
+        sys.exit()     
     else:
         cointag_list = []
         for coin in coinslib.coins:
             cointag_list.append(coin)
         num_all_coins = len(cointag_list)
-        trading_cointag_list = list(coinslib.trading_list.keys())
-        num_trading_coins = len(trading_cointag_list)
-        active_coins = check_active_coins(node_ip, user_pass, cointag_list, trading_cointag_list)
-        #tuilib.wait_continue()
-        num_active_coins = len(active_coins[0])
-        num_active_trading_coins = len(active_coins[1])
-        msg = str(num_active_coins)+"/"+str(num_all_coins)+" coins active, "\
-            + str(num_active_trading_coins)+"/"+str(num_trading_coins)+" trading"
+        active_coins = check_active_coins(node_ip, user_pass, cointag_list)
+        num_active_coins = len(active_coins)
+        msg = str(num_active_coins)+"/"+str(num_all_coins)+" coins active"
         if num_active_coins == 0:
             color = 'red'
             all_active = False
@@ -78,7 +78,7 @@ def check_coins_status(node_ip, user_pass):
         else:
             color = 'green'
             all_active = True
-        return msg, color, all_active, active_coins[0], active_coins[1]
+        return msg, color, all_active, active_coins
 
 def get_status(node_ip, user_pass):
     mm2_active = check_mm2_status(node_ip, user_pass)
@@ -87,9 +87,11 @@ def get_status(node_ip, user_pass):
     else:
         mm2_msg = tuilib.colorize("[MM2 disabled]", 'red')
     coins_status = check_coins_status(node_ip, user_pass)
+    my_current_orders = my_orders(node_ip, user_pass).json()['result']
+    num_orders = len(my_current_orders['maker_orders']) + len(my_current_orders['taker_orders'])
     coin_msg = tuilib.colorize("["+coins_status[0]+"]", coins_status[1])
     status_msg = mm2_msg+"   "+coin_msg
-    return status_msg, mm2_active, coins_status[2], coins_status[3], coins_status[4], 
+    return status_msg, mm2_active, coins_status[2], coins_status[3], num_orders
 
 def enable(node_ip, user_pass, cointag, tx_history=True):
     coin = coinslib.coins[cointag]
@@ -138,10 +140,6 @@ def my_balance(node_ip, user_pass, cointag):
     r = requests.post(node_ip, json=params)
     return r
 
-def my_orders(node_ip, user_pass):
-    params = {'userpass': user_pass, 'method': 'my_orders',}
-    r = requests.post(node_ip, json=params)
-    return r
 
 def cancel_all(node_ip, user_pass):
     params = {'userpass': user_pass,
@@ -221,7 +219,7 @@ def my_recent_swaps(node_ip, user_pass, limit=10, from_uuid=''):
 
 def build_coins_data(cointag_list=''):
     if cointag_list == '':
-        cointag_list = list(coinslib.coins.keys())
+        cointag_list = coinslib.cointags
     coins_data = {}
     cointags = []
     gecko_ids = []
@@ -229,19 +227,8 @@ def build_coins_data(cointag_list=''):
     for coin in cointag_list:
       coins_data[coin] = {}
       cointags.append(coin)
-      if coin == 'BCH':
-        ticker_pair = 'BCHABCBTC'
-      elif coin == 'BTC':
-        ticker_pair = 'BTCBTC'
-        coins_data[coin]['BTC_price'] = 1
-      else:
-        ticker_pair = coin+'BTC'
-      # Get BTC price from Binance
-      resp = binance_api.get_price(ticker_pair)
-      if 'price' in resp:
-        coins_data[coin]['BTC_price'] = float(resp['price'])
-      else:
-        coins_data[coin]['BTC_price'] = 0
+      coins_data[coin]['BTC_price'] = float(tuilib.get_btc_price(coin))
+      time.sleep(0.05)
     # Get Coingecko API ids
     print(tuilib.colorize('Getting prices from CoinGecko...', 'cyan'))
     gecko_coins_list = requests.get(url='https://api.coingecko.com/api/v3/coins/list').json()
@@ -283,19 +270,15 @@ def my_swap_status(node_ip, user_pass, swap_uuid):
     r = requests.post(node_ip,json=params)
     return r
 
-def get_unfinished_swap_uuids(node_ip, user_pass):
+def get_unfinished_swaps(node_ip, user_pass):
+    unfinished_swaps = []
     unfinished_swap_uuids = []
-    orders = my_orders(node_ip, user_pass).json()
-    for order in orders['result']['maker_orders']:
-        started_swaps = orders['result']['maker_orders'][order]['started_swaps']
-        if len(started_swaps) > 0:
-            for swap_uuid in started_swaps:
-                swap_events = []
-                swap_data = my_swap_status(node_ip, user_pass, swap_uuid).json()
-                for event in swap_data['result']['events']:
-                    swap_events.append(event['event']['type'])
-                if 'Finished' not in swap_events:
-                    unfinished_swap_uuids.append(swap_uuid)
-    for order in orders['result']['taker_orders']:
-        unfinished_swap_uuids.append(order)
-    return unfinished_swap_uuids 
+    recent_swaps = my_recent_swaps(node_ip, user_pass, 50).json()
+    for swap in recent_swaps['result']['swaps']:
+        swap_events = []
+        for event in swap['events']:
+            swap_events.append(event['event']['type'])
+        if 'Finished' not in swap_events:
+            unfinished_swaps.append(swap)
+            unfinished_swap_uuids.append(swap['uuid'])
+    return unfinished_swap_uuids, unfinished_swaps

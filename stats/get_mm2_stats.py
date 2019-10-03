@@ -1,7 +1,15 @@
-# Borrowed from https://raw.githubusercontent.com/tonymorony/atomicDEX_pystats/master/stats_lib.py
+#!/usr/bin/env python3
 import os
+import sys
 import json
 from os.path import expanduser
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
+try:
+  from coinslib import coins, trading_list
+except:
+  print("coinslib not found! copy mm2coins_example.py and modify as required.")
+  sys.exit(0)
+
 home = expanduser("~")
 
 error_events = [
@@ -16,12 +24,10 @@ error_events = [
     "MakerPaymentRefundFailed"
   ]
 
-
 # assuming start from DB/%NODE_PUBKEY%/SWAPS/STATS/ directory
 def fetch_local_swap_files(node_pubkey):
     print(home+"/pytomicDEX/DB/"+node_pubkey+"/SWAPS/STATS/")
     os.chdir(home+"/pytomicDEX/DB/"+node_pubkey+"/SWAPS/STATS/")
-
     files_list_tmp = os.listdir("MAKER")
     files_list = []
     for file in files_list_tmp:
@@ -63,7 +69,6 @@ def time_filter(data_to_filter, start_time_stamp, end_time_stamp):
         except Exception as e:
             pass
     return swaps_for_dates
-
 
 # checking if swap succesfull
 def count_successful_swaps(swaps_data):
@@ -113,3 +118,24 @@ def calculate_trades_volumes(swaps_data):
             print(swap_data["events"][0])
             print(e)
     return (maker_coin_volume, taker_coin_volume)
+
+node_pubkeys = os.listdir(home+"/pytomicDEX/DB")
+for node_pubkey in node_pubkeys:
+    print(node_pubkey)
+    swap_data = fetch_local_swap_files(node_pubkey)
+    for maker in coins:
+        for taker in coins:
+            if maker != taker:
+                swap_count = pair_filter(swap_data, maker, taker)
+                if len(swap_count) > 0:
+                    print(maker+"-"+taker+": "+str(len(swap_count)))
+
+    swaps = count_successful_swaps(swap_data)
+    print("Total successful: "+str(swaps[1]))
+    print("Total failed: "+str(swaps[0]))
+    print("Error Type Counts: "+str(swaps[2]))
+    print("Fail info: "+str(swaps[3]))
+            
+    volumes = calculate_trades_volumes(swap_data)
+    print("Total maker volume: "+str(volumes[0]))
+    print("Total taker volume: "+str(volumes[1]))
