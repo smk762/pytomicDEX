@@ -86,6 +86,17 @@ def exit(node_ip, user_pass):
     mm2_active = rpclib.get_status(node_ip, user_pass)[1]
     if mm2_active:
         while True:
+            q = input(colorize("Cancel all orders (y/n)? ", 'orange'))
+            if q == 'n' or q == 'N':
+                break
+            elif q == 'y' or q == 'Y':
+                resp = rpclib.cancel_all(node_ip, user_pass).json()
+                print(colorize("All orders cancelled!","orange"))
+                break
+            else:        
+                print(colorize("Invalid response, must be [Y/y] or [N/n]", 'red'))
+                pass
+        while True:
             q = input(colorize("Stop Marketmaker 2? (y/n): ", 'orange'))
             if q == 'y' or q == 'Y':
                 stop_mm2(node_ip, user_pass)
@@ -134,8 +145,6 @@ def select_coin(interrogative, coin_list, ignore=[]):
         i += 1
     selection = validate_selection(interrogative, coin_list)
     return selection
-
-
 
 def pair_orderbook_table(node_ip, user_pass, pair):
     base = pair[0]
@@ -306,19 +315,21 @@ def create_buy(node_ip, user_pass, base, rel):
                 else:
                     print(colorize("Invalid selection, must be [Y/y] or [N/n]. Try again...", 'red'))
     except Exception as e:
-        print("Create setprice error: "+str(e))
+        print("Create buy error: "+str(e))
         wait_continue()
         return 'back to menu'
 
 
-def show_orders_table(node_ip, user_pass):
+def show_orders_table(node_ip, user_pass, coins_data='', bot=False):
     my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
-    num_orders = len(my_current_orders['maker_orders']) + len(my_current_orders['maker_orders'])
+    num_orders = len(my_current_orders['maker_orders']) + len(my_current_orders['taker_orders'])
     if num_orders == 0:
         print(colorize("You have no pending orders!", 'red'))
-        wait_continue()
-        return 'back to menu'
-    coins_data = rpclib.build_coins_data()
+        if not bot:
+            wait_continue()
+            return 'back to menu'
+    if coins_data == '':
+        coins_data = rpclib.build_coins_data()
     total_btc_val = 0
     my_order_list = []
     try:
@@ -408,42 +419,42 @@ def show_orders_table(node_ip, user_pass):
                      )
             i += 1
             print("    "+row)
-        while True:
-            q = input(colorize("Select an order number to cancel a trade, Cancel [A]ll trades, or [E]xit to menu: ", 'orange'))
-            if q == 'e' or q == 'E':
-                break
-            elif q == 'a' or q == 'A':
-                resp = rpclib.cancel_all(node_ip, user_pass).json()
-                print(colorize("All orders cancelled!","orange"))
-                break
-            else:
-                try:
-                    selected = my_order_list[int(q)-1]
-                    base = selected['base']
-                    rel = selected['rel']
-                    resp = rpclib.cancel_pair(node_ip, user_pass, base, rel).json()
-                    print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
+        if not bot:
+            while True:
+                q = input(colorize("Select an order number to cancel a trade, Cancel [A]ll trades, or [E]xit to menu: ", 'orange'))
+                if q == 'e' or q == 'E':
                     break
-                except:
-                    print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(num_orders), 'red'))
-                    pass
-
-                        
+                elif q == 'a' or q == 'A':
+                    resp = rpclib.cancel_all(node_ip, user_pass).json()
+                    print(colorize("All orders cancelled!","orange"))
+                    break
+                else:
+                    try:
+                        selected = my_order_list[int(q)-1]
+                        base = selected['base']
+                        rel = selected['rel']
+                        resp = rpclib.cancel_pair(node_ip, user_pass, base, rel).json()
+                        print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
+                        break
+                    except:
+                        print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(num_orders), 'red'))
+                        pass                        
     except Exception as e:
         print("Orders error: "+str(e))
-        pass        
-    wait_continue()
+        pass
+    if not bot:        
+        wait_continue()
 
-def show_balances_table(node_ip, user_pass, coins_data=''):
+def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
         coin_status = rpclib.check_coins_status(node_ip, user_pass)
         active_coins = coin_status[3]
         if coins_data == '':
             coins_data = rpclib.build_coins_data(coinslib.coins)
         if len(active_coins) == 0:
             msg = colorize("No coins activated!", 'red')
-            wait_continue()
+            if not bot:
+                wait_continue()
             #TODO: add highlights for bot buy/sell
-        trading_coins = []
         btc_total = 0
         usd_total = 0
         aud_total = 0
@@ -475,7 +486,7 @@ def show_balances_table(node_ip, user_pass, coins_data=''):
                 aud_price = coins_data[coin]['AUD_price']
                 aud_val = aud_price*bal
                 aud_total += aud_val
-                if coin not in trading_coins:
+                if coin not in coinslib.trading_list:
                     row = hl+'{:^7}'.format(coin)+hl+'{:^50}'.format(addr)+hl \
                                                  +'{:^11}'.format(str(bal)[:9])+hl \
                                                  +'{:^11}'.format(str(btc_price)[:9])+hl+'{:^11}'.format(str(btc_val)[:9])+hl \
@@ -496,10 +507,11 @@ def show_balances_table(node_ip, user_pass, coins_data=''):
                      +'{:^11}'.format('TOTAL AUD')+hl+'{:^11}'.format(str(aud_total)[:9])+hl
         print(colorize(" "+row, 'lightblue'))
         print(colorize(" "+table_dash+"\n\n", 'lightblue'))
-        while True:
-            outcome = withdraw_tui(node_ip, user_pass, active_coins)
-            if outcome == 'back to menu':
-                break
+        if not bot:
+            while True:
+                outcome = withdraw_tui(node_ip, user_pass, active_coins)
+                if outcome == 'back to menu':
+                    break
 
 def withdraw_tui(node_ip, user_pass, active_coins):
     q = input(colorize("[W]ithdraw funds, or [E]xit to menu: ", 'orange'))
@@ -685,7 +697,7 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                 num_in_progress += 1
     return swap_json, num_swaps, num_finished, num_failed, num_in_progress, header_list
 
-def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data=''):
+def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False):
     print(colorize("Getting swaps info...", 'cyan'))
     swap_info = swaps_info(node_ip, user_pass)
     swap_json = swap_info[0]
@@ -782,7 +794,8 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data=''):
         #calculate in / out value
     else:
         print(colorize("You have no swaps in your history!", 'orange'))
-    wait_continue()
+    if not bot:
+        wait_continue()
 
 def recover_swap(node_ip, user_pass):
     uuid = input(colorize("Enter stuck swap UUID: ", 'orange'))
@@ -903,15 +916,30 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
 
 def run_tradebot(node_ip, user_pass, refresh_mins=20):
     while True:
-        coins_data = rpclib.build_coins_data(coinslib.coins)
-        show_balances_table(coins_data, coinslib.trading_coins, coins_data)
-        show_recent_swaps(node_ip, user_pass, 50, coins_data)
-        for i in range(refresh_mins):
-            time_left = refresh_mins-i
-            print("Waiting 1 min, "+str(time_left)+"min until refresh..." )
-            time.sleep(60)
-        submit_bot_trades()
-        show_orders_table(node_ip, user_pass)
+        try:
+            coins_data = rpclib.build_coins_data(coinslib.coins)
+            submit_bot_trades(node_ip, user_pass)
+            show_orders_table(node_ip, user_pass, coins_data, True)
+            show_balances_table(node_ip, user_pass, coins_data, True)
+            show_recent_swaps(node_ip, user_pass, 50, coins_data, True)
+            for i in range(refresh_mins):
+                time_left = refresh_mins-i
+                print(str(time_left)+"min until refresh..." )
+                print("Exit bot with [CTRL-C]" )
+                time.sleep(60)
+        except KeyboardInterrupt:
+            while True:
+                q = input(colorize("Cancel all orders (y/n)? ", 'orange'))
+                if q == 'n' or q == 'N':
+                    break
+                elif q == 'y' or q == 'Y':
+                    resp = rpclib.cancel_all(node_ip, user_pass).json()
+                    print(colorize("All orders cancelled!","orange"))
+                    break
+                else:        
+                    print(colorize("Invalid selection, must be [Y/y] or [N/n]", 'red'))
+                    pass
+            break
 
 def get_btc_price(cointag):
     if cointag == 'BTC':
@@ -925,7 +953,6 @@ def get_btc_price(cointag):
     else:
         return 0
     
-
 def get_binance_addr(cointag):
     try:
         if cointag == "BCH":
@@ -937,13 +964,15 @@ def get_binance_addr(cointag):
         pass
     return deposit_addr
 
-def submit_bot_trades():
+def submit_bot_trades(node_ip, user_pass):
     swaps_in_progress = 0
     for base in coinslib.sell_list:
         try:
             balance_data = rpclib.my_balance(node_ip, user_pass, base).json()
             base_addr = balance_data['address']
-            bal = float(balance_data['balance'])
+            total_bal = float(balance_data['balance'])
+            locked_bal = float(balance_data['locked_by_swaps'])
+            bal = total_bal - locked_bal
         except:
             print("my_balance failed!")
             print(balance_data)
@@ -965,15 +994,16 @@ def submit_bot_trades():
                     withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
                 else:
                     withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                print(withdraw_tx)
+                #print(withdraw_tx)
+        my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:
                 rel_btc_price = get_btc_price(rel)
                 if rel_btc_price != 0:
                     trade_vol=bal*0.97
-                    for order in my_current_orders['result']['maker_orders']:
-                        if base == my_current_orders['result']['maker_orders'][order]['base'] and rel == my_current_orders['result']['maker_orders'][order]['rel']:
-                            started_swaps = my_current_orders['result']['maker_orders'][order]['started_swaps']
+                    for order in my_current_orders['maker_orders']:
+                        if base == my_current_orders['maker_orders'][order]['base'] and rel == my_current_orders['maker_orders'][order]['rel']:
+                            started_swaps = my_current_orders['maker_orders'][order]['started_swaps']
                             swaps_in_progress = len(started_swaps)
                             if swaps_in_progress > 0:
                                 print(str(swaps_in_progress)+" x "+base+" to "+rel+" swaps in order!")
@@ -1002,8 +1032,8 @@ def submit_bot_trades():
                             if trade_vol > min_swap:
                                 trade_price = pair_price*coinslib.coins[base]['premium']
                                 resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
-                                time.sleep(1)
-                            print(colorize(resp, 'cyan'))
+                                print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","cyan"))
+                                time.sleep(0.1)
                         else:
                             print(colorize("Unable to get price for "+base+", skipping...", 'cyan'))
                 else:
