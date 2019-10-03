@@ -571,8 +571,6 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                     taker_amount = swap_data['event']['data']['taker_amount']
                 timestamp = int(int(swap_data['timestamp'])/1000)
                 human_time = time.ctime(timestamp)
-                rate = float(maker_amount)/float(taker_amount)
-                swap_str = str(maker_amount)+" "+maker_coin+" for "+str(taker_amount)+" "+taker_coin+" ("+str(rate)+")"
                 for event in swap['events']:
                     if event['event']['type'] in error_events:
                         swap_status = event['event']['type']
