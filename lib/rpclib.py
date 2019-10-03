@@ -195,7 +195,6 @@ def withdraw_all(node_ip, user_pass, cointag, address):
               'coin': cointag,
               'to': address,
               'max': True}
-    print(params)
     r = requests.post(node_ip, json=params)
     return r 
 

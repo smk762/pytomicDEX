@@ -499,11 +499,10 @@ def withdraw_tui(node_ip, user_pass, active_coins):
                         txid_str = '0x'+txid['tx_hash']
                     else:
                         txid_str = txid['tx_hash']
-                    print(colorize("Withdrawl successful! TXID: ["+txid['tx_hash']+"]", 'green'))
+                    print(colorize("Withdrawl successful! TXID: ["+txid_str+"]", 'green'))
                     try:
-                        print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid['tx_hash']+"]", 'cyan'))
+                        print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid_str+"]", 'cyan'))
                     except:
-                        print(colorize("Track transaction status at ["+txid['tx_hash']+"]", 'cyan'))
                         pass
                     break
                 else:
