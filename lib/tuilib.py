@@ -552,9 +552,9 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
         for swap in swap_list:
             try:
                 maker_coin = ''
-                maker_amount = ''
+                maker_amount = 0
                 taker_coin = ''
-                taker_amount = ''
+                taker_amount = 0
                 role = swap['type']
                 swap_data = swap['events'][0]
                 if 'maker_coin' in swap_data['event']['data']:
