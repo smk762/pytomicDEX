@@ -535,13 +535,16 @@ def show_swaps_in_progress(node_ip, user_pass):
         print(colorize('No swaps in progress!','red'))
     wait_continue()
 
-def show_recent_swaps(node_ip, user_pass, swapcount=50):
+def swaps_info(node_ip, user_pass, swapcount=99999):
     recent_swaps = rpclib.my_recent_swaps(node_ip, user_pass, swapcount).json()
     swap_list = recent_swaps['result']['swaps']
+    swap_json = []
+    num_finished = 0
+    num_in_progress = 0
+    num_failed = 0
+    num_swaps = 0
     if len(swap_list) > 0:
-        coins_data = rpclib.build_coins_data()
         header_list = []
-        swap_json = []
         error_events = ['StartFailed', 'NegotiateFailed', 'TakerFeeValidateFailed',
                                         'MakerPaymentTransactionFailed', 'MakerPaymentDataSendFailed',
                                         'TakerPaymentValidateFailed', 'TakerPaymentSpendFailed', 
@@ -579,6 +582,23 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
             except Exception as e:
                 print(e)
                 pass
+        num_swaps = len(swap_json)
+        for swap in swap_json:
+            if swap['result'] == 'Finished':
+                num_finished += 1
+            elif swap['result'].find('Failed'):
+                num_failed += 1
+            else:
+                num_in_progress += 1
+    return swap_json, num_swaps, num_finished, num_failed, num_in_progress, header_list
+
+def show_recent_swaps(node_ip, user_pass, swapcount=50):
+    print(colorize("Getting swaps info...", 'cyan'))
+    swap_info = swaps_info(node_ip, user_pass)
+    swap_json = swap_info[0]
+    header_list = swap_info[5]
+    if len(swap_json) > 0:
+        coins_data = rpclib.build_coins_data()
         delta = {}
         header = "|"+'{:^17}'.format("TIME")+"|"+'{:^28}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
         for coin in header_list:
@@ -589,6 +609,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50):
         print(" "+header)
         print(" "+table_dash)
         for swap in swap_json:
+            role = swap['role']
             time_str = swap['time'][:-5]
             time_str = time_str[4:]
             row_str = "|"+'{:^17}'.format(time_str)+"|"

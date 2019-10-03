@@ -24,14 +24,13 @@ local_ip = "http://127.0.0.1:7783"
 
 mm2_main = {}
 mm2_main['header'] = "\
-          _                  _      _____  ________   __  \n\
-     /\  | |                (_)    |  __ \|  ____\ \ / /  \n\
-    /  \ | |_ ___  _ __ ___  _  ___| |  | | |__   \ V /   \n\
-   / /\ \| __/ _ \| '_ ` _ \| |/ __| |  | |  __|   > <    \n\
-  / ____ \ || (_) | | | | | | | (__| |__| | |____ / . \   \n\
- /_/    \_\__\___/|_| |_| |_|_|\___|_____/|______/_/ \_\  \n\
- \n\
- "
+              _                  _      _____  ________   __  \n\
+         /\  | |                (_)    |  __ \|  ____\ \ / /  \n\
+        /  \ | |_ ___  _ __ ___  _  ___| |  | | |__   \ V /   \n\
+       / /\ \| __/ _ \| '_ ` _ \| |/ __| |  | |  __|   > <    \n\
+      / ____ \ || (_) | | | | | | | (__| |__| | |____ / . \   \n\
+     /_/    \_\__\___/|_| |_| |_|_|\___|_____/|______/_/ \_\  \n\
+   \n"
                                                                                                               
 mm2_main['menu'] = [
     # TODO: Have to implement here native oracle file uploader / reader, should be dope
@@ -41,7 +40,7 @@ mm2_main['menu'] = [
     {"Show balances table": tuilib.show_balances_table}
     
 ]
-mm2_main['author'] = '{:^55}'.format('Welcome to the AtomicDEX TUI v0.1 by Thorn Mennet')
+mm2_main['author'] = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.1 by Thorn Mennet')
 
 no_params_list = ["Start MarketMaker 2"]
 
@@ -52,10 +51,15 @@ def main():
         print(tuilib.colorize(menu['header'], 'lightgreen'))
         print(tuilib.colorize(menu['author'], 'cyan'))
         status = rpclib.get_status(local_ip, userpass)
-        print('{:^75}'.format(status[0]))
+        print('{:^84}'.format(status[0]))
         if status[1]:
-            swaps_in_progress = len(rpclib.get_unfinished_swap_uuids(local_ip, userpass))
-            print(tuilib.colorize('{:^55}'.format("["+str(swaps_in_progress)+" swaps in progress]"), 'orange'))
+            swaps_info = tuilib.swaps_info(local_ip, userpass)
+            num_swaps = swaps_info[1]
+            num_finished = swaps_info[2]
+            num_in_progress = swaps_info[4]
+            num_failed = swaps_info[3]
+            print(tuilib.colorize('{:^68}'.format("[Total swaps: "+str(num_swaps)+"]  [Failed swaps: "+str(num_failed)+"]  [In Progress: "+str(num_in_progress)+"]  "), 'orange'))
+
         # Build Menu
         if status[1] is False:
             menuItems = [{"Start MarketMaker 2": tuilib.start_mm2}]
