@@ -119,7 +119,7 @@ except Exception as e:
     print(e)
     start_mm2('mm2.log')
     time.sleep(10)
-    activate_all(local_ip, userpass, coinslib.coins)
+    activate_all(local_ip, userpass)
     orderbook = get_orders_json(coinslib.coins)
     table_data = orderbook[0]+orderbook[1]
     pass
