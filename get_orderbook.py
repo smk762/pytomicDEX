@@ -47,11 +47,9 @@ def start_mm2(logfile):
 def activate_all(node_ip, user_pass):
     for coin in coinslib.coins:
         if coinslib.coins[coin]['activate_with'] == 'native':
-            r = rpclib.enable(node_ip, user_pass, coin)
-            print(colorize("Activating "+coin+" in native mode", 'cyan'))
+            r = enable(node_ip, user_pass, coin)
         else:
-            r = rpclib.electrum(node_ip, user_pass, coin)
-            print(colorize("Activating "+coin+" with electrum", 'cyan'))
+            r = electrum(node_ip, user_pass, coin)
 
 
 def enable(node_ip, user_pass, cointag, tx_history=True):
