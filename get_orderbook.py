@@ -28,18 +28,26 @@ with open(mm2_path+"/MM2.json") as j:
 gui = mm2json['gui']
 netid = mm2json['netid']
 passphrase = mm2json['passphrase']
-userpass = mm2json['rpc_password']
+user_pass = mm2json['rpc_password']
 rpc_password = mm2json['rpc_password']
-local_ip = "http://127.0.0.1:7783"
+node_ip = "http://127.0.0.1:7783"
+
+def help_mm2(node_ip, user_pass):
+    params = {'userpass': user_pass, 'method': 'help'}
+    r = requests.post(node_ip, json=params)
+    return r.text
+
+def check_mm2_status(node_ip, user_pass):
+    try: 
+        help_mm2(node_ip, user_pass)
+        return True
+    except Exception as e:
+        return False
 
 def start_mm2(logfile):
-  try:
-    stop_mm2("htpp://127.0.0.1:7783", userpass)
-  except:
-    pass
   mm2_output = open(logfile,'w+')
   os.chdir(mm2_path)
-  Popen(["/home/smk762/pytomicDEX/mm2"], stdout=mm2_output, stderr=mm2_output, universal_newlines=True)
+  Popen(["./mm2"], stdout=mm2_output, stderr=mm2_output, universal_newlines=True)
   print("Marketmaker 2 started. Use 'tail -f "+logfile+"' for mm2 console messages")
   os.chdir(cwd)
 
@@ -91,14 +99,14 @@ def orderbook(node_ip, user_pass, base, rel):
     r = requests.post(node_ip, json=params)
     return r
 
-def get_orders_json(coins):
+def get_orders_json(node_ip, user_pass, coins):
     orders = []
     ask_json = []
     bid_json = []
     for base in coins:
         for rel in coins:
             if base != rel:
-                orderbook_response = orderbook(local_ip, userpass, base, rel).json()
+                orderbook_response = orderbook(node_ip, user_pass, base, rel).json()
                 orders.append(orderbook_response)
     for pair in orders:
         if len(pair['asks']) > 0:
@@ -112,15 +120,17 @@ def get_orders_json(coins):
             #    print(str(bid['price'])+" "+pair['base']+" per "+pair['rel']+" ("+str(bid['maxvolume'])+" available)")
              #   bid_json.append({"baserel":baserel, "price":bid['price'], "volume":str(bid['maxvolume'])})
     return ask_json, bid_json
-try:
-    orderbook = get_orders_json(coinslib.coins)
+
+mm2_running = check_mm2_status(node_ip, user_pass)
+
+if mm2_running:
+    orderbook = get_orders_json(node_ip, user_pass, coinslib.coins)
     table_data = orderbook[0]+orderbook[1]
-except Exception as e:
-    print(e)
+else:
     start_mm2('mm2.log')
     time.sleep(10)
-    activate_all(local_ip, userpass)
-    orderbook = get_orders_json(coinslib.coins)
+    activate_all(node_ip, userpass)
+    orderbook = get_orders_json(node_ip, user_pass, coinslib.coins)
     table_data = orderbook[0]+orderbook[1]
     pass
 table_json = str(table_data).replace("'",'"')
