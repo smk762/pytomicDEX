@@ -204,6 +204,31 @@ def pair_orderbook_table(node_ip, user_pass, pair):
                              )
                 i += 1
                 print("    "+row)
+            else:
+                orderbook_trim.append(bid)
+                price = str(bid['price'])
+                volume = str(bid['maxvolume'])
+                if market_rate != 0:
+                    differential = float(price)/float(market_rate)-1
+                else:
+                    differential = 0
+                diff_pct = str(differential*100)[:5]+"%"
+                if differential < 0:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                elif differential > 0.07:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                else:
+                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                rel_price = float(price)
+                print("    |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
+                             +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
+                             +'{:^36}'.format("YOUR ORDER")+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                             +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                             +str(differential)+"\033[0m"+hl \
+                             )
+                i += 1
+                print("    "+row)
+
     else:
         print("    |"+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format("-")+hl \
                      +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
@@ -979,22 +1004,27 @@ def submit_bot_trades(node_ip, user_pass):
             base_addr = ''
             bal = 0
             pass
-        if bal > coinslib.coins[base]['reserve_balance']*1.2:
-            qty = bal - coinslib.coins[base]['reserve_balance']
-            bal = bal - qty
-            deposit_addr = get_binance_addr(base)
-            withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
-            send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
-            print("Sent "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
-            print("TXID: "+send_resp['tx_hash'])
-        elif bal < coinslib.coins[base]['reserve_balance']*0.8:
-            qty = coinslib.coins[base]['reserve_balance'] - bal
-            if base_addr != '':
-                if base == "BCH":
-                    withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
-                else:
-                    withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                #print(withdraw_tx)
+        try:
+            if bal > coinslib.coins[base]['reserve_balance']*1.2:
+                qty = bal - coinslib.coins[base]['reserve_balance']
+                bal = bal - qty
+                deposit_addr = get_binance_addr(base)
+                withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
+                send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
+                print("Sent "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
+                print("TXID: "+send_resp['tx_hash'])
+            elif bal < coinslib.coins[base]['reserve_balance']*0.8:
+                qty = coinslib.coins[base]['reserve_balance'] - bal
+                if base_addr != '':
+                    if base == "BCH":
+                        withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+                    else:
+                        withdraw_tx = binance_api.withdraw(base, base_addr, qty)
+                    #print(withdraw_tx)
+        except Exception as e:
+            print(e)
+            print('Binance deposit/withdraw failed')
+            pass
         my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:
