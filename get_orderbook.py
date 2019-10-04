@@ -129,7 +129,7 @@ if mm2_running:
 else:
     start_mm2('mm2.log')
     time.sleep(10)
-    activate_all(node_ip, userpass)
+    activate_all(node_ip, user_pass)
     orderbook = get_orders_json(node_ip, user_pass, coinslib.coins)
     table_data = orderbook[0]+orderbook[1]
     pass
