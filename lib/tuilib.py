@@ -483,12 +483,12 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
         btc_total = 0
         usd_total = 0
         aud_total = 0
-        header = hl+'{:^7}'.format('COIN')+hl+'{:^50}'.format('ADDRESS (green = bot trading)')+hl \
+        header = hl+'{:^10}'.format('COIN')+hl+'{:^50}'.format('ADDRESS (green = bot trading)')+hl \
                             +'{:^11}'.format('BALANCE')+hl+'{:^11}'.format('BTC PRICE')+hl \
                             +'{:^11}'.format('BTC VALUE')+hl+'{:^11}'.format('USD PRICE')+hl \
                             +'{:^11}'.format('USD VALUE')+hl+'{:^11}'.format('AUD PRICE')+hl \
                             +'{:^11}'.format('AUD VALUE')+hl
-        table_dash = "-"*144
+        table_dash = "-"*147
         print(colorize(" "+table_dash, 'lightblue'))
         print(colorize(" "+header, 'lightblue'))
         print(colorize(" "+table_dash, 'lightblue'))
@@ -512,21 +512,21 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
                 aud_val = aud_price*bal
                 aud_total += aud_val
                 if coin not in coinslib.trading_list:
-                    row = hl+'{:^7}'.format(coin)+hl+'{:^50}'.format(addr)+hl \
+                    row = hl+'{:^10}'.format(coin)+hl+'{:^50}'.format(addr)+hl \
                                                  +'{:^11}'.format(str(bal)[:9])+hl \
                                                  +'{:^11}'.format(str(btc_price)[:9])+hl+'{:^11}'.format(str(btc_val)[:9])+hl \
                                                  +'{:^11}'.format(str(usd_price)[:9])+hl+'{:^11}'.format(str(usd_val)[:9])+hl \
                                                  +'{:^11}'.format(str(aud_price)[:9])+hl+'{:^11}'.format(str(aud_val)[:9])+hl
                     print(colorize(" "+row, 'lightblue'))
                 else:
-                    row = hl+colorize('{:^7}'.format(coin),'green')+hl+colorize('{:^50}'.format(addr),'green')+hl \
+                    row = hl+colorize('{:^10}'.format(coin),'green')+hl+colorize('{:^50}'.format(addr),'green')+hl \
                                                  +colorize('{:^11}'.format(str(bal)[:9]),'green')+hl \
                                                  +colorize('{:^11}'.format(str(btc_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(btc_val)[:9]),'green')+hl\
                                                  +colorize('{:^11}'.format(str(usd_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(usd_val)[:9]),'green')+hl\
                                                  +colorize('{:^11}'.format(str(aud_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(aud_val)[:9]),'green')+hl
                     print(colorize(" "+row, 'lightblue'))
         print(colorize(" "+table_dash, 'lightblue')) 
-        row = hl+'{:^70}'.format(' ')+hl \
+        row = hl+'{:^73}'.format(' ')+hl \
                      +'{:^11}'.format('TOTAL BTC')+hl+'{:^11}'.format(str(btc_total)[:9])+hl \
                      +'{:^11}'.format('TOTAL USD')+hl+'{:^11}'.format(str(usd_total)[:9])+hl \
                      +'{:^11}'.format('TOTAL AUD')+hl+'{:^11}'.format(str(aud_total)[:9])+hl
