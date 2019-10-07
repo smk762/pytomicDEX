@@ -6,6 +6,7 @@ import json
 import hmac
 import hashlib
 import requests
+import sys
 from urllib.parse import urljoin, urlencode
 
 # Get and set config
@@ -14,8 +15,14 @@ home = expanduser("~")
 
 # from https://code.luasoftware.com/tutorials/cryptocurrency/python-connect-to-binance-api/
 
-with open(home+"/pytomicDEX/api_keys.json") as keys_j:
-    keys_json = json.load(keys_j)
+try:
+    with open(sys.path[0]+"/api_keys.json") as keys_j:
+        keys_json = json.load(keys_j)
+except FileNotFoundError:
+    print("You need api_keys.json file in PytomicDEX directory")
+    print("Check api_keys_example.json, create file and run me again")
+    exit()
+
 
 api_key = keys_json['binance_key']
 api_secret = keys_json['binance_secret']
