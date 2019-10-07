@@ -10,6 +10,7 @@ from lib import rpclib, tuilib, coinslib, binance_api
 
 # Get and set config
 cwd = os.getcwd()
+script_path = sys.path[0]
 home = expanduser("~")
 
 header = "\
@@ -28,7 +29,7 @@ no_params_list = ["Start MarketMaker 2"]
 
 def main():
     try:
-        with open(cwd+"/MM2.json") as j:
+        with open(script_path+"/MM2.json") as j:
           mm2json = json.load(j)
         gui = mm2json['gui']
         netid = mm2json['netid']
@@ -89,7 +90,7 @@ def main():
             if list(menuItems[int(choice)].keys())[0] == "Setup MM2.json file":
                 list(menuItems[int(choice)].values())[0]()
                 try:
-                    with open(cwd+"/MM2.json") as j:
+                    with open(script_path+"/MM2.json") as j:
                       mm2json = json.load(j)
                     gui = mm2json['gui']
                     netid = mm2json['netid']

@@ -10,10 +10,10 @@ from . import coinslib, rpclib, binance_api
 
 
 cwd = os.getcwd()
+script_path = sys.path[0]
 home = expanduser("~")
 
 def colorize(string, color):
-
         colors = {
                 'black':'\033[30m',
                 'red':'\033[31m',
@@ -67,7 +67,7 @@ def start_mm2(logfile='mm2_output.log'):
             time.sleep(1)
             wait_continue(msg)
         else:
-            print(colorize("\nmm2 binary not found in "+os.getcwd()+"!", 'red'))
+            print(colorize("\nmm2 binary not found in "+script_path+"!", 'red'))
             print(colorize("See https://developers.komodoplatform.com/basic-docs/atomicdex/atomicdex-setup/get-started-atomicdex.html for install instructions.", 'orange'))
             print(colorize("Exiting...\n", 'blue'))
             sys.exit()        
@@ -146,12 +146,12 @@ def select_coin(interrogative, coin_list, ignore=[]):
     selection = validate_selection(interrogative, coin_list)
     return selection
 
-def pair_orderbook_table(node_ip, user_pass, pair):
-    base = pair[0]
-    rel = pair[1]
-    print(colorize('Getting orderbook...', 'cyan'))
+def pair_orderbook_table(node_ip, user_pass, base, rel, coins_data='', no_stop=False):
+    if not no_stop:
+        print(colorize('Getting orderbook...', 'cyan'))
     orderbook = rpclib.orderbook(node_ip, user_pass, base, rel).json()
-    pair_data = rpclib.build_coins_data(pair)
+    if coins_data == '':
+        coins_data = rpclib.build_coins_data(node_ip, user_pass, [base,rel])
     try:
         balance_data = rpclib.my_balance(node_ip, user_pass, base).json()
         addr = balance_data['address']
@@ -159,24 +159,27 @@ def pair_orderbook_table(node_ip, user_pass, pair):
         addr = ''
         pass
     row = "-"*175 
-    print("    "+row)
-    print(
-            "    |"+'{:^10}'.format('ORDER NUM')+hl+'{:^14}'.format('PAIR')+hl+'{:^16}'.format('VOLUME'+" ("+base+")")+hl \
+    orderbook_trim = []
+    header_row =  hl+'{:^10}'.format('ORDER NUM')+hl+'{:^14}'.format('PAIR')+hl+'{:^16}'.format('VOLUME'+" ("+base+")")+hl \
             +'{:^18}'.format('PRICE (USD)')+hl \
             +'{:^36}'.format('SELLER ADDRESS')+hl+'{:^18}'.format('PRICE ('+rel+')')+hl \
             +'{:^18}'.format('MM2 RATE')+hl+'{:^18}'.format('MARKET RATE')+hl \
-            +'{:^16}'.format('DIFFERENTIAL')+hl    \
-            )
-    print("    "+row)
+            +'{:^16}'.format('DIFFERENTIAL')+hl
+    if not no_stop:
+        print("    "+row)
+        print("    "+header_row)
+        print("    "+row)
+    elif len(orderbook['asks']) == 0 and no_stop:
+        return []
     try:
-        market_rate = pair_data[base]['BTC_price']/pair_data[rel]['BTC_price']
+        market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
     except:
         market_rate = 0
     pair = rel+"/"+base
-    btc_price = pair_data[base]['BTC_price']
-    aud_price = pair_data[base]['AUD_price']
-    usd_price = pair_data[base]['USD_price']
-    orderbook_trim = []
+    btc_price = coins_data[base]['BTC_price']
+    aud_price = coins_data[base]['AUD_price']
+    usd_price = coins_data[base]['USD_price']
+    price_source = coins_data[base]['price_source']
     if len(orderbook['asks']) > 0:
         i = 1
         for bid in orderbook['asks']:
@@ -190,20 +193,33 @@ def pair_orderbook_table(node_ip, user_pass, pair):
                     differential = 0
                 diff_pct = str(differential*100)[:5]+"%"
                 if differential < 0:
-                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
                 elif differential > 0.07:
-                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
                 else:
-                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
                 rel_price = float(price)
-                print("    |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
-                             +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
-                             +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                             +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                             +str(differential)+"\033[0m"+hl \
-                             )
-                i += 1
-                print("    "+row)
+                if not no_stop:
+                    print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
+                                 +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
+                                 +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                 +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                 +str(diff_pct)+"\033[0m"+hl \
+                                 )
+                    i += 1
+                    print("    "+row)
+                elif differential < 0:
+                    print("    "+row)
+                    print("    "+header_row)
+                    print("    "+row)
+                    print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
+                                 +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
+                                 +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                 +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                 +str(diff_pct)+"\033[0m"+hl \
+                                 )
+                    i += 1
+                    print("    "+row)
             else:
                 orderbook_trim.append(bid)
                 price = str(bid['price'])
@@ -214,27 +230,27 @@ def pair_orderbook_table(node_ip, user_pass, pair):
                     differential = 0
                 diff_pct = str(differential*100)[:5]+"%"
                 if differential < 0:
-                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
                 elif differential > 0.07:
-                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
                 else:
-                    differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
                 rel_price = float(price)
-                print("    |"+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
+                print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
                              +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
-                             +'{:^36}'.format("YOUR ORDER")+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                             +colorize('{:^36}'.format("YOUR ORDER"), 'cyan')+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
                              +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                             +str(differential)+"\033[0m"+hl \
+                             +str(diff_pct)+"\033[0m"+hl \
                              )
                 i += 1
                 print("    "+row)
 
-    else:
-        print("    |"+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format("-")+hl \
+    elif not no_stop:
+        print("    "+hl+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format("-")+hl \
                      +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
                      +'{:^36}'.format(str("-"))+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
                      +'{:^18}'.format(str('-'))+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                     +'{:^18}'.format(str('-')+"\033[0m")+"    |" \
+                     +'{:^18}'.format(str('-')+"\033[0m")+hl \
                      )
         print("    "+row)
         while True:
@@ -251,14 +267,16 @@ def pair_orderbook_table(node_ip, user_pass, pair):
                 print(colorize("Enter [Y/y] or [N/n] only, try again... ", 'red'))
     return orderbook_trim
 
-def show_orderbook_pair(node_ip, user_pass):
+def show_orderbook_pair(node_ip, user_pass, base='', rel=''):
     coin_status = rpclib.check_coins_status(node_ip, user_pass)
     active_coins = coin_status[3]
-    base = select_coin("Select coin to buy: ", active_coins)
-    rel = select_coin("Select coin to sell: ", active_coins, [base])
+    if base == '':
+        base = select_coin("Select coin to buy: ", active_coins)
+    if rel == '':
+        rel = select_coin("Select coin to sell: ", active_coins, [base])
     # todo: ignore orders set by user
     try:
-        orderbook = pair_orderbook_table(node_ip, user_pass, [base,rel])
+        orderbook = pair_orderbook_table(node_ip, user_pass, base, rel)
         while True:
             if orderbook == 'back to menu':
                 return 'back to menu'
@@ -268,7 +286,7 @@ def show_orderbook_pair(node_ip, user_pass):
             if q == 'e' or q == 'E':
                 break
             if q == 'R' or q == 'r':
-                orderbook = pair_orderbook_table(node_ip, user_pass, [base,rel])
+                orderbook = pair_orderbook_table(node_ip, user_pass, base, rel)
             elif q == 'c' or q == 'C':
                 while True:
                     outcome = create_buy(node_ip, user_pass, base, rel)
@@ -326,11 +344,11 @@ def create_buy(node_ip, user_pass, base, rel):
             print(colorize("Can't buy more than max volume! Try again..." , 'red'))
         else:
             while True:
-                q = input(colorize("Confirm setprice order, "+str(buy_num)+" "+base+" for "+str(float(rel_price)*buy_num)+" "+rel+" (y/n): ",'orange'))
+                q = input(colorize("Confirm buy order, "+str(buy_num)+" "+base+" for "+str(float(rel_price)*buy_num)+" "+rel+" (y/n): ",'orange'))
                 if q == 'Y' or q == 'y':
                     resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, rel_price).json()
                     if 'error' in resp:
-                        print(colorize("Setprice Error: "+str(resp), 'red'))
+                        print(colorize("Buy Error: "+str(resp), 'red'))
                     else:
                         print(colorize("Order submitted!", 'green'))
                     wait_continue()
@@ -354,14 +372,14 @@ def show_orders_table(node_ip, user_pass, coins_data='', bot=False):
             wait_continue()
             return 'back to menu'
     if coins_data == '':
-        coins_data = rpclib.build_coins_data()
+        coins_data = rpclib.build_coins_data(node_ip, user_pass)
     total_btc_val = 0
     my_order_list = []
     try:
         row = colorize("-"*174, 'blue')
         print("    "+row)
         print(
-                "    |"+'{:^11}'.format("ORDER NUM")+hl+'{:^14}'.format('ORDER TYPE')+hl \
+                hl+'{:^11}'.format("ORDER NUM")+hl+'{:^14}'.format('ORDER TYPE')+hl \
                 +'{:^14}'.format('PAIR')+hl+'{:^18}'.format('VOLUME')+hl \
                 +'{:^18}'.format('PRICE (USD)')+hl+'{:^18}'.format('PRICE (AUD)')+hl \
                 +'{:^18}'.format('PRICE (BTC)')+hl+'{:^18}'.format('MY PRICE')+hl \
@@ -396,11 +414,21 @@ def show_orders_table(node_ip, user_pass, coins_data='', bot=False):
                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
             else:
                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+            price_source = coins_data[base]['price_source']
+            btc_price = str(btc_price)
+            if price_source == 'binance':
+                btc_price = colorize('{:^18}'.format(str(btc_price)), 'yellow')
+            elif price_source == 'coingecko':
+                btc_price = colorize('{:^18}'.format(str(btc_price)), 'pink')
+            elif price_source == 'mm2_orderbook':
+                btc_price = colorize('{:^18}'.format(str(btc_price)), 'cyan')
+            #print(price_source)
+            #print(btc_price)
             rel_price = float(price)
             print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
                                  +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
                                  +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
-                                 +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                 +'{:^18}'.format(str(btc_price))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
                                  +'{:^18}'.format(str(market_rate)[:14])+hl \
                                  +str(differential)+hl, 'blue') \
                      )
@@ -434,11 +462,19 @@ def show_orders_table(node_ip, user_pass, coins_data='', bot=False):
                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
             else:
                 differential = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+            price_source = coins_data[base]['price_source']
+            btc_price = str(btc_price)
+            if price_source == 'binance':
+                btc_price = colorize('{:^18}'.format(str(btc_price)), 'yellow')
+            elif price_source == 'coingecko':
+                btc_price = colorize('{:^18}'.format(str(btc_price)), 'pink')
+            elif price_source == 'mm2_orderbook':
+                btc_price = colorize('{:^18}'.format(str(btc_price)), 'cyan')
             rel_price = float(price)
             print(colorize("    "+hl+'{:^11}'.format("["+str(i)+"]")+hl+'{:^14}'.format(order_type)+hl \
                                  +'{:^14}'.format(pair)+hl+'{:^18}'.format(volume[:14])+hl \
                                  +'{:^18}'.format("$"+str(usd_price)[:14])+hl+'{:^18}'.format("$"+str(aud_price)[:14])+hl \
-                                 +'{:^18}'.format(str(btc_price)[:14])+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                 +'{:^18}'.format(str(btc_price))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
                                  +'{:^18}'.format(str(market_rate)[:14])+hl \
                                  +str(differential)+hl, 'blue') \
                      )
@@ -462,7 +498,7 @@ def show_orders_table(node_ip, user_pass, coins_data='', bot=False):
                         print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
                         break
                     except:
-                        print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(num_orders), 'red'))
+                        print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(my_order_list)), 'red'))
                         pass                        
     except Exception as e:
         print("Orders error: "+str(e))
@@ -474,7 +510,7 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
         coin_status = rpclib.check_coins_status(node_ip, user_pass)
         active_coins = coin_status[3]
         if coins_data == '':
-            coins_data = rpclib.build_coins_data(coinslib.coins)
+            coins_data = rpclib.build_coins_data(node_ip, user_pass, coinslib.coins)
         if len(active_coins) == 0:
             msg = colorize("No coins activated!", 'red')
             if not bot:
@@ -484,11 +520,11 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
         usd_total = 0
         aud_total = 0
         header = hl+'{:^10}'.format('COIN')+hl+'{:^50}'.format('ADDRESS (green = bot trading)')+hl \
-                            +'{:^11}'.format('BALANCE')+hl+'{:^11}'.format('BTC PRICE')+hl \
+                            +'{:^11}'.format('BALANCE')+hl+'{:^16}'.format('BTC PRICE')+hl \
                             +'{:^11}'.format('BTC VALUE')+hl+'{:^11}'.format('USD PRICE')+hl \
                             +'{:^11}'.format('USD VALUE')+hl+'{:^11}'.format('AUD PRICE')+hl \
                             +'{:^11}'.format('AUD VALUE')+hl
-        table_dash = "-"*147
+        table_dash = "-"*152
         print(colorize(" "+table_dash, 'lightblue'))
         print(colorize(" "+header, 'lightblue'))
         print(colorize(" "+table_dash, 'lightblue'))
@@ -511,22 +547,29 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
                 aud_price = coins_data[coin]['AUD_price']
                 aud_val = aud_price*bal
                 aud_total += aud_val
+                price_source = coins_data[coin]['price_source']
+                if price_source == 'binance':
+                    btc_price = colorize('{:^16}'.format(str(btc_price)[:8]), 'yellow')
+                elif price_source == 'coingecko':
+                    btc_price = colorize('{:^16}'.format(str(btc_price)[:8]), 'pink')
+                elif price_source == 'mm2_orderbook':
+                    btc_price = colorize('{:^16}'.format(str(btc_price)[:8]), 'cyan')
                 if coin not in coinslib.trading_list:
                     row = hl+'{:^10}'.format(coin)+hl+'{:^50}'.format(addr)+hl \
                                                  +'{:^11}'.format(str(bal)[:9])+hl \
-                                                 +'{:^11}'.format(str(btc_price)[:9])+hl+'{:^11}'.format(str(btc_val)[:9])+hl \
+                                                 +'{:^16}'.format(str(btc_price))+hl+'{:^11}'.format(str(btc_val)[:9])+hl \
                                                  +'{:^11}'.format(str(usd_price)[:9])+hl+'{:^11}'.format(str(usd_val)[:9])+hl \
                                                  +'{:^11}'.format(str(aud_price)[:9])+hl+'{:^11}'.format(str(aud_val)[:9])+hl
                     print(colorize(" "+row, 'lightblue'))
                 else:
                     row = hl+colorize('{:^10}'.format(coin),'green')+hl+colorize('{:^50}'.format(addr),'green')+hl \
                                                  +colorize('{:^11}'.format(str(bal)[:9]),'green')+hl \
-                                                 +colorize('{:^11}'.format(str(btc_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(btc_val)[:9]),'green')+hl\
+                                                 +colorize('{:^16}'.format(str(btc_price)),'green')+hl+colorize('{:^11}'.format(str(btc_val)[:9]),'green')+hl\
                                                  +colorize('{:^11}'.format(str(usd_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(usd_val)[:9]),'green')+hl\
                                                  +colorize('{:^11}'.format(str(aud_price)[:9]),'green')+hl+colorize('{:^11}'.format(str(aud_val)[:9]),'green')+hl
                     print(colorize(" "+row, 'lightblue'))
         print(colorize(" "+table_dash, 'lightblue')) 
-        row = hl+'{:^73}'.format(' ')+hl \
+        row = hl+'{:^78}'.format(' ')+hl \
                      +'{:^11}'.format('TOTAL BTC')+hl+'{:^11}'.format(str(btc_total)[:9])+hl \
                      +'{:^11}'.format('TOTAL USD')+hl+'{:^11}'.format(str(usd_total)[:9])+hl \
                      +'{:^11}'.format('TOTAL AUD')+hl+'{:^11}'.format(str(aud_total)[:9])+hl
@@ -729,7 +772,7 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
     header_list = swap_info[5]
     if len(swap_json) > 0:
         if coins_data == '':
-            coins_data = rpclib.build_coins_data() 
+            coins_data = rpclib.build_coins_data(node_ip, user_pass) 
         delta = {}
         header = "|"+'{:^17}'.format("TIME")+"|"+'{:^28}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
         for coin in header_list:
@@ -746,11 +789,14 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
             row_str = "|"+'{:^17}'.format(time_str)+"|"
             if swap['result'].find('Failed') > 0:
                 highlight = 'red'
+                result = 'FAILED'
             elif swap['result'].find('Finished') > -1:
                 highlight = 'green'
+                result = 'FINISHED'
             else:
                 highlight = 'orange'
-            result = colorize('{:^28}'.format(swap['result']), highlight)+"|"
+                result = 'IN PROGRESS'
+            result = colorize('{:^28}'.format(result), highlight)+"|"
             row_str += result
             row_str += '{:^7}'.format(role)+"|"
             for coin in header_list:
@@ -942,7 +988,7 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
 def run_tradebot(node_ip, user_pass, refresh_mins=20):
     while True:
         try:
-            coins_data = rpclib.build_coins_data(coinslib.coins)
+            coins_data = rpclib.build_coins_data(node_ip, user_pass, coinslib.coins)
             submit_bot_trades(node_ip, user_pass)
             show_orders_table(node_ip, user_pass, coins_data, True)
             show_balances_table(node_ip, user_pass, coins_data, True)
@@ -1005,7 +1051,7 @@ def submit_bot_trades(node_ip, user_pass):
             bal = 0
             pass
         try:
-            if bal > coinslib.coins[base]['reserve_balance']*1.2:
+            if bal > coinslib.coins[base]['reserve_balance']*1.2 and base not in ['RICK','MORTY']:
                 qty = bal - coinslib.coins[base]['reserve_balance']
                 bal = bal - qty
                 deposit_addr = get_binance_addr(base)
@@ -1029,7 +1075,7 @@ def submit_bot_trades(node_ip, user_pass):
         for rel in coinslib.buy_list:
             if rel != base:
                 rel_btc_price = get_btc_price(rel)
-                if rel_btc_price != 0:
+                if rel_btc_price != 0 or rel in ['RICK', 'MORTY']:
                     trade_vol=bal*0.97
                     for order in my_current_orders['maker_orders']:
                         if base == my_current_orders['maker_orders'][order]['base'] and rel == my_current_orders['maker_orders'][order]['rel']:
@@ -1045,7 +1091,7 @@ def submit_bot_trades(node_ip, user_pass):
                                             swaps_in_progress -= 1;
                     if swaps_in_progress == 0:
                         base_btc_price = get_btc_price(base)
-                        if base_btc_price != 0:
+                        if base_btc_price != 0 or base in ['RICK', 'MORTY']:
                             if base == 'BTC':
                                 rel_price = 1
                             else:
@@ -1054,16 +1100,26 @@ def submit_bot_trades(node_ip, user_pass):
                                 rel_price = 1
                             else:
                                 rel_price = rel_btc_price
-                            pair_price = float(base_price)/float(rel_price)
+                            if base not in ['RICK', 'MORTY'] and rel not in ['RICK', 'MORTY']:
+                                pair_price = float(base_price)/float(rel_price)
+                            else:
+                                pair_price = 1
                             try:
                                 min_swap = coinslib.coins[base]['min_swap']
                             except:
                                 min_swap = 0
                             if trade_vol > min_swap:
-                                trade_price = pair_price*coinslib.coins[base]['premium']
-                                resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
-                                print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","cyan"))
-                                time.sleep(0.1)
+                                if base in ['RICK', 'MORTY'] or rel in ['RICK', 'MORTY']:
+                                    if base in ['RICK', 'MORTY'] and rel in ['RICK', 'MORTY']:
+                                        trade_price = 1
+                                        resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
+                                        print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","red"))
+                                        time.sleep(0.1)                                    
+                                else:
+                                    trade_price = pair_price*coinslib.coins[base]['premium']
+                                    resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
+                                    print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","cyan"))
+                                    time.sleep(0.1)
                         else:
                             print(colorize("Unable to get price for "+base+", skipping...", 'cyan'))
                 else:
