@@ -94,7 +94,7 @@ def get_status(node_ip, user_pass):
         mm2_msg = tuilib.colorize("[MM2 disabled]", 'red')
         num_orders = 0
         status_msg = ''
-        coins_status = ['','','',]
+        coins_status = ['','','','']
     return status_msg, mm2_active, coins_status[2], coins_status[3], num_orders
 
 def enable(node_ip, user_pass, cointag, tx_history=True):
