@@ -30,6 +30,11 @@ def my_orders(node_ip, user_pass):
     r = requests.post(node_ip, json=params)
     return r
 
+def version(node_ip, user_pass):
+    params = {'userpass': user_pass, 'method': 'version',}
+    r = requests.post(node_ip, json=params)
+    return r
+
 def orderbook(node_ip, user_pass, base, rel):
     params = {'userpass': user_pass,
               'method': 'orderbook',
@@ -84,7 +89,8 @@ def check_coins_status(node_ip, user_pass):
 def get_status(node_ip, user_pass):
     mm2_active = check_mm2_status(node_ip, user_pass)
     if mm2_active:
-        mm2_msg = tuilib.colorize("[MM2 active]", 'green')
+        ver = version(node_ip, user_pass).json()['result'].split("_")[0]
+        mm2_msg = tuilib.colorize("[MM2 v"+ver+" active]", 'green')
         coins_status = check_coins_status(node_ip, user_pass)
         my_current_orders = my_orders(node_ip, user_pass).json()['result']
         num_orders = len(my_current_orders['maker_orders']) + len(my_current_orders['taker_orders'])

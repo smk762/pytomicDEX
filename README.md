@@ -7,7 +7,7 @@
 
 #### Dependancies  
 ```
-pip3 install requests json subprocess  
+pip3 install requests json subprocess python-bitcoinlib
 ```  
 #### Recommended reading  
 https://developers.atomicdex.io/  

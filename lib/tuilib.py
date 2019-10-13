@@ -8,6 +8,18 @@ import subprocess
 from os.path import expanduser
 from . import coinslib, rpclib, binance_api
 
+import bitcoin
+from bitcoin.wallet import P2PKHBitcoinAddress
+from bitcoin.core import x
+from bitcoin.core import CoreMainParams
+
+class CoinParams(CoreMainParams):
+    MESSAGE_START = b'\x24\xe9\x27\x64'
+    DEFAULT_PORT = 7770
+    BASE58_PREFIXES = {'PUBKEY_ADDR': 60,
+                       'SCRIPT_ADDR': 85,
+                       'SECRET_KEY': 188}
+bitcoin.params = CoinParams
 
 cwd = os.getcwd()
 script_path = sys.path[0]
@@ -534,8 +546,8 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
                     balance_data = rpclib.my_balance(node_ip, user_pass, coin).json()
                     addr = balance_data['address']
                     bal = float(balance_data['balance'])
-                except:
-                    addr = "RPC timed out!"
+                except Exception as e:
+                    addr = "RPC timed out! "+str(e)
                     bal = 0
                     pass
                 btc_price = float(coins_data[coin]['BTC_price'])
@@ -774,9 +786,9 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
         if coins_data == '':
             coins_data = rpclib.build_coins_data(node_ip, user_pass) 
         delta = {}
-        header = "|"+'{:^17}'.format("TIME")+"|"+'{:^28}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
+        header = "|"+'{:^14}'.format("TIME")+"|"+'{:^8}'.format("RESULT")+"|"+'{:^7}'.format("ROLE")+"|"
         for coin in header_list:
-            header += '{:^10}'.format(coin)+"|"
+            header += '{:^8}'.format(coin)+"|"
             delta[coin] = 0
         table_dash = "-"*len(header)
         print(" "+table_dash)
@@ -784,9 +796,9 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
         print(" "+table_dash)
         for swap in swap_json:
             role = swap['role']
-            time_str = swap['time'][:-5]
+            time_str = swap['time'][:-8]
             time_str = time_str[4:]
-            row_str = "|"+'{:^17}'.format(time_str)+"|"
+            row_str = "|"+'{:^14}'.format(time_str)+"|"
             if swap['result'].find('Failed') > 0:
                 highlight = 'red'
                 result = 'FAILED'
@@ -795,8 +807,8 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
                 result = 'FINISHED'
             else:
                 highlight = 'orange'
-                result = 'IN PROGRESS'
-            result = colorize('{:^28}'.format(result), highlight)+"|"
+                result = 'PENDING'
+            result = colorize('{:^8}'.format(result), highlight)+"|"
             row_str += result
             row_str += '{:^7}'.format(role)+"|"
             for coin in header_list:
@@ -817,17 +829,17 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
                 if result.find('Failed') == -1:
                     delta[coin] += swap_amount
                 if swap_amount < 0:
-                    row_str += colorize('{:^10}'.format(str(swap_amount)[:8]), 'red')+"|"
+                    row_str += colorize('{:^8}'.format(str(swap_amount)[:6]), 'red')+"|"
                 elif swap_amount > 0:
-                    row_str += colorize('{:^10}'.format(str(swap_amount)[:8]), 'green')+"|"
+                    row_str += colorize('{:^8}'.format(str(swap_amount)[:6]), 'green')+"|"
                 else:
-                    row_str += colorize('{:^10}'.format('-'), 'darkgrey')+"|"
+                    row_str += colorize('{:^8}'.format('-'), 'darkgrey')+"|"
             print(" "+row_str)
-        delta_row = "|"+'{:^54}'.format("TOTAL")+"|"
-        btc_row = "|"+'{:^54}'.format("BTC")+"|"
-        usd_row = "|"+'{:^54}'.format("USD")+"|"
-        aud_row = "|"+'{:^54}'.format("AUD")+"|"
-        table_dash = "-"*(len(delta_row)+(len(header_list)+1)*11)
+        delta_row = "|"+'{:^31}'.format("TOTAL")+"|"
+        btc_row = "|"+'{:^31}'.format("BTC")+"|"
+        usd_row = "|"+'{:^31}'.format("USD")+"|"
+        aud_row = "|"+'{:^31}'.format("AUD")+"|"
+        table_dash = "-"*(len(delta_row)+(len(header_list)+1)*9)
         btc_sum = 0
         usd_sum = 0
         aud_sum = 0
@@ -844,14 +856,14 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
                         highlight = 'green'
                     else:
                         highlight = 'red'
-                    delta_row += colorize('{:^10}'.format(str(delta[header_coin])[:8]),highlight)+"|"
-                    btc_row += colorize('{:^10}'.format(str(btc_price)[:8]),highlight)+"|"
-                    usd_row += colorize('{:^10}'.format("$"+str(usd_price)[:7]),highlight)+"|"
-                    aud_row += colorize('{:^10}'.format("$"+str(aud_price)[:7]),highlight)+"|"
-        delta_row += '{:^10}'.format("TOTAL")+"|"
-        btc_row += '{:^10}'.format(str(btc_sum)[:8])+"|"
-        usd_row += '{:^10}'.format("$"+str(usd_sum)[:7])+"|"
-        aud_row += '{:^10}'.format("$"+str(aud_sum)[:7])+"|"
+                    delta_row += colorize('{:^8}'.format(str(delta[header_coin])[:6]),highlight)+"|"
+                    btc_row += colorize('{:^8}'.format(str(btc_price)[:6]),highlight)+"|"
+                    usd_row += colorize('{:^8}'.format("$"+str(usd_price)[:5]),highlight)+"|"
+                    aud_row += colorize('{:^8}'.format("$"+str(aud_price)[:5]),highlight)+"|"
+        delta_row += '{:^8}'.format("TOTAL")+"|"
+        btc_row += '{:^8}'.format(str(btc_sum)[:6])+"|"
+        usd_row += '{:^8}'.format("$"+str(usd_sum)[:5])+"|"
+        aud_row += '{:^8}'.format("$"+str(aud_sum)[:5])+"|"
 
         print(" "+table_dash)
         print(" "+delta_row)
@@ -929,7 +941,7 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
         header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
                             +'{:^28}'.format('FAIL EVENT')+hl+'{:^23}'.format('ERROR')+hl \
                             +'{:^7}'.format('TAKER')+hl+'{:^7}'.format('MAKER')+hl \
-                            +'{:^66}'.format('TAKER PUB')+hl
+                            +'{:^66}'.format('TAKER RADD')+hl
         table_dash = "-"*194
         print(colorize(" "+table_dash, 'lightblue'))
         print(colorize(" "+header, 'lightblue'))
@@ -947,6 +959,10 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                 swap_time = ((end_time - start_time)/1000)/60
                 if 'taker_pub' in swap_summary:
                     taker_pub = swap_summary['taker_pub']
+                    try:
+                        taker_radd = str(P2PKHBitcoinAddress.from_pubkey(x("02"+taker_pub)))
+                    except:
+                        taker_radd = taker_pub
                 if 'taker_coin' in swap_summary:
                     taker_coin = swap_summary['taker_coin']
                 if 'maker_coin' in swap_summary:
@@ -960,7 +976,7 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                 row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
                             +'{:^28}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
                             +'{:^7}'.format(taker_coin)+hl+'{:^7}'.format(maker_coin)+hl \
-                            +'{:^66}'.format(taker_pub)+hl
+                            +'{:^66}'.format(taker_radd)+hl
                 print(colorize(" "+row, 'lightblue'))
                 print(colorize(" "+table_dash, 'lightblue'))
                 #print(error)
@@ -1074,7 +1090,10 @@ def submit_bot_trades(node_ip, user_pass):
         my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:
-                rel_btc_price = get_btc_price(rel)
+                if 'override_KMD_buy_price' in coinslib.coins[rel]:
+                    rel_btc_price = float(get_btc_price('KMD'))*float(coinslib.coins[rel]['override_KMD_buy_price'])
+                else:
+                    rel_btc_price = get_btc_price(rel)
                 if rel_btc_price != 0 or rel in ['RICK', 'MORTY']:
                     trade_vol=bal*0.97
                     for order in my_current_orders['maker_orders']:
@@ -1090,7 +1109,10 @@ def submit_bot_trades(node_ip, user_pass):
                                             print(swap_uuid+" finished")
                                             swaps_in_progress -= 1;
                     if swaps_in_progress == 0:
-                        base_btc_price = get_btc_price(base)
+                        if 'override_KMD_sell_price' in coinslib.coins[base]:
+                            base_btc_price = float(get_btc_price('KMD'))*float(coinslib.coins[base]['override_KMD_sell_price'])
+                        else:
+                            base_btc_price = get_btc_price(base)
                         if base_btc_price != 0 or base in ['RICK', 'MORTY']:
                             if base == 'BTC':
                                 rel_price = 1
@@ -1114,8 +1136,9 @@ def submit_bot_trades(node_ip, user_pass):
                                         trade_price = 1
                                         resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
                                         print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","red"))
-                                        time.sleep(0.1)                                    
+                                        time.sleep(0.1)
                                 else:
+
                                     trade_price = pair_price*coinslib.coins[base]['premium']
                                     resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
                                     print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","cyan"))

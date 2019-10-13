@@ -27,8 +27,8 @@ coins = {
         "minQty":"1.00000000",
         "maxQty":"90000000.00000000",
         "stepSize":"1.00000000",
-        "bot_sell": False,
-        "bot_buy": False
+        "bot_sell": True,
+        "bot_buy": True
     },
     "BCH":{
         "min_swap": 0.01,
@@ -66,7 +66,7 @@ coins = {
                      {"url":"electrum2.cipig.net:10000"},
                      {"url":"electrum3.cipig.net:10000"}],
         "bot_sell": False,
-        "bot_buy": False
+        "bot_buy": True
     },
     "BTCH":{
         "min_swap": 0.1,
@@ -234,13 +234,16 @@ coins = {
     "LABS":{
         "min_swap": 5,
         "activate_with":"electrum",
-        "reserve_balance":2,
+        "reserve_balance":10000,
+        "override_KMD_buy_price":0.01,
+        "override_KMD_sell_price":0.2,
+        "premium":1.03,
         "tx_explorer":"https://labs.explorer.dexstats.info/tx",
         "electrum": [{"url":"electrum1.cipig.net:10019"},
                      {"url":"electrum2.cipig.net:10019"},
                      {"url":"electrum3.cipig.net:10019"}],
-        "bot_sell": False,
-        "bot_buy": False
+        "bot_sell": True,
+        "bot_buy": True
     },
     "LINK":{
         "min_swap": 0.5,
@@ -256,8 +259,8 @@ coins = {
         "minQty":"1.00000000",
         "maxQty":"90000000.00000000",
         "stepSize":"1.00000000",
-        "bot_sell": False,
-        "bot_buy": False
+        "bot_sell": True,
+        "bot_buy": True
     },
     "LTC":{
         "api-id": "litecoin",
