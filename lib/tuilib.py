@@ -1082,6 +1082,7 @@ def binance_account_info(base='', bal=0, base_addr=''):
     for item in binance_balances:
         if item['asset'] == base:
             binance_balance = float(item['free'])
+            print(base+" balance on Binance is: "+binance_balance)
             break
         else:
             binance_balance = 0
@@ -1097,14 +1098,15 @@ def binance_account_info(base='', bal=0, base_addr=''):
                 print("Response: "+send_resp)
                 print("TXID: "+send_resp['tx_hash'])
             elif bal < coinslib.coins[base]['reserve_balance']*0.8:
-                if base_addr != '' and binance_balance > qty:
+                if base_addr != '':
                     qty = coinslib.coins[base]['reserve_balance'] - bal
-                    print("Withdrawing "+str(qty)+" "+base+" from Binance")
-                    if base == "BCH":
-                        withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
-                    else:
-                        withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                    print(withdraw_tx)
+                    if binance_balance > qty:
+                        print("Withdrawing "+str(qty)+" "+base+" from Binance")
+                        if base == "BCH":
+                            withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+                        else:
+                            withdraw_tx = binance_api.withdraw(base, base_addr, qty)
+                        print(withdraw_tx)
         except Exception as e:
             print(e)
             print('Binance deposit/withdraw failed')
