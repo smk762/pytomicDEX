@@ -1076,7 +1076,7 @@ def get_binance_addr(cointag):
         pass
     return deposit_addr
 
-def binance_account_info(base='', bal=0, base_addr=''):
+def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr=''):
     account_info = binance_api.get_account_info()
     binance_balances = account_info['balances']
     for item in binance_balances:
@@ -1131,7 +1131,7 @@ def submit_bot_trades(node_ip, user_pass):
             base_addr = ''
             bal = 0
             pass
-        bal = binance_account_info(base, bal, base_addr)
+        bal = binance_account_info(node_ip, user_pass, base, bal, base_addr)
         my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:
