@@ -1079,17 +1079,20 @@ def get_binance_addr(cointag):
 def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr=''):
     account_info = binance_api.get_account_info()
     binance_balances = account_info['balances']
+    atomicDEX_reserve = coinslib.coins[base]['reserve_balance']
     if base != '':
         for item in binance_balances:
             if item['asset'] == base:
                 binance_balance = float(item['free'])
                 print(base+" balance on Binance is: "+str(binance_balance))
+                print(base+" balance on AtomicDEX is: "+str(bal))
+                print(base+" reserve on AtomicDEX is: "+str(atomicDEX_reserve))
                 break
             else:
                 binance_balance = 0
         try:
-            if bal > coinslib.coins[base]['reserve_balance']*1.2 and base not in ['RICK','MORTY']:
-                qty = bal - coinslib.coins[base]['reserve_balance']
+            if bal > atomicDEX_reserve*1.2 and base not in ['RICK','MORTY']:
+                qty = bal - atomicDEX_reserve
                 bal = bal - qty
                 deposit_addr = get_binance_addr(base)
                 withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
@@ -1100,9 +1103,9 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='')
                     print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid_str+"]", 'cyan'))
                 else:
                     print("Response: "+str(send_resp))                
-            elif bal < coinslib.coins[base]['reserve_balance']*0.8:
+            elif bal < atomicDEX_reserve*0.8:
                 if base_addr != '':
-                    qty = coinslib.coins[base]['reserve_balance'] - bal
+                    qty = atomicDEX_reserve - bal
                     if binance_balance > qty:
                         print("Withdrawing "+str(qty)+" "+base+" from Binance")
                         if base == "BCH":
