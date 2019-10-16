@@ -1082,7 +1082,7 @@ def binance_account_info(base='', bal=0, base_addr=''):
     for item in binance_balances:
         if item['asset'] == base:
             binance_balance = float(item['free'])
-            print(base+" balance on Binance is: "+binance_balance)
+            print(base+" balance on Binance is: "+str(binance_balance))
             break
         else:
             binance_balance = 0
