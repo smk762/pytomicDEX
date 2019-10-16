@@ -204,8 +204,8 @@ def withdraw(asset, addr, amount):
     timestamp = int(time.time() * 1000)
     params = {
         'asset': asset,
-        'asset': addr,
-        'asset': amount,
+        'address': addr,
+        'amount': amount,
         'timestamp': timestamp
     }
     query_string = urlencode(params)
