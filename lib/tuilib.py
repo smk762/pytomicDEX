@@ -1113,7 +1113,7 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='')
             pass
     else:
         for item in binance_balances:
-            if item['asset'] in in coinslib.trading_list:
+            if item['asset'] in coinslib.trading_list:
                 binance_balance = float(item['free'])
                 print(base+" balance on Binance is: "+str(binance_balance))
                 break
