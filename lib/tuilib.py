@@ -1079,14 +1079,14 @@ def get_binance_addr(cointag):
 def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr=''):
     account_info = binance_api.get_account_info()
     binance_balances = account_info['balances']
-    for item in binance_balances:
-        if item['asset'] == base:
-            binance_balance = float(item['free'])
-            print(base+" balance on Binance is: "+str(binance_balance))
-            break
-        else:
-            binance_balance = 0
     if base != '':
+        for item in binance_balances:
+            if item['asset'] == base:
+                binance_balance = float(item['free'])
+                print(base+" balance on Binance is: "+str(binance_balance))
+                break
+            else:
+                binance_balance = 0
         try:
             if bal > coinslib.coins[base]['reserve_balance']*1.2 and base not in ['RICK','MORTY']:
                 qty = bal - coinslib.coins[base]['reserve_balance']
@@ -1112,7 +1112,13 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='')
             print('Binance deposit/withdraw failed')
             pass
     else:
-        print(account_info.json())
+        for item in binance_balances:
+            if item['asset'] in in coinslib.trading_list:
+                binance_balance = float(item['free'])
+                print(base+" balance on Binance is: "+str(binance_balance))
+                break
+            else:
+                binance_balance = 0
         input(colorize("Press [Enter] to continue...",'cyan'))
     return bal
 
