@@ -1109,12 +1109,13 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='')
                     if qty > binance_balance:
                         qty = binance_balance*0.98
                     qty = round(float(qty), 8)
-                    print("Withdrawing "+str(qty)+" of "+binance_balance+" "+base+" from Binance")
-                    if base == "BCH":
-                        withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
-                    else:
-                        withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                    print(withdraw_tx)
+                    if binance_balance > qty:
+                        print("Withdrawing "+str(qty)+" of "+str(binance_balance)+" "+base+" from Binance")
+                        if base == "BCH":
+                            withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+                        else:
+                            withdraw_tx = binance_api.withdraw(base, base_addr, qty)
+                        print(withdraw_tx)
         except Exception as e:
             print(e)
             print('Binance deposit/withdraw failed')
