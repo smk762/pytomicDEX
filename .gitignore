@@ -9,6 +9,7 @@ bot.log
 DB
 mm2
 logs/
+stats/
 api_keys.json
 MM2.json
 run_bot.py

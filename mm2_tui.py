@@ -25,7 +25,7 @@ header = "\
 
 author = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.2 by Thorn Mennet')
 
-no_params_list = ["Start MarketMaker 2"]
+no_params_list = ["Start MarketMaker 2","View Binance Account Info"]
 
 def main():
     try:
@@ -78,6 +78,7 @@ def main():
                     menuItems.append({"Recover stuck swap": tuilib.recover_swap})
                     menuItems.append({"Run Tradebot": tuilib.run_tradebot})
 
+        menuItems.append({"View Binance Account Info": tuilib.binance_account_info})
         menuItems.append({"Exit TUI": tuilib.exit})
         print("\n")
         for item in menuItems:

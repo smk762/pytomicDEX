@@ -131,6 +131,19 @@ def create_sell_order(ticker_pair, qty, price):
     else:
         raise BinanceException(status_code=r.status_code, data=r.json())
 
+def get_account_info():
+    path = '/api/v3/account'
+    timestamp = int(time.time() * 1000)
+    params = {
+        'recvWindow': 5000,
+        'timestamp': timestamp
+    }
+    query_string = urlencode(params)
+    params['signature'] = hmac.new(api_secret.encode('utf-8'), query_string.encode('utf-8'), hashlib.sha256).hexdigest()
+    url = urljoin(base_url, path)
+    r = requests.get(url, headers=headers, params=params)
+    return r
+
 
 def get_order(ticker_pair, order_id):
     path = '/api/v3/order'

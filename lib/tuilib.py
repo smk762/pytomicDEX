@@ -21,9 +21,18 @@ class CoinParams(CoreMainParams):
                        'SECRET_KEY': 188}
 bitcoin.params = CoinParams
 
+def get_radd_from_pub(pub):
+    try:
+        taker_addr = str(P2PKHBitcoinAddress.from_pubkey(x("02"+pub)))
+    except:
+        taker_addr = pub
+    return str(taker_addr)
+
 cwd = os.getcwd()
 script_path = sys.path[0]
 home = expanduser("~")
+
+ignored_addresses = ['RDbAXLCmQ2EN7daEZZp7CC9xzkcN8DfAZd']
 
 def colorize(string, color):
         colors = {
@@ -181,102 +190,106 @@ def pair_orderbook_table(node_ip, user_pass, base, rel, coins_data='', no_stop=F
         print("    "+row)
         print("    "+header_row)
         print("    "+row)
-    elif len(orderbook['asks']) == 0 and no_stop:
+    elif 'asks' in orderbook and len(orderbook['asks']) == 0 and no_stop:
         return []
     try:
         market_rate = coins_data[base]['BTC_price']/coins_data[rel]['BTC_price']
     except:
         market_rate = 0
     pair = rel+"/"+base
-    btc_price = coins_data[base]['BTC_price']
-    aud_price = coins_data[base]['AUD_price']
-    usd_price = coins_data[base]['USD_price']
-    price_source = coins_data[base]['price_source']
-    if len(orderbook['asks']) > 0:
-        i = 1
-        for bid in orderbook['asks']:
-            if bid['address'] != addr:
-                orderbook_trim.append(bid)
-                price = str(bid['price'])
-                volume = str(bid['maxvolume'])
-                if market_rate != 0:
-                    differential = float(price)/float(market_rate)-1
+    try:
+        btc_price = coins_data[base]['BTC_price']
+        aud_price = coins_data[base]['AUD_price']
+        usd_price = coins_data[base]['USD_price']
+        price_source = coins_data[base]['price_source']
+        if 'asks' in orderbook and len(orderbook['asks']) > 0:
+            i = 1
+            for bid in orderbook['asks']:
+                if bid['address'] != addr:
+                    orderbook_trim.append(bid)
+                    price = str(bid['price'])
+                    volume = str(bid['maxvolume'])
+                    if market_rate != 0:
+                        differential = float(price)/float(market_rate)-1
+                    else:
+                        differential = 0
+                    diff_pct = str(differential*100)[:5]+"%"
+                    if differential < 0:
+                        diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                    elif differential > 0.07:
+                        diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                    else:
+                        diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                    rel_price = float(price)
+                    if not no_stop:
+                        print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
+                                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
+                                     +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                     +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                     +str(diff_pct)+"\033[0m"+hl \
+                                     )
+                        i += 1
+                        print("    "+row)
+                    elif differential < 0:
+                        print("    "+row)
+                        print("    "+header_row)
+                        print("    "+row)
+                        print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
+                                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
+                                     +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                     +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                                     +str(diff_pct)+"\033[0m"+hl \
+                                     )
+                        i += 1
+                        print("    "+row)
                 else:
-                    differential = 0
-                diff_pct = str(differential*100)[:5]+"%"
-                if differential < 0:
-                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
-                elif differential > 0.07:
-                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
-                else:
-                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
-                rel_price = float(price)
-                if not no_stop:
+                    orderbook_trim.append(bid)
+                    price = str(bid['price'])
+                    volume = str(bid['maxvolume'])
+                    if market_rate != 0:
+                        differential = float(price)/float(market_rate)-1
+                    else:
+                        differential = 0
+                    diff_pct = str(differential*100)[:5]+"%"
+                    if differential < 0:
+                        diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
+                    elif differential > 0.07:
+                        diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
+                    else:
+                        diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
+                    rel_price = float(price)
                     print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
                                  +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
-                                 +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
+                                 +colorize('{:^36}'.format("YOUR ORDER"), 'cyan')+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
                                  +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
                                  +str(diff_pct)+"\033[0m"+hl \
                                  )
                     i += 1
                     print("    "+row)
-                elif differential < 0:
-                    print("    "+row)
-                    print("    "+header_row)
-                    print("    "+row)
-                    print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
-                                 +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
-                                 +'{:^36}'.format(str(bid['address']))+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                                 +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                                 +str(diff_pct)+"\033[0m"+hl \
-                                 )
-                    i += 1
-                    print("    "+row)
-            else:
-                orderbook_trim.append(bid)
-                price = str(bid['price'])
-                volume = str(bid['maxvolume'])
-                if market_rate != 0:
-                    differential = float(price)/float(market_rate)-1
-                else:
-                    differential = 0
-                diff_pct = str(differential*100)[:5]+"%"
-                if differential < 0:
-                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'green')
-                elif differential > 0.07:
-                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'red')
-                else:
-                    diff_pct = colorize('{:^16}'.format(str(diff_pct)[:8]), 'default')
-                rel_price = float(price)
-                print("    "+hl+'{:^10}'.format("["+str(i)+"]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format(volume[:10])+hl \
-                             +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
-                             +colorize('{:^36}'.format("YOUR ORDER"), 'cyan')+hl+'{:^18}'.format(str(rel_price)[:14])+hl \
-                             +'{:^18}'.format(str(price)[:14])+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                             +str(diff_pct)+"\033[0m"+hl \
-                             )
-                i += 1
-                print("    "+row)
 
-    elif not no_stop:
-        print("    "+hl+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format("-")+hl \
-                     +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
-                     +'{:^36}'.format(str("-"))+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                     +'{:^18}'.format(str('-'))+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
-                     +'{:^18}'.format(str('-')+"\033[0m")+hl \
-                     )
-        print("    "+row)
-        while True:
-            q = input(colorize("No orders in orderbook for "+base+"/"+rel+"! Create one manually? (y/n): ", 'orange'))
-            if q == 'N' or q == 'n':
-                return 'back to menu'
-            elif q == 'Y' or q == 'y':
-                while True:
-                    outcome = create_buy(node_ip, user_pass, base, rel)
-                    if outcome == 'back to menu':
-                        break
-                break
-            else:
-                print(colorize("Enter [Y/y] or [N/n] only, try again... ", 'red'))
+        elif not no_stop:
+            print("    "+hl+'{:^10}'.format("[*]")+hl+'{:^14}'.format(pair)+hl+'{:^16}'.format("-")+hl \
+                         +'{:^18}'.format("$"+str(usd_price)[:14])+hl \
+                         +'{:^36}'.format(str("-"))+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                         +'{:^18}'.format(str('-'))+hl+'{:^18}'.format(str(market_rate)[:14])+hl \
+                         +'{:^18}'.format(str('-')+"\033[0m")+hl \
+                         )
+            print("    "+row)
+            while True:
+                q = input(colorize("No orders in orderbook for "+base+"/"+rel+"! Create one manually? (y/n): ", 'orange'))
+                if q == 'N' or q == 'n':
+                    return 'back to menu'
+                elif q == 'Y' or q == 'y':
+                    while True:
+                        outcome = create_buy(node_ip, user_pass, base, rel)
+                        if outcome == 'back to menu':
+                            break
+                    break
+                else:
+                    print(colorize("Enter [Y/y] or [N/n] only, try again... ", 'red'))
+    except Exception as e:
+        print("Orderbook error: "+str(e))
+        pass
     return orderbook_trim
 
 def show_orderbook_pair(node_ip, user_pass, base='', rel=''):
@@ -751,12 +764,20 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                 timestamp = int(int(swap_data['timestamp'])/1000)
                 human_time = time.ctime(timestamp)
                 for event in swap['events']:
+                    if event['event']['type'] == 'Started':
+                        if 'taker' in swap_data['event']['data']:
+                            taker_pub = swap_data['event']['data']['taker']
+                            taker_addr = get_radd_from_pub(taker_pub)
+                        else: 
+                            taker_pub = swap_data['event']['data']['maker']
+                            taker_addr = get_radd_from_pub(taker_pub)
                     if event['event']['type'] in error_events:
                         swap_status = event['event']['type']
                         break
                     else:
                         swap_status = event['event']['type']
-                swap_json.append({"result":swap_status,
+                if taker_addr not in ignored_addresses:
+                    swap_json.append({"result":swap_status,
                                                 "time":human_time,
                                                 "role":role,
                                                 "maker_coin":maker_coin,
@@ -921,9 +942,15 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                         error = str(event['event']['data'])
                         errors_list.append({event_type:error})
                     if event['event']['type'] == 'Started':
+                        if 'taker' in event['event']['data']:
+                            taker_pub = event['event']['data']['taker']
+                            taker_addr = get_radd_from_pub(taker_pub)
+                        else: 
+                            taker_pub = event['event']['data']['maker']
+                            taker_addr = get_radd_from_pub(taker_pub)
                         failed_swap_json.update({'lock_duration':event['event']['data']['lock_duration']})
                         failed_swap_json.update({'taker_coin':event['event']['data']['taker_coin']})
-                        failed_swap_json.update({'taker_pub':event['event']['data']['taker']})
+                        failed_swap_json.update({'taker_addr':taker_addr})
                         failed_swap_json.update({'maker_coin':event['event']['data']['maker_coin']})
                         failed_swap_json.update({'maker_pub':event['event']['data']['my_persistent_pub']})
                     if 'data' in event['event']:
@@ -934,8 +961,10 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                     if event['event']['type'] == 'Finished':
                         failed_swap_json.update({'timestamps_list':timestamps_list})
                         failed_swap_json.update({'errors':errors_list})
-                        failed_swaps_summary[uuid] = failed_swap_json
-            except:
+                        if taker_addr not in ignored_addresses:
+                            failed_swaps_summary[uuid] = failed_swap_json
+            except Exception as e:
+                print("swap summary error: "+str(e))
                 pass
 
         header = hl+'{:^7}'.format('NUM')+hl+'{:^40}'.format('UUID')+hl+'{:^7}'.format('TYPE')+hl \
@@ -950,19 +979,15 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
         for uuid in failed_swaps_summary:
             swap_summary = failed_swaps_summary[uuid]
             for error in swap_summary['errors']:
-                taker_pub = ''
+                taker_addr = ''
                 taker_coin = ''
                 maker_coin = ''
                 #swap_time = swap_summary['timestamps_list'][0][1]-swap_summary['timestamps_list'][0][0]
                 start_time = list(swap_summary['timestamps_list'][0].values())[0]
                 end_time = list(swap_summary['timestamps_list'][-1].values())[0]
                 swap_time = ((end_time - start_time)/1000)/60
-                if 'taker_pub' in swap_summary:
-                    taker_pub = swap_summary['taker_pub']
-                    try:
-                        taker_radd = str(P2PKHBitcoinAddress.from_pubkey(x("02"+taker_pub)))
-                    except:
-                        taker_radd = taker_pub
+                if 'taker_addr' in swap_summary:
+                    taker_addr = swap_summary['taker_addr']
                 if 'taker_coin' in swap_summary:
                     taker_coin = swap_summary['taker_coin']
                 if 'maker_coin' in swap_summary:
@@ -976,7 +1001,7 @@ def show_failed_swaps(node_ip, user_pass, swapcount=50):
                 row = hl+'{:^7}'.format("["+str(i)+"]")+hl+'{:^40}'.format(uuid)+hl+'{:^7}'.format(str(swap_type))+hl \
                             +'{:^28}'.format(str(list(error.keys())[0]))+hl+'{:^23}'.format(error_type)+hl \
                             +'{:^7}'.format(taker_coin)+hl+'{:^7}'.format(maker_coin)+hl \
-                            +'{:^66}'.format(taker_radd)+hl
+                            +'{:^66}'.format(taker_addr)+hl
                 print(colorize(" "+row, 'lightblue'))
                 print(colorize(" "+table_dash, 'lightblue'))
                 #print(error)
@@ -1015,18 +1040,18 @@ def run_tradebot(node_ip, user_pass, refresh_mins=20):
                 print("Exit bot with [CTRL-C]" )
                 time.sleep(60)
         except KeyboardInterrupt:
-            while True:
-                q = input(colorize("Cancel all orders (y/n)? ", 'orange'))
-                if q == 'n' or q == 'N':
-                    break
-                elif q == 'y' or q == 'Y':
-                    resp = rpclib.cancel_all(node_ip, user_pass).json()
-                    print(colorize("All orders cancelled!","orange"))
-                    break
-                else:        
-                    print(colorize("Invalid selection, must be [Y/y] or [N/n]", 'red'))
-                    pass
             break
+    while True:
+        q = input(colorize("Cancel all orders (y/n)? ", 'orange'))
+        if q == 'n' or q == 'N':
+            break
+        elif q == 'y' or q == 'Y':
+            resp = rpclib.cancel_all(node_ip, user_pass).json()
+            print(colorize("All orders cancelled!","orange"))
+            break
+        else:        
+            print(colorize("Invalid selection, must be [Y/y] or [N/n]", 'red'))
+            pass
 
 def get_btc_price(cointag):
     if cointag == 'BTC':
@@ -1051,6 +1076,37 @@ def get_binance_addr(cointag):
         pass
     return deposit_addr
 
+def binance_account_info(base='', bal=0):
+    account_info = binance_api.get_account_info()
+    if base != '':
+        try:
+            if bal > coinslib.coins[base]['reserve_balance']*1.2 and base not in ['RICK','MORTY']:
+                qty = bal - coinslib.coins[base]['reserve_balance']
+                bal = bal - qty
+                deposit_addr = get_binance_addr(base)
+                withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
+                print("Sending "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
+                send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
+                print("Response: "+send_resp)
+                print("TXID: "+send_resp['tx_hash'])
+            elif bal < coinslib.coins[base]['reserve_balance']*0.8:
+                qty = coinslib.coins[base]['reserve_balance'] - bal
+                print("Withdrawing "+str(qty)+" "+base+" from Binance")
+                if base_addr != '':
+                    if base == "BCH":
+                        withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+                    else:
+                        withdraw_tx = binance_api.withdraw(base, base_addr, qty)
+                    #print(withdraw_tx)
+        except Exception as e:
+            print(e)
+            print('Binance deposit/withdraw failed')
+            pass
+    else:
+        print(account_info.json())
+        input(colorize("Press [Enter] to continue...",'cyan'))
+    return bal
+
 def submit_bot_trades(node_ip, user_pass):
     swaps_in_progress = 0
     for base in coinslib.sell_list:
@@ -1066,27 +1122,7 @@ def submit_bot_trades(node_ip, user_pass):
             base_addr = ''
             bal = 0
             pass
-        try:
-            if bal > coinslib.coins[base]['reserve_balance']*1.2 and base not in ['RICK','MORTY']:
-                qty = bal - coinslib.coins[base]['reserve_balance']
-                bal = bal - qty
-                deposit_addr = get_binance_addr(base)
-                withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
-                send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
-                print("Sent "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
-                print("TXID: "+send_resp['tx_hash'])
-            elif bal < coinslib.coins[base]['reserve_balance']*0.8:
-                qty = coinslib.coins[base]['reserve_balance'] - bal
-                if base_addr != '':
-                    if base == "BCH":
-                        withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
-                    else:
-                        withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                    #print(withdraw_tx)
-        except Exception as e:
-            print(e)
-            print('Binance deposit/withdraw failed')
-            pass
+        bal = binance_account_info(base, bal)
         my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:
