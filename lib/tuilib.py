@@ -1081,7 +1081,7 @@ def binance_account_info(base='', bal=0, base_addr=''):
     binance_balances = account_info['balances']
     for item in binance_balances:
         if item['asset'] == base:
-            binance_balance = float(binance_balances['free'])
+            binance_balance = float(item['free'])
             break
         else:
             binance_balance = 0
