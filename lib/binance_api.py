@@ -142,7 +142,7 @@ def get_account_info():
     params['signature'] = hmac.new(api_secret.encode('utf-8'), query_string.encode('utf-8'), hashlib.sha256).hexdigest()
     url = urljoin(base_url, path)
     r = requests.get(url, headers=headers, params=params)
-    return r
+    return r.json()
 
 
 def get_order(ticker_pair, order_id):
