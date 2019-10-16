@@ -1112,13 +1112,14 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='')
             print('Binance deposit/withdraw failed')
             pass
     else:
-        for item in binance_balances:
-            if item['asset'] in coinslib.trading_list:
-                binance_balance = float(item['free'])
-                print(base+" balance on Binance is: "+str(binance_balance))
-                break
-            else:
-                binance_balance = 0
+        for base in coinslib.trading_list:
+            for item in binance_balances:
+                if item['asset'] == base:
+                    binance_balance = float(item['free'])
+                    print(base+" balance on Binance is: "+str(binance_balance))
+                    break
+                else:
+                    binance_balance = 0
         input(colorize("Press [Enter] to continue...",'cyan'))
     return bal
 
