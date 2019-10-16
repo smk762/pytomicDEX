@@ -1095,8 +1095,11 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='')
                 withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
                 print("Sending "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
                 send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
-                print("Response: "+str(send_resp))
-                print("TXID: "+send_resp['tx_hash'])
+                if 'tx_hash' in send_resp:
+                    txid_str = send_resp['tx_hash']
+                    print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid_str+"]", 'cyan'))
+                else:
+                    print("Response: "+str(send_resp))                
             elif bal < coinslib.coins[base]['reserve_balance']*0.8:
                 if base_addr != '':
                     qty = coinslib.coins[base]['reserve_balance'] - bal
