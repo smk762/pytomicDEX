@@ -1076,8 +1076,15 @@ def get_binance_addr(cointag):
         pass
     return deposit_addr
 
-def binance_account_info(base='', bal=0):
+def binance_account_info(base='', bal=0, base_addr=''):
     account_info = binance_api.get_account_info()
+    binance_balances = account_info['balances']
+    for asset in binance_balances:
+        if binance_balances['asset'] == base:
+            binance_balance = float(binance_balances['free'])
+            break
+        else:
+            binance_balance = 0
     if base != '':
         try:
             if bal > coinslib.coins[base]['reserve_balance']*1.2 and base not in ['RICK','MORTY']:
@@ -1090,14 +1097,14 @@ def binance_account_info(base='', bal=0):
                 print("Response: "+send_resp)
                 print("TXID: "+send_resp['tx_hash'])
             elif bal < coinslib.coins[base]['reserve_balance']*0.8:
-                qty = coinslib.coins[base]['reserve_balance'] - bal
-                print("Withdrawing "+str(qty)+" "+base+" from Binance")
-                if base_addr != '':
+                if base_addr != '' and binance_balance > qty:
+                    qty = coinslib.coins[base]['reserve_balance'] - bal
+                    print("Withdrawing "+str(qty)+" "+base+" from Binance")
                     if base == "BCH":
                         withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
                     else:
                         withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                    #print(withdraw_tx)
+                    print(withdraw_tx)
         except Exception as e:
             print(e)
             print('Binance deposit/withdraw failed')
@@ -1122,7 +1129,7 @@ def submit_bot_trades(node_ip, user_pass):
             base_addr = ''
             bal = 0
             pass
-        bal = binance_account_info(base, bal)
+        bal = binance_account_info(base, bal, base_addr)
         my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:
