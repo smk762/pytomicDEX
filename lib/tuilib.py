@@ -1079,8 +1079,8 @@ def get_binance_addr(cointag):
 def binance_account_info(base='', bal=0, base_addr=''):
     account_info = binance_api.get_account_info()
     binance_balances = account_info['balances']
-    for asset in binance_balances:
-        if binance_balances['asset'] == base:
+    for item in binance_balances:
+        if item['asset'] == base:
             binance_balance = float(binance_balances['free'])
             break
         else:
