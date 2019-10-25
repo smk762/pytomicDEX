@@ -5,6 +5,9 @@
 
 ![pytomicDEX TUI](https://i.imgur.com/eFjW83f.png)
 
+#### Requirements  
+Python 3.6+
+
 #### Dependancies  
 ```
 pip3 install requests json subprocess python-bitcoinlib
