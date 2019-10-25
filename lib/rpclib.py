@@ -260,6 +260,7 @@ def build_coins_data(node_ip, user_pass, cointag_list=''):
       print(tuilib.colorize('Getting prices from CoinGecko...', 'pink'))
       gecko_coins_list = requests.get(url='https://api.coingecko.com/api/v3/coins/list').json()
       for gecko_coin in gecko_coins_list:
+        try:
           if gecko_coin['symbol'].upper() in cointags:
               # override to avoid batcoin and dex
               if gecko_coin['symbol'].upper() == 'BAT':
@@ -270,6 +271,10 @@ def build_coins_data(node_ip, user_pass, cointag_list=''):
               else:
                   coins_data[gecko_coin['symbol'].upper()]['gecko_id'] = gecko_coin['id']
                   gecko_ids.append(gecko_coin['id'])
+        except Exception as e:
+          print(colorize("error getting coingecko price for "+gecko_coin, 'red'))
+          print(colorize(e, 'red'))
+          pass
       # Get fiat price on Coingecko
       gecko_prices = gecko_fiat_prices(",".join(gecko_ids), 'usd,aud,btc').json()
       for coin_id in gecko_prices:
