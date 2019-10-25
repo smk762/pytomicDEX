@@ -158,6 +158,14 @@ def cancel_all(node_ip, user_pass):
     r = requests.post(node_ip,json=params)
     return r
 
+def get_fee(node_ip, user_pass, coin):
+    params = {'userpass': user_pass,
+              'method': 'get_trade_fee',
+              'coin': coin
+              }
+    r = requests.post(node_ip,json=params)
+    return r
+
 def cancel_pair(node_ip, user_pass, base, rel):
     params = {'userpass': user_pass,
               'method': 'cancel_all_orders',
@@ -228,65 +236,68 @@ def my_recent_swaps(node_ip, user_pass, limit=10, from_uuid=''):
     return r
 
 def build_coins_data(node_ip, user_pass, cointag_list=''):
-    if cointag_list == '':
-        cointag_list = coinslib.cointags
-    if 'KMD' not in cointag_list:
-        cointag_list.append('KMD')
-    coins_data = {}
-    cointags = []
-    gecko_ids = []
-    print(tuilib.colorize('Getting prices from Binance...', 'yellow'))
-    for coin in cointag_list:
-        coins_data[coin] = {}
-        cointags.append(coin)
-        coins_data[coin]['BTC_price'] = float(tuilib.get_btc_price(coin))
-        coins_data[coin]['price_source'] = 'binance'
-        time.sleep(0.05)
-    # Get Coingecko API ids
-    print(tuilib.colorize('Getting prices from CoinGecko...', 'pink'))
-    gecko_coins_list = requests.get(url='https://api.coingecko.com/api/v3/coins/list').json()
-    for gecko_coin in gecko_coins_list:
-        if gecko_coin['symbol'].upper() in cointags:
-            # override to avoid batcoin and dex
-            if gecko_coin['symbol'].upper() == 'BAT':
-                coins_data[gecko_coin['symbol'].upper()]['gecko_id'] = 'basic-attention-token'
-                gecko_ids.append('basic-attention-token')
-            elif gecko_coin['symbol'].upper() in ['DEX', 'CRYPTO']:
-                pass
-            else:
-                coins_data[gecko_coin['symbol'].upper()]['gecko_id'] = gecko_coin['id']
-                gecko_ids.append(gecko_coin['id'])
-    # Get fiat price on Coingecko
-    gecko_prices = gecko_fiat_prices(",".join(gecko_ids), 'usd,aud,btc').json()
-    for coin_id in gecko_prices:
-        for coin in coins_data:
-            if 'gecko_id' in coins_data[coin]:
-                if coins_data[coin]['gecko_id'] == coin_id:
-                    coins_data[coin]['AUD_price'] = gecko_prices[coin_id]['aud']
-                    coins_data[coin]['USD_price'] = gecko_prices[coin_id]['usd']
-                    if coins_data[coin]['BTC_price'] == 0:
-                        coins_data[coin]['BTC_price'] = gecko_prices[coin_id]['btc']
-                        coins_data[coin]['price_source'] = 'coingecko'
-            else:
-                coins_data[coin]['AUD_price'] = 0
-                coins_data[coin]['USD_price'] = 0
-    print(tuilib.colorize('Getting prices from mm2 orderbook...', 'cyan'))
-    for coin in coins_data:
-        if coins_data[coin]['BTC_price'] == 0:
-            mm2_kmd_price = get_kmd_mm2_price(node_ip, user_pass, coin)
-            coins_data[coin]['KMD_price'] = mm2_kmd_price[1]
-            coins_data[coin]['price_source'] = 'mm2_orderbook'
-            coins_data[coin]['BTC_price'] = mm2_kmd_price[1]*coins_data['KMD']['BTC_price']
-            coins_data[coin]['AUD_price'] = mm2_kmd_price[1]*coins_data['KMD']['AUD_price']
-            coins_data[coin]['USD_price'] = mm2_kmd_price[1]*coins_data['KMD']['USD_price']
-    for coin in coins_data:
-        if coin == 'RICK' or coin == 'MORTY':
-            coins_data[coin]['BTC_price'] = 0
-            coins_data[coin]['AUD_price'] = 0
-            coins_data[coin]['USD_price'] = 0
-            coins_data[coin]['KMD_price'] = 0
-            coins_data[coin]['price_source'] = 'mm2_orderbook'
-    return coins_data
+  try:
+      if cointag_list == '':
+          cointag_list = coinslib.cointags
+      if 'KMD' not in cointag_list:
+          cointag_list.append('KMD')
+      coins_data = {}
+      cointags = []
+      gecko_ids = []
+      print(tuilib.colorize('Getting prices from Binance...', 'yellow'))
+      for coin in cointag_list:
+          coins_data[coin] = {}
+          cointags.append(coin)
+          coins_data[coin]['BTC_price'] = float(tuilib.get_btc_price(coin))
+          coins_data[coin]['price_source'] = 'binance'
+          time.sleep(0.05)
+      # Get Coingecko API ids
+      print(tuilib.colorize('Getting prices from CoinGecko...', 'pink'))
+      gecko_coins_list = requests.get(url='https://api.coingecko.com/api/v3/coins/list').json()
+      for gecko_coin in gecko_coins_list:
+          if gecko_coin['symbol'].upper() in cointags:
+              # override to avoid batcoin and dex
+              if gecko_coin['symbol'].upper() == 'BAT':
+                  coins_data[gecko_coin['symbol'].upper()]['gecko_id'] = 'basic-attention-token'
+                  gecko_ids.append('basic-attention-token')
+              elif gecko_coin['symbol'].upper() in ['DEX', 'CRYPTO']:
+                  pass
+              else:
+                  coins_data[gecko_coin['symbol'].upper()]['gecko_id'] = gecko_coin['id']
+                  gecko_ids.append(gecko_coin['id'])
+      # Get fiat price on Coingecko
+      gecko_prices = gecko_fiat_prices(",".join(gecko_ids), 'usd,aud,btc').json()
+      for coin_id in gecko_prices:
+          for coin in coins_data:
+              if 'gecko_id' in coins_data[coin]:
+                  if coins_data[coin]['gecko_id'] == coin_id:
+                      coins_data[coin]['AUD_price'] = gecko_prices[coin_id]['aud']
+                      coins_data[coin]['USD_price'] = gecko_prices[coin_id]['usd']
+                      if coins_data[coin]['BTC_price'] == 0:
+                          coins_data[coin]['BTC_price'] = gecko_prices[coin_id]['btc']
+                          coins_data[coin]['price_source'] = 'coingecko'
+              else:
+                  coins_data[coin]['AUD_price'] = 0
+                  coins_data[coin]['USD_price'] = 0
+      print(tuilib.colorize('Getting prices from mm2 orderbook...', 'cyan'))
+      for coin in coins_data:
+          if coins_data[coin]['BTC_price'] == 0:
+              mm2_kmd_price = get_kmd_mm2_price(node_ip, user_pass, coin)
+              coins_data[coin]['KMD_price'] = mm2_kmd_price[1]
+              coins_data[coin]['price_source'] = 'mm2_orderbook'
+              coins_data[coin]['BTC_price'] = mm2_kmd_price[1]*coins_data['KMD']['BTC_price']
+              coins_data[coin]['AUD_price'] = mm2_kmd_price[1]*coins_data['KMD']['AUD_price']
+              coins_data[coin]['USD_price'] = mm2_kmd_price[1]*coins_data['KMD']['USD_price']
+      for coin in coins_data:
+          if coin == 'RICK' or coin == 'MORTY':
+              coins_data[coin]['BTC_price'] = 0
+              coins_data[coin]['AUD_price'] = 0
+              coins_data[coin]['USD_price'] = 0
+              coins_data[coin]['KMD_price'] = 0
+              coins_data[coin]['price_source'] = 'mm2_orderbook'
+      return coins_data
+  except Exception as e:
+    print(e)
 
 def gecko_fiat_prices(gecko_ids, fiat):
     url = 'https://api.coingecko.com/api/v3/simple/price'

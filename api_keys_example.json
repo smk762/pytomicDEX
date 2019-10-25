@@ -1,4 +1,8 @@
 {
 	"binance_key":"",
-	"binance_secret":""
+	"binance_secret":"",
+        "graviex_key":"",
+        "graviex_secret":"",
+        "coinspot_key":"",
+        "coinspot_secret":""
 }

@@ -13,6 +13,7 @@ cwd = os.getcwd()
 script_path = sys.path[0]
 home = expanduser("~")
 
+
 header = "\
                 _                  _      _____  ________   __  \n\
            /\  | |                (_)    |  __ \|  ____\ \ / /  \n\
@@ -25,7 +26,7 @@ header = "\
 
 author = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.2 by Thorn Mennet')
 
-no_params_list = ["Start MarketMaker 2","View Binance Account Info"]
+no_params_list = ["Start MarketMaker 2"]
 
 def main():
     try:
@@ -61,6 +62,9 @@ def main():
                 num_in_progress = swaps_info[4]
                 print(tuilib.colorize('{:^68}'.format("[Total swaps: "+str(num_swaps)+"]  [Failed swaps: "+str(num_failed)+"]  [In Progress: "+str(num_in_progress)+"]  "), 'orange'))
                 print(tuilib.colorize('{:^68}'.format("[You have "+str(num_orders)+" orders active in the orderbook]"), 'orange'))
+                if len(sys.argv) > 1:
+                    if sys.argv[1] == 'runbot':
+                        tuilib.run_tradebot(local_ip, userpass)
             # Build Menu
             if status[1] is False:
                 menuItems.append({"Start MarketMaker 2": tuilib.start_mm2})

@@ -7,6 +7,7 @@ import requests
 import subprocess
 from os.path import expanduser
 from . import coinslib, rpclib, binance_api
+from decimal import Decimal, ROUND_DOWN
 
 import bitcoin
 from bitcoin.wallet import P2PKHBitcoinAddress
@@ -60,7 +61,7 @@ def colorize(string, color):
 hl = colorize("|", 'lightblue')
 
 def wait_continue(msg=''):
-    return input(colorize(msg+"Press [Enter] to continue...", 'orange'))
+    input(colorize(msg+"Press [Enter] to continue...", 'orange'))
 
 def create_MM2_json():
     data = {}
@@ -207,6 +208,7 @@ def pair_orderbook_table(node_ip, user_pass, base, rel, coins_data='', no_stop=F
             for bid in orderbook['asks']:
                 if bid['address'] != addr:
                     orderbook_trim.append(bid)
+                    bid['price'] = str(round(float(bid['price']),7))
                     price = str(bid['price'])
                     volume = str(bid['maxvolume'])
                     if market_rate != 0:
@@ -321,26 +323,30 @@ def show_orderbook_pair(node_ip, user_pass, base='', rel=''):
             else:
                 try:
                     selected = orderbook[int(q)-1]
+                    price = float(selected['price'])
                     while True:
                         try:
-                            max_afforded_val = float(bal)/float(selected['price'])
+                            fee = rpclib.get_fee(node_ip, user_pass, rel).json()['result']['amount']
+                            max_afforded_val = ((float(bal)-float(fee)*2)/price)*0.99
                             volume = float(selected['maxvolume'])
                             if volume > max_afforded_val:
                                 max_vol = max_afforded_val
                             else:
                                 max_vol = volume
-                            buy_num = float(input(colorize("How many "+base+" to buy at "+selected['price'][:6]+"? (max. "+str(max_vol)[:8]+"): ", 'orange')))
+                            max_vol = Decimal(Decimal(max_vol).quantize(Decimal('.001'), rounding=ROUND_DOWN))
+                            buy_num = float(input(colorize("How many "+base+" to buy at "+str(price)+"? (max. "+str(max_vol)+"): ", 'orange')))
                             if buy_num > max_afforded_val:
                                     print(colorize("Can't buy more than max affordable volume! Try again..." , 'red'))
                             else:
                                 while True:
-                                    q = input(colorize("Confirm buy order, "+str(buy_num)+" "+base+" for "+str(float(selected['price'])*buy_num)+" "+rel+" (y/n): ",'orange'))
+                                    q = input(colorize("Confirm buy order, "+str(buy_num)+" "+base+" for "+str(price*buy_num)+" "+rel+" (y/n): ",'orange'))
                                     if q == 'Y' or q == 'y':
-                                        resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, selected['price']).json()
+                                        resp = rpclib.buy(node_ip, user_pass, base, rel, buy_num, price).json()
                                         if 'error' not in resp:
                                             input(colorize("Order submitted! Press [Enter] to continue...", 'green'))
                                         else:
                                             print(resp)
+                                            input(colorize("Press [Enter] to continue...", 'orange'))
                                         break
                                     elif q == 'N' or q == 'n':
                                         break
@@ -351,7 +357,8 @@ def show_orderbook_pair(node_ip, user_pass, base='', rel=''):
                             print(e)
                             pass
                     break
-                except:
+                except Exception as e:
+                    print(e)
                     print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(orderbook)), 'red'))
                     pass
     except Exception as e:
@@ -363,8 +370,11 @@ def create_buy(node_ip, user_pass, base, rel):
     try:
         rel_bal = rpclib.my_balance(node_ip, user_pass, rel).json()['balance']
         rel_price = float(input(colorize("What "+rel+" price?: ", 'orange')))
+        rel_price = round(rel_price,7)
         max_vol = float(rel_bal)/rel_price
+        max_vol = round(max_vol,7)
         buy_num = float(input(colorize("How many "+base+" to buy? (max. "+'{:^8}'.format(str(max_vol))+"): ", 'orange')))
+        buy_num = round(buy_num,7)
         if buy_num > max_vol:
             print(colorize("Can't buy more than max volume! Try again..." , 'red'))
         else:
@@ -1030,7 +1040,7 @@ def run_tradebot(node_ip, user_pass, refresh_mins=20):
     while True:
         try:
             coins_data = rpclib.build_coins_data(node_ip, user_pass, coinslib.coins)
-            submit_bot_trades(node_ip, user_pass)
+            submit_bot_trades(node_ip, user_pass, coins_data)
             show_orders_table(node_ip, user_pass, coins_data, True)
             show_balances_table(node_ip, user_pass, coins_data, True)
             show_recent_swaps(node_ip, user_pass, 50, coins_data, True)
@@ -1064,7 +1074,7 @@ def get_btc_price(cointag):
         return btc_price['price']
     else:
         return 0
-    
+
 def get_binance_addr(cointag):
     try:
         if cointag == "BCH":
@@ -1076,63 +1086,78 @@ def get_binance_addr(cointag):
         pass
     return deposit_addr
 
-def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr=''):
-    account_info = binance_api.get_account_info()
-    binance_balances = account_info['balances']
-    atomicDEX_reserve = coinslib.coins[base]['reserve_balance']
-    if base != '':
-        for item in binance_balances:
-            if item['asset'] == base:
-                binance_balance = float(item['free'])
-                print(base+" balance on Binance is: "+str(binance_balance))
-                print(base+" balance on AtomicDEX is: "+str(bal))
-                print(base+" reserve on AtomicDEX is: "+str(atomicDEX_reserve))
-                break
-            else:
-                binance_balance = 0
+def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='', coins_data='', bot=False):
+    if base == '':
+        coinslist = coinslib.cointags
+        coins_data = rpclib.build_coins_data(node_ip, user_pass)
+    else:
+        coinslist = [base]
+    for base in coinslist:
         try:
-            if bal > atomicDEX_reserve*1.2 and base not in ['RICK','MORTY']:
-                qty = bal - atomicDEX_reserve
-                bal = bal - qty
-                deposit_addr = get_binance_addr(base)
-                withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
-                print("Sending "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
-                send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
-                if 'tx_hash' in send_resp:
-                    txid_str = send_resp['tx_hash']
-                    print(colorize("Track transaction status at ["+coinslib.coins[cointag]['tx_explorer']+"/"+txid_str+"]", 'cyan'))
-                else:
-                    print("Response: "+str(send_resp))                
-            elif bal < atomicDEX_reserve*0.8:
-                if base_addr != '':
-                    qty = atomicDEX_reserve - bal
-                    if qty > binance_balance:
-                        qty = binance_balance*0.98
-                    qty = round(float(qty), 8)
-                    if binance_balance > qty:
-                        print("Withdrawing "+str(qty)+" of "+str(binance_balance)+" "+base+" from Binance")
-                        if base == "BCH":
-                            withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+            account_info = binance_api.get_account_info()
+            usd_price = coins_data[base]['USD_price']
+            binance_balances = account_info['balances']
+            atomicDEX_reserve = coinslib.coins[base]['reserve_balance']
+            if bot:
+                for item in binance_balances:
+                    if item['asset'] == base:
+                        binance_balance = float(item['free'])
+                        print(base+" balance on Binance is: "+str(binance_balance))
+                        print(base+" balance on AtomicDEX is: "+str(bal))
+                        print(base+" reserve for AtomicDEX is: "+str(atomicDEX_reserve))
+                        break
+                    else:
+                        binance_balance = 0
+                try:
+                    if bal > atomicDEX_reserve*1.2 and base not in ['RICK','MORTY']:
+                        qty = bal - atomicDEX_reserve
+                        bal = bal - qty
+                        deposit_addr = get_binance_addr(base)
+                        withdraw_tx = rpclib.withdraw(node_ip, user_pass, base, deposit_addr['address'], qty).json()
+                        print("Sending "+str(qty)+" "+base+" to Binance address "+deposit_addr['address'])
+                        send_resp = rpclib.send_raw_transaction(node_ip, user_pass, base, withdraw_tx['tx_hex']).json()
+                        if 'tx_hash' in send_resp:
+                            txid_str = send_resp['tx_hash']
+                            print(colorize("Track transaction status at ["+coinslib.coins[base]['tx_explorer']+"/"+txid_str+"]", 'cyan'))
                         else:
-                            withdraw_tx = binance_api.withdraw(base, base_addr, qty)
-                        print(withdraw_tx)
+                            print("Response: "+str(send_resp))                
+                    elif bal < atomicDEX_reserve*0.9 and base not in ['RICK','MORTY']:
+                        qty = atomicDEX_reserve - bal
+                        if base_addr != '':
+                            if qty > binance_balance:
+                                qty = binance_balance
+                            qty = round(float(qty), 8)
+                            if binance_balance >= qty and qty > 0:
+                                print("Withdrawing "+str(qty)+" of "+str(binance_balance)+" "+base+" from Binance to address "+base_addr)
+                                if base == "BCH":
+                                    withdraw_tx = binance_api.withdraw(base+"ABC", base_addr, qty)
+                                else:
+                                    withdraw_tx = binance_api.withdraw(base, base_addr, qty)
+                                print(withdraw_tx)
+                            else:
+                                print("Binance balance "+str(binance_balance)+" too low to reach AtomicDEX reserve "+str(atomicDEX_reserve)+" ...")
+                                pass
+                except Exception as e:
+                    print(e)
+                    print('Binance deposit/withdraw failed')
+                    pass
+            else:
+                for item in binance_balances:
+                    if item['asset'] == base:
+                        binance_balance = float(item['free'])
+                        print(base+" balance on Binance is: "+str(binance_balance))
+                        break
+                    else:
+                        binance_balance = 0
         except Exception as e:
             print(e)
-            print('Binance deposit/withdraw failed')
+            input(colorize("Press [Enter] to continue...", 'orange'))
             pass
-    else:
-        for base in coinslib.trading_list:
-            for item in binance_balances:
-                if item['asset'] == base:
-                    binance_balance = float(item['free'])
-                    print(base+" balance on Binance is: "+str(binance_balance))
-                    break
-                else:
-                    binance_balance = 0
-        input(colorize("Press [Enter] to continue...",'cyan'))
+    if not bot:
+        input(colorize("Press [Enter] to continue...", 'orange'))
     return bal
 
-def submit_bot_trades(node_ip, user_pass):
+def submit_bot_trades(node_ip, user_pass, coins_data):
     swaps_in_progress = 0
     for base in coinslib.sell_list:
         try:
@@ -1147,7 +1172,7 @@ def submit_bot_trades(node_ip, user_pass):
             base_addr = ''
             bal = 0
             pass
-        bal = binance_account_info(node_ip, user_pass, base, bal, base_addr)
+        bal = binance_account_info(node_ip, user_pass, base, bal, base_addr, coins_data, True)
         my_current_orders = rpclib.my_orders(node_ip, user_pass).json()['result']
         for rel in coinslib.buy_list:
             if rel != base:

@@ -106,24 +106,36 @@ def get_orders_json(node_ip, user_pass, coins):
             if base != rel:
                 orderbook_response = orderbook(node_ip, user_pass, base, rel).json()
                 orders.append(orderbook_response)
+                print(orderbook_response)
     for pair in orders:
-        if len(pair['asks']) > 0:
-            baserel = pair['rel']+"/"+pair['base']
-            print(baserel)
-            for ask in pair['asks']:
-                print(str(ask['price'])[:12]+" "+pair['rel']+" per "+pair['base']+" ("+str(ask['maxvolume'])+" "+pair['base']+" available)")
-                baserel = pair['base']+"/"+pair['rel']
-                ask_json.append({"pair":baserel, "price":str(str(ask['price'])[:12]+" "+pair['rel']), "volume":str(str(ask['maxvolume'])+" "+pair['base'])})
-           # for bid in pair['bids']:
-            #    print(str(bid['price'])+" "+pair['base']+" per "+pair['rel']+" ("+str(bid['maxvolume'])+" available)")
-             #   bid_json.append({"baserel":baserel, "price":bid['price'], "volume":str(bid['maxvolume'])})
+        if 'asks' in pair:
+            if len(pair['asks']) > 0:
+                baserel = pair['rel']+"/"+pair['base']
+                print(baserel)
+                for ask in pair['asks']:
+                    print(str(ask['price'])[:12]+" "+pair['rel']+" per "+pair['base']+" ("+str(ask['maxvolume'])+" "+pair['base']+" available)")
+                    baserel = pair['base']+"/"+pair['rel']
+                    ask_json.append({"pair":baserel, "price":str(str(ask['price'])[:12]+" "+pair['rel']), "volume":str(str(ask['maxvolume'])+" "+pair['base'])})
+               # for bid in pair['bids']:
+                #    print(str(bid['price'])+" "+pair['base']+" per "+pair['rel']+" ("+str(bid['maxvolume'])+" available)")
+                 #   bid_json.append({"baserel":baserel, "price":bid['price'], "volume":str(bid['maxvolume'])})
     return ask_json, bid_json
+
+def stop_mm2(node_ip, user_pass):
+        params = {'userpass': user_pass, 'method': 'stop'}
+        try:
+            r = requests.post(node_ip, json=params)
+            msg = "MM2 stopped. "
+        except:
+            msg = "MM2 was not running. "
 
 mm2_running = check_mm2_status(node_ip, user_pass)
 
 if mm2_running:
+    print("mm2 is running")
     orderbook = get_orders_json(node_ip, user_pass, coinslib.coins)
     table_data = orderbook[0]+orderbook[1]
+    activate_all(node_ip, user_pass)
 else:
     start_mm2('mm2.log')
     time.sleep(10)
@@ -131,6 +143,15 @@ else:
     orderbook = get_orders_json(node_ip, user_pass, coinslib.coins)
     table_data = orderbook[0]+orderbook[1]
     pass
+if table_data == []:
+    stop_mm2(node_ip, user_pass)
+    time.sleep(15)
+    start_mm2('mm2.log')
+    time.sleep(10)
+    activate_all(node_ip, user_pass)
+    orderbook = get_orders_json(node_ip, user_pass, coinslib.coins)
+    table_data = orderbook[0]+orderbook[1]
+
 table_json = str(table_data).replace("'",'"')
 print(table_json)
 jsonfile = orderbook_json
