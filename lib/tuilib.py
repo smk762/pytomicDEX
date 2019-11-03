@@ -33,7 +33,7 @@ cwd = os.getcwd()
 script_path = sys.path[0]
 home = expanduser("~")
 
-ignored_addresses = ['RDbAXLCmQ2EN7daEZZp7CC9xzkcN8DfAZd']
+ignored_addresses = ['RDbAXLCmQ2EN7daEZZp7CC9xzkcN8DfAZd', '']
 
 def colorize(string, color):
         colors = {
@@ -737,7 +737,7 @@ def show_pending_swaps(node_ip, user_pass, swapcount=50):
         print(colorize("You have no pending swaps in your history!", 'orange'))
     wait_continue()
 
-def swaps_info(node_ip, user_pass, swapcount=99999):
+def swaps_info(node_ip, user_pass, swapcount=250):
     recent_swaps = rpclib.my_recent_swaps(node_ip, user_pass, swapcount).json()
     swap_list = recent_swaps['result']['swaps']
     swap_json = []
@@ -753,6 +753,7 @@ def swaps_info(node_ip, user_pass, swapcount=99999):
                                         'MakerPaymentRefunded', 'MakerPaymentRefundFailed']
         for swap in swap_list:
             try:
+                taker_addr = ''
                 maker_coin = ''
                 maker_amount = 0
                 taker_coin = ''
@@ -1219,7 +1220,7 @@ def submit_bot_trades(node_ip, user_pass, coins_data):
                             if trade_vol > min_swap:
                                 if base in ['RICK', 'MORTY'] or rel in ['RICK', 'MORTY']:
                                     if base in ['RICK', 'MORTY'] and rel in ['RICK', 'MORTY']:
-                                        trade_price = 1
+                                        trade_price = 1.762
                                         resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
                                         print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","red"))
                                         time.sleep(0.1)

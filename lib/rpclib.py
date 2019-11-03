@@ -42,17 +42,17 @@ def orderbook(node_ip, user_pass, base, rel):
     r = requests.post(node_ip, json=params)
     return r
 
+def get_enabled_coins(node_ip, user_pass):
+    params = {'userpass': user_pass,
+              'method': 'get_enabled_coins'}
+    r = requests.post(node_ip, json=params)
+    return r
+
 def check_active_coins(node_ip, user_pass, cointag_list):
     active_cointags = []
-    for cointag in cointag_list:
-        try:
-            # Dirty way to detect activation (rel is checked first by mm2)
-            resp = orderbook(node_ip, user_pass, 'XXXX', cointag).json()
-            if resp['error'] == 'Base coin is not found or inactive':
-                active_cointags.append(cointag)
-        except Exception as e:
-            #print(e)
-            pass
+    active_coins = get_enabled_coins(node_ip, user_pass).json()['result']
+    for coin in active_coins:
+        active_cointags.append(coin['ticker'])
     return active_cointags 
 
 def check_coins_status(node_ip, user_pass):
@@ -80,7 +80,7 @@ def check_coins_status(node_ip, user_pass):
             all_active = False
         elif num_active_coins < len(coinslib.coins):
             color = 'yellow'
-            all_active = False
+            all_active = True
         else:
             color = 'green'
             all_active = True
