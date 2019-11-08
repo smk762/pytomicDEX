@@ -527,10 +527,10 @@ def show_orders_table(node_ip, user_pass, coins_data='', bot=False):
                 else:
                     try:
                         selected = my_order_list[int(q)-1]
-                        base = selected['base']
-                        rel = selected['rel']
-                        resp = rpclib.cancel_pair(node_ip, user_pass, base, rel).json()
-                        print(colorize("Order #"+q+" ("+base+"/"+rel+") cancelled!","orange"))
+                        print(selected)
+                        order_uuid = selected['uuid']
+                        resp = rpclib.cancel_uuid(node_ip, user_pass, order_uuid).json()
+                        print(colorize("Order #"+q+" cancelled!","orange"))
                         break
                     except:
                         print(colorize("Invalid selection, must be [E/e] or a number between 1 and "+str(len(my_order_list)), 'red'))
@@ -876,22 +876,25 @@ def show_recent_swaps(node_ip, user_pass, swapcount=50, coins_data='', bot=False
         usd_sum = 0
         aud_sum = 0
         for delta_coin in delta:
-            for header_coin in header_list:
-                if delta_coin == header_coin:
-                    btc_price = coins_data[header_coin]['BTC_price']*delta[header_coin]
-                    usd_price = coins_data[header_coin]['USD_price']*delta[header_coin]
-                    aud_price = coins_data[header_coin]['AUD_price']*delta[header_coin]
-                    btc_sum += btc_price
-                    usd_sum += usd_price
-                    aud_sum += aud_price
-                    if float(delta[header_coin]) > 0:
-                        highlight = 'green'
-                    else:
-                        highlight = 'red'
-                    delta_row += colorize('{:^8}'.format(str(delta[header_coin])[:6]),highlight)+"|"
-                    btc_row += colorize('{:^8}'.format(str(btc_price)[:6]),highlight)+"|"
-                    usd_row += colorize('{:^8}'.format("$"+str(usd_price)[:5]),highlight)+"|"
-                    aud_row += colorize('{:^8}'.format("$"+str(aud_price)[:5]),highlight)+"|"
+            try:
+                for header_coin in header_list:
+                    if delta_coin == header_coin:
+                        btc_price = coins_data[header_coin]['BTC_price']*delta[header_coin]
+                        usd_price = coins_data[header_coin]['USD_price']*delta[header_coin]
+                        aud_price = coins_data[header_coin]['AUD_price']*delta[header_coin]
+                        btc_sum += btc_price
+                        usd_sum += usd_price
+                        aud_sum += aud_price
+                        if float(delta[header_coin]) > 0:
+                            highlight = 'green'
+                        else:
+                            highlight = 'red'
+                        delta_row += colorize('{:^8}'.format(str(delta[header_coin])[:6]),highlight)+"|"
+                        btc_row += colorize('{:^8}'.format(str(btc_price)[:6]),highlight)+"|"
+                        usd_row += colorize('{:^8}'.format("$"+str(usd_price)[:5]),highlight)+"|"
+                        aud_row += colorize('{:^8}'.format("$"+str(aud_price)[:5]),highlight)+"|"
+            except:
+                pass
         delta_row += '{:^8}'.format("TOTAL")+"|"
         btc_row += '{:^8}'.format(str(btc_sum)[:6])+"|"
         usd_row += '{:^8}'.format("$"+str(usd_sum)[:5])+"|"
@@ -1139,6 +1142,7 @@ def binance_account_info(node_ip='', user_pass='', base='', bal=0, base_addr='',
                                 print("Binance balance "+str(binance_balance)+" too low to reach AtomicDEX reserve "+str(atomicDEX_reserve)+" ...")
                                 pass
                 except Exception as e:
+                    print(deposit_addr)
                     print(e)
                     print('Binance deposit/withdraw failed')
                     pass
