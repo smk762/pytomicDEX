@@ -301,22 +301,21 @@ def build_coins_data(node_ip, user_pass, cointag_list=''):
       print(tuilib.colorize('Getting prices from mm2 orderbook...', 'cyan'))
       for coin in coins_data:
           try:
-              if coins_data[coin]['BTC_price'] == 0:
+              if coin == 'RICK' or coin == 'MORTY':
+                  coins_data[coin]['BTC_price'] = 0
+                  coins_data[coin]['AUD_price'] = 0
+                  coins_data[coin]['USD_price'] = 0
+                  coins_data[coin]['KMD_price'] = 0
+                  coins_data[coin]['price_source'] = 'mm2_orderbook'
+              elif coins_data[coin]['BTC_price'] == 0:
                   mm2_kmd_price = get_kmd_mm2_price(node_ip, user_pass, coin)
                   coins_data[coin]['KMD_price'] = mm2_kmd_price[1]
                   coins_data[coin]['price_source'] = 'mm2_orderbook'
                   coins_data[coin]['BTC_price'] = mm2_kmd_price[1]*coins_data['KMD']['BTC_price']
                   coins_data[coin]['AUD_price'] = mm2_kmd_price[1]*coins_data['KMD']['AUD_price']
                   coins_data[coin]['USD_price'] = mm2_kmd_price[1]*coins_data['KMD']['USD_price']
-              except Exception as e:
-                  print("Error getting KMD price: "+str(e))
-      for coin in coins_data:
-          if coin == 'RICK' or coin == 'MORTY':
-              coins_data[coin]['BTC_price'] = 0
-              coins_data[coin]['AUD_price'] = 0
-              coins_data[coin]['USD_price'] = 0
-              coins_data[coin]['KMD_price'] = 0
-              coins_data[coin]['price_source'] = 'mm2_orderbook'
+          except Exception as e:
+              print("Error getting KMD price: "+str(e))
   except Exception as e:
     print("Error getting coins_data: "+str(e))
   return coins_data
