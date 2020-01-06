@@ -314,10 +314,9 @@ def build_coins_data(node_ip, user_pass, cointag_list=''):
               coins_data[coin]['USD_price'] = 0
               coins_data[coin]['KMD_price'] = 0
               coins_data[coin]['price_source'] = 'mm2_orderbook'
-      return coins_data
   except Exception as e:
-    #print(e)
-    pass
+    print("Error getting coins_data: "+str(e))
+  return coins_data
 
 def gecko_fiat_prices(gecko_ids, fiat):
     url = 'https://api.coingecko.com/api/v3/simple/price'
