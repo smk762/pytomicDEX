@@ -48,7 +48,7 @@ def get_enabled_coins(node_ip, user_pass):
     r = requests.post(node_ip, json=params)
     return r
 
-def check_active_coins(node_ip, user_pass, cointag_list):
+def check_active_coins(node_ip, user_pass):
     active_cointags = []
     active_coins = get_enabled_coins(node_ip, user_pass).json()['result']
     for coin in active_coins:
@@ -72,7 +72,7 @@ def check_coins_status(node_ip, user_pass):
         for coin in coinslib.coins:
             cointag_list.append(coin)
         num_all_coins = len(cointag_list)
-        active_coins = check_active_coins(node_ip, user_pass, cointag_list)
+        active_coins = check_active_coins(node_ip, user_pass)
         num_active_coins = len(active_coins)
         msg = str(num_active_coins)+"/"+str(num_all_coins)+" coins active"
         if num_active_coins == 0:
@@ -189,6 +189,7 @@ def cancel_pair(node_ip, user_pass, base, rel):
     r = requests.post(node_ip,json=params)
     return r
 
+# sell base, buy rel.
 def setprice(node_ip, user_pass, base, rel, basevolume, relprice, trademax=False, cancel_previous=True):
     params = {'userpass': user_pass,
               'method': 'setprice',

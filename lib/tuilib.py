@@ -1229,8 +1229,10 @@ def submit_bot_trades(node_ip, user_pass, coins_data):
                                         print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","red"))
                                         time.sleep(0.1)
                                 else:
-
-                                    trade_price = pair_price*coinslib.coins[base]['premium']
+                                    if 'premium' in coinslib.coins[base]:
+                                        trade_price = pair_price*coinslib.coins[base]['premium']
+                                    else:
+                                        trade_price = pair_price*1.05
                                     resp = rpclib.setprice(node_ip, user_pass, base, rel, trade_vol, trade_price).json()
                                     print(colorize("Setprice order: "+str(trade_vol)[:8]+" "+base+" for "+str(trade_price*trade_vol)[:8]+" "+rel+" submitted...","cyan"))
                                     time.sleep(0.1)

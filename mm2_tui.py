@@ -80,9 +80,10 @@ def main():
                     menuItems.append({"Review recent swaps": tuilib.show_recent_swaps})
                     menuItems.append({"Review failed swaps": tuilib.show_failed_swaps})
                     menuItems.append({"Recover stuck swap": tuilib.recover_swap})
-                    menuItems.append({"Run Tradebot": tuilib.run_tradebot})
-
-        menuItems.append({"View Binance Account Info": tuilib.binance_account_info})
+                    if binance_api.api_key != '':
+                        menuItems.append({"Run Tradebot": tuilib.run_tradebot})
+        if binance_api.api_key != '':
+            menuItems.append({"View Binance Account Info (needs valid API keys)": tuilib.binance_account_info})
         menuItems.append({"Exit TUI": tuilib.exit})
         print("\n")
         for item in menuItems:
