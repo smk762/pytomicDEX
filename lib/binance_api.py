@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 from os.path import expanduser
+import shutil
 import time
 import json
 import hmac
@@ -15,22 +16,18 @@ home = expanduser("~")
 
 # from https://code.luasoftware.com/tutorials/cryptocurrency/python-connect-to-binance-api/
 
-try:
-    with open(sys.path[0]+"/api_keys.json") as keys_j:
-        keys_json = json.load(keys_j)
-except FileNotFoundError:
-    print("You need api_keys.json file in PytomicDEX directory")
-    print("Check api_keys_example.json, create file and run me again")
-    exit()
+if not os.path.isfile(sys.path[0]+"/api_keys.json"):
+    shutil.copy(sys.path[0]+"/api_keys_example.json", sys.path[0]+"/api_keys.json")
 
+with open(sys.path[0]+"/api_keys.json") as keys_j:
+    keys_json = json.load(keys_j)
+    api_key = keys_json['binance_key']
+    api_secret = keys_json['binance_secret']
+    base_url = 'https://api.binance.com'
 
-api_key = keys_json['binance_key']
-api_secret = keys_json['binance_secret']
-base_url = 'https://api.binance.com'
-
-headers = {
-    'X-MBX-APIKEY': api_key
-}
+    headers = {
+        'X-MBX-APIKEY': api_key
+    }
 
 class BinanceException(Exception):
     def __init__(self, status_code, data):
