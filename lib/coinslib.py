@@ -62,7 +62,7 @@ coins = {
     "BTC":{
         "api-id": "bitcoin",
         "activate_with":"electrum",
-        "reserve_balance":0.1,
+        "reserve_balance":0.02,
         "tx_explorer":"https://explorer.bitcoin.com/btc/tx",
         "electrum": [{"url":"electrum1.cipig.net:10000"},
                      {"url":"electrum2.cipig.net:10000"},
@@ -151,7 +151,7 @@ coins = {
         "electrum":  [{"url":"electrum1.cipig.net:10061"},
                       {"url":"electrum2.cipig.net:10061"},
                       {"url":"electrum3.cipig.net:10061"}],
-        "reserve_balance":1,
+        "reserve_balance":0.5,
         "premium":1.03,
         "min_swap":0.01,
         "minQty":"0.00100000",
@@ -193,7 +193,7 @@ coins = {
         "electrum": [{"url":"electrum1.cipig.net:10060"},
                      {"url":"electrum2.cipig.net:10060"},
                      {"url":"electrum3.cipig.net:10060"}],
-        "reserve_balance":20000,
+        "reserve_balance":10000,
         "premium":1.0377,
         "min_swap":10,
         "minQty":"1.00000000",
@@ -201,6 +201,17 @@ coins = {
         "stepSize":"1.00000000",
         "bot_sell": True,
         "bot_buy": True
+    },
+    "ECA":{
+        "min_swap": 1,
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"https://explorer.electraproject.org/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10052"},
+                     {"url":"electrum2.cipig.net:10052"},
+                     {"url":"electrum3.cipig.net:10052"}],
+        "bot_sell": False,
+        "bot_buy": False
     },
     "ETH":{
         "api-id": "ethereum",
@@ -219,6 +230,17 @@ coins = {
         "stepSize":"0.001000000",
         "bot_sell": True,
         "bot_buy": True
+    },
+    "FTC":{
+        "min_swap": 1,
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"https://fsight.chain.tips/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10054"},
+                     {"url":"electrum2.cipig.net:10054"},
+                     {"url":"electrum3.cipig.net:10054"}],
+        "bot_sell": False,
+        "bot_buy": False
     },
     "HUSH":{
         "min_swap": 1,
@@ -239,7 +261,7 @@ coins = {
         "electrum": [{"url":"electrum1.cipig.net:10001"},
                      {"url":"electrum2.cipig.net:10001"},
                      {"url":"electrum3.cipig.net:10001"}],
-        "reserve_balance":1000,
+        "reserve_balance":100,
         "premium":1.03,
         "min_swap":0.1,
         "minQty":"0.01000000",
@@ -497,7 +519,7 @@ coins = {
         "min_swap": 0.1,
         "api-id": "zcash",
         "activate_with":"electrum",
-        "reserve_balance":2,
+        "reserve_balance":1,
         "tx_explorer":"https://explorer.zcha.in/transactions",
         "electrum": [{"url":"electrum3.cipig.net:10058"},
                      {"url":"electrum3.cipig.net:10058"},
