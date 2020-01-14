@@ -316,6 +316,11 @@ def build_coins_data(node_ip, user_pass, cointag_list=''):
                   coins_data[coin]['USD_price'] = mm2_kmd_price[1]*coins_data['KMD']['USD_price']
           except Exception as e:
               print("Error getting KMD price: "+str(e))
+              coins_data[coin]['KMD_price'] = 0
+              coins_data[coin]['price_source'] = 'mm2_orderbook'
+              coins_data[coin]['BTC_price'] = 0
+              coins_data[coin]['AUD_price'] = 0
+              coins_data[coin]['USD_price'] = 0
   except Exception as e:
     print("Error getting coins_data: "+str(e))
   return coins_data
@@ -333,15 +338,19 @@ def get_kmd_mm2_price(node_ip, user_pass, coin):
     total_kmd_value = 0
     max_kmd_value = 0
     kmd_volume = 0
-    num_asks = len(kmd_orders['asks'])
-    for asks in kmd_orders['asks']:
-        kmd_value = float(asks['maxvolume']) * float(asks['price'])
-        if kmd_value < min_kmd_value:
-            min_kmd_value = kmd_value
-        elif kmd_value > max_kmd_value:
-            max_kmd_value = kmd_value
-        total_kmd_value += kmd_value
-        kmd_volume += float(asks['maxvolume'])
+    num_asks = 0
+    if 'asks' in kmd_orders:
+      num_asks = len(kmd_orders['asks'])
+      for asks in kmd_orders['asks']:
+          kmd_value = float(asks['maxvolume']) * float(asks['price'])
+          if kmd_value < min_kmd_value:
+              min_kmd_value = kmd_value
+          elif kmd_value > max_kmd_value:
+              max_kmd_value = kmd_value
+          total_kmd_value += kmd_value
+          kmd_volume += float(asks['maxvolume'])
+    else:
+      print(kmd_orders)
     if num_asks > 0:
         median_kmd_value = total_kmd_value/kmd_volume
     else:
