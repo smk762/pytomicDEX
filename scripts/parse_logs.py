@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 import os
+import sys
 import json
 
 # Change this to your log filename
-logfilename = "my_logs.txt"
+try: 
+    logfilename = sys.argv[1]
+except:
+    print("use like: parse_logs.py logfile.log")
+
 if not os.path.isdir("MAKER"):
     os.makedirs("MAKER")
 if not os.path.isdir("TAKER"):
