@@ -18,10 +18,10 @@ with open(logfilename, "r") as f:
     lines = f.readlines()
     for line in lines:
         # Remove log data not during stress test
-        if line.find('getRecentSwaps') > -1:
+        if line.find('{"result":{"from_uuid":null,"limit":100,"skipped":0,"swaps":') > -1:
             print(line)
             try:
-                swap_json = " ".join(line.split(" ")[3:])[1:]
+                swap_json = line
                 swap_results = json.loads(swap_json)['result']['swaps']
                 for swap in swap_results: 
                     if swap['type'] == 'Taker':
