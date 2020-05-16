@@ -17,11 +17,10 @@ if not os.path.isdir("TAKER"):
 with open(logfilename, "r") as f:
     lines = f.readlines()
     for line in lines:
-        # Remove log data not during stress test
-        if line.find('{"result":{"from_uuid":null,"limit":100,"skipped":0,"swaps":') > -1:
+        if line.find('getRecentSwaps') > -1:
             print(line)
+            swap_json = line.split('getRecentSwaps')[1]
             try:
-                swap_json = line
                 swap_results = json.loads(swap_json)['result']['swaps']
                 for swap in swap_results: 
                     if swap['type'] == 'Taker':
