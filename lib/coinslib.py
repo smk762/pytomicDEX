@@ -270,6 +270,18 @@ coins = {
         "bot_sell": True,
         "bot_buy": True
     },
+    "KOIN":{
+        "api-id": "",
+        "activate_with":"electrum",
+        "tx_explorer":"https://koin.kmdexplorer.io/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10024"},
+                     {"url":"electrum2.cipig.net:10024"},
+                     {"url":"electrum3.cipig.net:10024"}],
+        "reserve_balance":1,
+        "min_swap":0.1,
+        "bot_sell": True,
+        "bot_buy": True
+    },
     "KMDICE":{
         "min_swap": 0.1,
         "api-id": "",
