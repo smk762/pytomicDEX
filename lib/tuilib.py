@@ -154,6 +154,7 @@ def validate_selection(interrogative, selection_list):
 def select_coin(interrogative, coin_list, ignore=[]):
     i = 1
     row = ''
+    coin_list.sort()
     for coin in ignore:
         coin_list.remove(coin)
     for coin in coin_list:
@@ -294,6 +295,23 @@ def pair_orderbook_table(node_ip, user_pass, base, rel, coins_data='', no_stop=F
         pass
     return orderbook_trim
 
+def rat_float(rat):
+    numerator = rat[0]
+    denominator = rat[1]
+    if numerator[0] == -1:
+        numerator = numerator[1]*-1
+    else:
+        numerator = numerator[1]
+    print(numerator)
+    if denominator[0] == -1:
+        denominator = denominator[1]*-1
+    else:
+        denominator = denominator[1]
+    print(denominator)
+    fee = numerator[0]/denominator[0]
+    return fee
+
+
 def show_orderbook_pair(node_ip, user_pass, base='', rel=''):
     coin_status = rpclib.check_coins_status(node_ip, user_pass)
     active_coins = coin_status[3]
@@ -327,6 +345,10 @@ def show_orderbook_pair(node_ip, user_pass, base='', rel=''):
                     while True:
                         try:
                             fee = rpclib.get_fee(node_ip, user_pass, rel).json()['result']['amount']
+                            print(fee)
+                            fee = rat_float(fee)
+                            print(fee)
+                            print(bal)
                             max_afforded_val = ((float(bal)-float(fee)*2)/price)*0.99
                             volume = float(selected['maxvolume'])
                             if volume > max_afforded_val:
@@ -573,14 +595,30 @@ def show_balances_table(node_ip, user_pass, coins_data='', bot=False):
                     addr = "RPC timed out! "+str(e)
                     bal = 0
                     pass
-                btc_price = float(coins_data[coin]['BTC_price'])
-                btc_val = btc_price*bal
+                btc_price = 0
+                btc_val = 0
+                usd_price = 0
+                usd_val = 0
+                aud_price = 0
+                aud_val = 0
+                try:
+                    if coin in coins_data:
+                        btc_price = float(coins_data[coin]['BTC_price'])
+                        btc_val = btc_price*bal
+                        usd_price = coins_data[coin]['USD_price']
+                        usd_val = usd_price*bal
+                        aud_price = coins_data[coin]['AUD_price']
+                        aud_val = aud_price*bal
+                except Exception as e:
+                    pass
+                    '''
+                    # some coins only returning btc price
+                    print(coin)
+                    print(coins_data[coin])
+                    print(e)
+                    '''
                 btc_total += btc_val
-                usd_price = coins_data[coin]['USD_price']
-                usd_val = usd_price*bal
                 usd_total += usd_val
-                aud_price = coins_data[coin]['AUD_price']
-                aud_val = aud_price*bal
                 aud_total += aud_val
                 price_source = coins_data[coin]['price_source']
                 if price_source == 'binance':

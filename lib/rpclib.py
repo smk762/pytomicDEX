@@ -71,6 +71,7 @@ def check_coins_status(node_ip, user_pass):
         cointag_list = []
         for coin in coinslib.coins:
             cointag_list.append(coin)
+        cointag_list.sort()
         num_all_coins = len(cointag_list)
         active_coins = check_active_coins(node_ip, user_pass)
         num_active_coins = len(active_coins)
