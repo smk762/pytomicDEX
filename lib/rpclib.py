@@ -58,7 +58,7 @@ def check_active_coins(node_ip, user_pass):
 def check_coins_status(node_ip, user_pass):
     if os.path.exists(script_path+"/coins") is False:
         print(tuilib.colorize("\n'coins' file not found in "+script_path+"!",'red'))
-        print(tuilib.colorize("Use 'wget https://raw.githubusercontent.com/jl777/coins/master/coins' to download.", 'orange'))
+        print(tuilib.colorize("Use 'wget https://raw.githubusercontent.com/komodoplatform/coins/master/coins' to download.", 'orange'))
         print(tuilib.colorize("Exiting...\n", 'blue'))
         sys.exit()
     elif os.path.exists(script_path+"/api_keys.json") is False:
