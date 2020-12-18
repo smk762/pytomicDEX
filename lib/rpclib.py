@@ -136,6 +136,7 @@ def electrum(node_ip, user_pass, cointag, tx_history=True):
                   'coin': cointag,
                   'mm2':1,
                   'tx_history':tx_history,}
+    print(params)
     r = requests.post(node_ip, json=params)
     return r
 

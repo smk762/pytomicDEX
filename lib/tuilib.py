@@ -136,9 +136,11 @@ def activate_all(node_ip, user_pass):
     for coin in coinslib.coins:
         if coinslib.coins[coin]['activate_with'] == 'native':
             r = rpclib.enable(node_ip, user_pass, coin)
+            print(r.json())
             print(colorize("Activating "+coin+" in native mode", 'cyan'))
         else:
             r = rpclib.electrum(node_ip, user_pass, coin)
+            print(r.json())
             print(colorize("Activating "+coin+" with electrum", 'cyan'))
 
 def validate_selection(interrogative, selection_list):

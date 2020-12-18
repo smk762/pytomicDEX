@@ -29,6 +29,18 @@ coins = {
         "bot_sell": True,
         "bot_buy": True
     },
+    "AWC":{
+        "min_swap": 0.5,
+        "activate_with":"electrum",
+        "api-id": "",
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": True,
+        "bot_buy": True
+    },
     "BCH":{
         "min_swap": 0.01,
         "activate_with":"electrum",
@@ -46,6 +58,18 @@ coins = {
         "stepSize":"0.00001000",
         "bot_sell": True,
         "bot_buy": True
+    },
+    "BET":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"https://bet.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10012"},
+                     {"url":"electrum2.cipig.net:10012"},
+                     {"url":"electrum3.cipig.net:10012"}],
+        "bot_sell": False,
+        "bot_buy": False
     },
     "BOTS":{
         "min_swap": 0.1,
@@ -82,6 +106,30 @@ coins = {
         "bot_sell": False,
         "bot_buy": False
     },
+    "BUSD":{
+        "min_swap": 0.5,
+        "activate_with":"electrum",
+        "api-id": "",
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": True,
+        "bot_buy": True
+    },
+    "DAI":{
+        "min_swap": 0.5,
+        "activate_with":"electrum",
+        "api-id": "",
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": True,
+        "bot_buy": True
+    },
     "CHIPS":{
         "min_swap": 0.1,
         "api-id": "",
@@ -94,15 +142,15 @@ coins = {
         "bot_sell": False,
         "bot_buy": False
     },
-    "COMMOD":{
+    "CCL":{
         "min_swap": 0.1,
         "api-id": "",
         "activate_with":"electrum",
         "reserve_balance":2,
         "tx_explorer":"https://commod.explorer.dexstats.info/tx",
-        "electrum": [{"url":"electrum1.cipig.net:10022"},
-                     {"url":"electrum2.cipig.net:10022"},
-                     {"url":"electrum3.cipig.net:10022"}],
+        "electrum": [{"url":"electrum1.cipig.net:10029"},
+                     {"url":"electrum2.cipig.net:10029"},
+                     {"url":"electrum3.cipig.net:10029"}],
         "bot_sell": False,
         "bot_buy": False
     },
@@ -213,6 +261,17 @@ coins = {
         "bot_sell": False,
         "bot_buy": False
     },
+    "EMC2":{
+        "min_swap": 1,
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"",
+        "electrum": [{"url":"electrum1.cipig.net:10062"},
+                     {"url":"electrum2.cipig.net:10062"},
+                     {"url":"electrum3.cipig.net:10062"}],
+        "bot_sell": False,
+        "bot_buy": False
+    },
     "ETH":{
         "api-id": "ethereum",
         "activate_with":"electrum",
@@ -231,6 +290,17 @@ coins = {
         "bot_sell": True,
         "bot_buy": True
     },
+    "FIRO":{
+        "min_swap": 1,
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"",
+        "electrum": [{"url":"electrumx.zcoin.io:50001"},
+                     {"url":"electrumx01.zcoin.io:50001"},
+                     {"url":"electrumx02.zcoin.io:50001"}],
+        "bot_sell": False,
+        "bot_buy": False
+    },
     "FTC":{
         "min_swap": 1,
         "activate_with":"electrum",
@@ -242,17 +312,55 @@ coins = {
         "bot_sell": False,
         "bot_buy": False
     },
-    "HUSH":{
+    "GLEEC":{
         "min_swap": 1,
         "api-id": "hush",
         "activate_with":"electrum",
         "reserve_balance":2,
-        "tx_explorer":"https://hush3.komodod.com/t",
-        "electrum": [{"url":"electrum1.cipig.net:10064"},
-                     {"url":"electrum2.cipig.net:10064"},
-                     {"url":"electrum3.cipig.net:10064"}],
+        "tx_explorer":"",
+        "electrum": [{"url":"electrum1.cipig.net:10069"},
+                     {"url":"electrum2.cipig.net:10069"},
+                     {"url":"electrum3.cipig.net:10069"}],
         "bot_sell": False,
         "bot_buy": False
+    },
+    "HODL":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "override_KMD_buy_price":10,
+        "tx_explorer":"https://hodl.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10009"},
+                     {"url":"electrum2.cipig.net:10009"},
+                     {"url":"electrum3.cipig.net:10009"}],
+        "bot_sell": False,
+        "bot_buy": True
+    },
+    "ILN":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "override_KMD_buy_price":10,
+        "tx_explorer":"https://iln.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.ilien.io:65011"},
+                     {"url":"electrum2.ilien.io:65011"}],
+        "bot_sell": False,
+        "bot_buy": True
+    },
+    "JUMBLR":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "override_KMD_buy_price":10,
+        "tx_explorer":"https://jumblr.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10004"},
+                     {"url":"electrum2.cipig.net:10004"},
+                     {"url":"electrum3.cipig.net:10004"}],
+        "bot_sell": False,
+        "bot_buy": True
     },
     "KMD":{
         "api-id": "komodo",
@@ -356,6 +464,78 @@ coins = {
         "bot_sell": True,
         "bot_buy": True
     },
+    "MCL":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"https://mcl.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10023"},
+                     {"url":"electrum2.cipig.net:10023"},
+                     {"url":"electrum3.cipig.net:10023"}],
+        "bot_sell": True,
+        "bot_buy": True
+    },
+    "MGW":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"https://mgw.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10015"},
+                     {"url":"electrum2.cipig.net:10015"},
+                     {"url":"electrum3.cipig.net:10015"}],
+        "bot_sell": True,
+        "bot_buy": True
+    },
+    "MSHARK":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"https://mshark.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10013"},
+                     {"url":"electrum2.cipig.net:10013"},
+                     {"url":"electrum3.cipig.net:10013"}],
+        "bot_sell": True,
+        "bot_buy": True
+    },
+    "MONA":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"",
+        "electrum": [{"url":"electrumx3.monacoin.nl:50001"},
+                     {"url":"electrumx1.monacoin.ninja:50001"},
+                     {"url":"electrumx.tamami-foundation.org:50001"}],
+        "bot_sell": True,
+        "bot_buy": True
+    },
+    "NAV":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"",
+        "electrum": [{"url":"electrum1.cipig.net:10056"},
+                     {"url":"electrum2.cipig.net:10056"},
+                     {"url":"electrum3.cipig.net:10056"}],
+        "bot_sell": True,
+        "bot_buy": True
+    },
+    "NMC":{
+        "min_swap": 0.1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"",
+        "electrum": [{"url":"electrumx1.nmc.bitclc.net:50001"},
+                     {"url":"electrumx2.nmc.bitclc.net:50001"},
+                     {"url":"electrumx3.nmc.bitclc.net:50001"}],
+        "bot_sell": True,
+        "bot_buy": True
+    },
     "OOT":{
         "min_swap": 1,
         "api-id": "",
@@ -377,6 +557,43 @@ coins = {
                      "http://eth2.cipig.net:8555",
                      "http://eth3.cipig.net:8555"],
         "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": False,
+        "bot_buy": False
+    },
+    "RFOX":{
+        "min_swap": 0.5,
+        "api-id": "paxos-standard",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": False,
+        "bot_buy": False
+    },
+    "PBC":{
+        "min_swap": 1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"https://oot.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10070"},
+                     {"url":"electrum2.cipig.net:10070"},
+                     {"url":"electrum3.cipig.net:10070"}],
+        "bot_sell": False,
+        "bot_buy": False
+    },
+    "PANGEA":{
+        "min_swap": 1,
+        "api-id": "",
+        "reserve_balance":2,
+        "activate_with":"electrum",
+        "tx_explorer":"https://pangea.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.cipig.net:10010"},
+                     {"url":"electrum2.cipig.net:10010"},
+                     {"url":"electrum3.cipig.net:10010"}],
         "bot_sell": False,
         "bot_buy": False
     },
@@ -431,14 +648,14 @@ coins = {
         "bot_sell": True,
         "bot_buy": True
     },
-    "RFOX":{
+    "SPACE":{
         "min_swap": 5,
         "activate_with":"electrum",
         "reserve_balance":2,
-        "tx_explorer":"https://rfox.explorer.dexstats.info/tx",
-        "electrum": [{"url":"electrum1.cipig.net:10034"},
-                     {"url":"electrum2.cipig.net:10034"},
-                     {"url":"electrum3.cipig.net:10034"}],
+        "tx_explorer":"https://space.explorer.dexstats.info/tx",
+        "electrum": [{"url":"electrum1.spaceworks.co:50001"},
+                     {"url":"electrum2.spaceworks.co:50001"},
+                     {"url":"electrum1.spaceworks.co:50002"}],
         "bot_sell": False,
         "bot_buy": False
     },
@@ -502,6 +719,32 @@ coins = {
         "bot_sell": False,
         "bot_buy": False
     },
+    "USDC":{
+        "min_swap": 0.5,
+        "api-id": "true-usd",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": False,
+        "bot_buy": False
+    },
+    "VRA":{
+        "min_swap": 0.5,
+        "api-id": "true-usd",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"https://etherscan.io/tx",
+        "electrum": ["http://eth1.cipig.net:8555",
+                     "http://eth2.cipig.net:8555",
+                     "http://eth3.cipig.net:8555"],
+        "contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+        "bot_sell": False,
+        "bot_buy": False
+    },
     "VRSC":{        
         "min_swap": 0.1,
         "activate_with":"electrum",
@@ -536,6 +779,18 @@ coins = {
                      {"url":"electrum3.cipig.net:10058"}],
         "bot_sell": True,
         "bot_buy": True
+    },
+    "ZER":{
+        "min_swap": 0.1,
+        "api-id": "zaddex",
+        "activate_with":"electrum",
+        "reserve_balance":2,
+        "tx_explorer":"",
+        "electrum": [{"url":"electrum1.cipig.net:10065"},
+                     {"url":"electrum2.cipig.net:10065"},
+                     {"url":"electrum3.cipig.net:10065"}],
+        "bot_sell": False,
+        "bot_buy": False
     },
     "ZEXO":{
         "min_swap": 0.1,
