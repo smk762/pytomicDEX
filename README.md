@@ -28,7 +28,7 @@ nano MM2.json
 ```
 Update the rpc_password, passphrase, userhome and netid (optional) to custom values.  
 `gui` Leave this as the default value `MM2GUI`    
-`netid` Defines the network you will trade on. `9999` is being used for beta testing and is the most active.   
+`netid` Defines the network you will trade on. `7777` is being used for released GUI apps and is the most active.   
 To trade directly with someone on a private network, the seller and buyer can set this to a different custom value.  
 `rpc_password` Should be at least 12 alphanumeric characters.  
 This authenticates the user for communicating with the mm2 daemon.   
