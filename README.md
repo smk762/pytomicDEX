@@ -1,6 +1,6 @@
 # pytomicDEX
 
-**Superceeded by https://github.com/smk762/pytomicDEX**
+**Superceeded by https://github.com/smk762/pytomicDEX_makerbot**
 
 ### A Python TUI for using [Komodo Platform](https://komodoplatform.com/)'s [AtomicDEX](https://atomicdex.io/) from the command line  
 *Note: Only tested in Ubuntu 18.04 so far.*  
