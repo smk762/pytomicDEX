@@ -24,7 +24,7 @@ header = "\
     \n"
 
 
-author = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.2 by Thorn Mennet')
+author = '{:^65}'.format('Welcome to the AtomicDEX TUI v0.2 by dragonhound')
 
 no_params_list = ["Start MarketMaker 2"]
 
